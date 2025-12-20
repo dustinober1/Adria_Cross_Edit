@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Page not found - Adria Cross Personal Stylist">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Page Not Found — Adria Cross Personal Stylist</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/landing.css">
+    <style>
+        .error-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #fdfcfb 0%, #f5f3f0 100%);
+        }
+
+        .error-code {
+            font-size: 8rem;
+            font-weight: 700;
+            color: #c19a5d;
+            line-height: 1;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #c19a5d, #d4a574);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .error-message {
+            font-size: 1.5rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .error-description {
+            font-size: 1.1rem;
+            color: #888;
+            margin-bottom: 2rem;
+            max-width: 400px;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-home {
+            padding: 1rem 2.5rem;
+            border-radius: 25px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            background: linear-gradient(135deg, #d4a574 0%, #c19a5d 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(193, 154, 93, 0.35);
+        }
+
+        .btn-contact {
+            padding: 1rem 2.5rem;
+            border-radius: 25px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            background: transparent;
+            border: 2px solid #c19a5d;
+            color: #c19a5d;
+        }
+
+        .btn-contact:hover {
+            background: #c19a5d;
+            color: white;
+            box-shadow: 0 8px 20px rgba(193, 154, 93, 0.35);
+        }
+
+        .decorative-line {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(135deg, #c19a5d, #d4a574);
+            border-radius: 2px;
+            margin: 1.5rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 5rem;
+            }
+
+            .error-message {
+                font-size: 1.2rem;
+            }
+
+            .error-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-link"
+        style="position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden;">Skip to main
+        content</a>
+
+    <!-- Navigation Bar -->
+    <nav class="top-nav" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html">Adria Cross</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="blog.html">Blog</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main id="main-content" role="main" class="error-container">
+        <div class="error-code">404</div>
+        <h1 class="error-message">Page Not Found</h1>
+        <div class="decorative-line"></div>
+        <p class="error-description">
+            Oops! The page you're looking for seems to have wandered off — perhaps it's out shopping for the perfect
+            outfit.
+        </p>
+        <div class="error-actions">
+            <a href="index.html" class="btn-home">Return Home</a>
+            <a href="contact.html" class="btn-contact">Contact Me</a>
+        </div>
+    </main>
+
+    <script src="js/logger.min.js"></script>
+    <script>
+        // Mobile menu toggle
+        const navToggle = document.getElementById('navToggle');
+        const navMenu = document.getElementById('navMenu');
+        const navLinks = document.querySelectorAll('#navMenu a');
+
+        navToggle.addEventListener('click', () => {
+            const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+            navToggle.setAttribute('aria-expanded', !isExpanded);
+            navToggle.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+
+        // Close menu when a link is clicked
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navToggle.setAttribute('aria-expanded', 'false');
+                navToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.top-nav')) {
+                navToggle.setAttribute('aria-expanded', 'false');
+                navToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+
+</html>

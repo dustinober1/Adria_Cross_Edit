@@ -29,7 +29,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/landing.css">
     <style>
         .splash-container {
@@ -215,13 +215,16 @@
 </head>
 
 <body>
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <!-- Navigation Bar -->
-    <nav class="top-nav">
+    <nav class="top-nav" role="navigation" aria-label="Main navigation">
         <div class="nav-container">
             <div class="nav-logo">
                 <a href="index.html">Adria Cross</a>
             </div>
-            <button class="nav-toggle" id="navToggle">
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -236,75 +239,82 @@
         </div>
     </nav>
 
-    <div class="splash-container">
-        <div class="welcome-section">
-            <h1>Adria Cross</h1>
-            <p class="subtitle"><em>Personal Stylist</em></p>
-            <p><em>It's not your body, it's your wardrobe.</em></p>
+    <main id="main-content" role="main">
+        <div class="splash-container">
+            <div class="welcome-section">
+                <h1>Adria Cross</h1>
+                <p class="subtitle"><em>Personal Stylist</em></p>
+                <p><em>It's not your body, it's your wardrobe.</em></p>
 
-            <p>Helping women and men fall back in love with their clothes — by creating confidence through style that
-                fits who you are, how you live, and where you're headed.</p>
+                <p>Helping women and men fall back in love with their clothes — by creating confidence through style
+                    that
+                    fits who you are, how you live, and where you're headed.</p>
 
-            <p>Discover your personal style, save time every morning, and feel unstoppable with a curated, wearable
-                wardrobe.</p>
+                <p>Discover your personal style, save time every morning, and feel unstoppable with a curated, wearable
+                    wardrobe.</p>
 
-            <div class="cta-buttons">
-                <a href="about.html" class="btn-cta btn-secondary-cta">Learn More About Me</a>
-                <a href="services.html" class="btn-cta btn-secondary-cta">Explore Services</a>
-                <a href="contact.html#calendar-section" class="btn-cta btn-primary-cta">Book a No Cost Consultation</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Instagram Feed Section -->
-    <div class="article-section" style="padding: 2rem; max-width: 1200px; margin: 4rem auto;">
-        <h2 style="text-align: center; color: #c19a5d; margin-bottom: 1.5rem;">Follow Me On Instagram @adriacrossedit
-        </h2>
-        <p style="text-align: center; color: #666; margin-bottom: 2rem;">Latest style inspiration and behind-the-scenes
-            content</p>
-
-        <div class="instagram-feed"
-            style="display: flex; overflow-x: auto; gap: 1rem; padding: 1rem; scrollbar-width: thin;">
-            <!-- Embedded Instagram Posts with fixed dimensions for proper loading -->
-            <div class="instagram-post"
-                style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
-                <iframe src="https://www.instagram.com/p/DPpP_JFjQqq/embed/captioned/" width="280" height="350"
-                    frameborder="0" scrolling="no"
-                    style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
-            </div>
-            <div class="instagram-post"
-                style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
-                <iframe src="https://www.instagram.com/reel/DIACG7WJBL3/embed/captioned/" width="280" height="350"
-                    frameborder="0" scrolling="no"
-                    style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
-            </div>
-            <div class="instagram-post"
-                style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
-                <iframe src="https://www.instagram.com/reel/DH4g_4zJTvH/embed/captioned/" width="280" height="350"
-                    frameborder="0" scrolling="no"
-                    style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
-            </div>
-            <div class="instagram-post"
-                style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
-                <iframe src="https://www.instagram.com/reel/DHW7c2tJnD2/embed/captioned/" width="280" height="350"
-                    frameborder="0" scrolling="no"
-                    style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
-            </div>
-            <div class="instagram-post"
-                style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
-                <iframe src="https://www.instagram.com/reel/C6mZ6FMJc7w/embed/captioned/" width="280" height="350"
-                    frameborder="0" scrolling="no"
-                    style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
+                <div class="cta-buttons">
+                    <a href="about.html" class="btn-cta btn-secondary-cta">Learn More About Me</a>
+                    <a href="services.html" class="btn-cta btn-secondary-cta">Explore Services</a>
+                    <a href="contact.html#calendar-section" class="btn-cta btn-primary-cta">Book a No Cost
+                        Consultation</a>
+                </div>
             </div>
         </div>
 
-        <div style="text-align: center; margin-top: 2rem;">
-            <a href="https://www.instagram.com/adriacrossedit/" target="_blank" class="btn-cta btn-secondary-cta"
-                style="padding: 0.8rem 2rem; display: inline-block;">
-                Follow @adriacrossedit
-            </a>
+        <!-- Instagram Feed Section -->
+        <div class="article-section" style="padding: 2rem; max-width: 1200px; margin: 4rem auto;">
+            <h2 style="text-align: center; color: #c19a5d; margin-bottom: 1.5rem;">Follow Me On Instagram
+                @adriacrossedit
+            </h2>
+            <p style="text-align: center; color: #666; margin-bottom: 2rem;">Latest style inspiration and
+                behind-the-scenes
+                content</p>
+
+            <div class="instagram-feed"
+                style="display: flex; overflow-x: auto; gap: 1rem; padding: 1rem; scrollbar-width: thin;" role="region"
+                aria-label="Instagram feed">
+                <!-- Embedded Instagram Posts with fixed dimensions for proper loading -->
+                <div class="instagram-post"
+                    style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
+                    <iframe src="https://www.instagram.com/p/DPpP_JFjQqq/embed/captioned/" width="280" height="350"
+                        frameborder="0" scrolling="no" loading="lazy" title="Instagram post 1 from @adriacrossedit"
+                        style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
+                </div>
+                <div class="instagram-post"
+                    style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
+                    <iframe src="https://www.instagram.com/reel/DIACG7WJBL3/embed/captioned/" width="280" height="350"
+                        frameborder="0" scrolling="no" loading="lazy" title="Instagram reel 2 from @adriacrossedit"
+                        style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
+                </div>
+                <div class="instagram-post"
+                    style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
+                    <iframe src="https://www.instagram.com/reel/DH4g_4zJTvH/embed/captioned/" width="280" height="350"
+                        frameborder="0" scrolling="no" loading="lazy" title="Instagram reel 3 from @adriacrossedit"
+                        style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
+                </div>
+                <div class="instagram-post"
+                    style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
+                    <iframe src="https://www.instagram.com/reel/DHW7c2tJnD2/embed/captioned/" width="280" height="350"
+                        frameborder="0" scrolling="no" loading="lazy" title="Instagram reel 4 from @adriacrossedit"
+                        style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
+                </div>
+                <div class="instagram-post"
+                    style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
+                    <iframe src="https://www.instagram.com/reel/C6mZ6FMJc7w/embed/captioned/" width="280" height="350"
+                        frameborder="0" scrolling="no" loading="lazy" title="Instagram reel 5 from @adriacrossedit"
+                        style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="https://www.instagram.com/adriacrossedit/" target="_blank" class="btn-cta btn-secondary-cta"
+                    style="padding: 0.8rem 2rem; display: inline-block;">
+                    Follow @adriacrossedit
+                </a>
+            </div>
         </div>
-    </div>
+    </main>
 
     <script src="js/logger.min.js"></script>
     <script>

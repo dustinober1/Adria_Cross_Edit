@@ -1,0 +1,12 @@
+# Robots.txt for Adria Cross Personal Stylist Website
+# https://www.adriacross.com
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://www.adriacross.com/sitemap.xml
+
+# Disallow admin or private directories if any
+Disallow: /private/
+Disallow: /.git/

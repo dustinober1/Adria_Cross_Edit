@@ -2,12 +2,13 @@
 
 /* CSS Custom Properties for Consistent Theming */
 :root {
-    --primary-color: #c19a5d;
-    --primary-dark: #a87f4a;
+    --primary-color: #b8860b;
+    /* Improved contrast - darkened gold */
+    --primary-dark: #966c09;
     --primary-light: #d4a574;
     --text-primary: #2c2c2c;
-    --text-secondary: #666;
-    --text-muted: #888;
+    --text-secondary: #555;
+    --text-muted: #666;
     --background: #fafafa;
     --surface: #ffffff;
     --surface-alt: #f8f6f3;
@@ -19,6 +20,29 @@
     --radius-md: 12px;
     --radius-lg: 20px;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --focus-outline: 2px solid #b8860b;
+}
+
+/* Skip Link for Accessibility */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-color);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-weight: 600;
+    z-index: 9999;
+    transition: top 0.3s ease;
+}
+
+.skip-link:focus {
+    top: 1rem;
+    outline: var(--focus-outline);
+    outline-offset: 2px;
 }
 
 * {
@@ -1082,7 +1106,25 @@ h1 {
 .btn:focus-visible,
 .form-group input:focus-visible,
 .form-group textarea:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: var(--focus-outline);
+    outline-offset: 2px;
+}
+
+/* Enhanced focus visible for navigation and interactive elements */
+.nav-menu li a:focus-visible,
+.nav-logo a:focus-visible,
+.btn-cta:focus-visible,
+.btn-primary-cta:focus-visible,
+.btn-secondary-cta:focus-visible,
+.faq-question:focus-visible {
+    outline: var(--focus-outline);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+}
+
+/* Ensure nav toggle is keyboard accessible */
+.nav-toggle:focus-visible {
+    outline: var(--focus-outline);
     outline-offset: 2px;
 }
 
