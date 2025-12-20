@@ -49,6 +49,7 @@ const allowedExternalDomains = [
   'adriacrossedit.com',
   'calendar.google.com',
   'docs.google.com',
+  'www.googletagmanager.com',
 ];
 
 // Track all links found
@@ -70,7 +71,7 @@ function isExternalLink(href) {
 
 function extractLinksFromHtml(content, filePath) {
   const links = [];
-  
+
   // Match href attributes
   const hrefRegex = /href=["']([^"']+)["']/g;
   let match;
@@ -122,10 +123,10 @@ function processLinks(href, sourceFile) {
   if (isExternalLink(href)) {
     const url = new URL(href);
     const domain = url.hostname;
-    
+
     // Check if domain is allowed
     const isDomainAllowed = allowedExternalDomains.some(d => domain.includes(d));
-    
+
     allLinks.external.add(href);
     if (!isDomainAllowed) {
       allLinks.issues.push({
@@ -144,7 +145,7 @@ function processLinks(href, sourceFile) {
 
   // Remove fragment/hash for file checking
   const [hrefPath] = href.split('#');
-  
+
   if (!hrefPath) return; // It's just a hash
 
   // Resolve relative path
@@ -173,7 +174,7 @@ function main() {
   // Process each file
   filesToCheck.forEach((file) => {
     const filePath = path.join(__dirname, file);
-    
+
     try {
       if (!fs.existsSync(filePath)) {
         console.log(`${colors.red}✗ File not found: ${file}${colors.reset}`);
@@ -216,7 +217,7 @@ function main() {
     const exists = checkLocalFileExists(resourcePath);
     const icon = exists ? `${colors.green}✓${colors.reset}` : `${colors.red}✗${colors.reset}`;
     console.log(`  ${icon} ${resource}`);
-    
+
     if (!exists && !resource.endsWith('/')) {
       allLinks.issues.push({
         type: 'missing_resource',
@@ -232,7 +233,7 @@ function main() {
   // Report issues
   if (allLinks.issues.length > 0) {
     console.log(`${colors.bold}${colors.red}❌ Issues Found (${allLinks.issues.length})${colors.reset}\n`);
-    
+
     allLinks.issues.forEach((issue, index) => {
       const severityColor = issue.severity === 'error' ? colors.red : colors.yellow;
       console.log(`${index + 1}. ${severityColor}[${issue.severity.toUpperCase()}]${colors.reset} ${issue.type}`);
@@ -247,7 +248,7 @@ function main() {
 
     const errors = allLinks.issues.filter(i => i.severity === 'error');
     const warnings = allLinks.issues.filter(i => i.severity === 'warning');
-    
+
     console.log(`${colors.bold}Summary:${colors.reset}`);
     console.log(`  ${colors.red}Errors: ${errors.length}${colors.reset}`);
     console.log(`  ${colors.yellow}Warnings: ${warnings.length}${colors.reset}`);
