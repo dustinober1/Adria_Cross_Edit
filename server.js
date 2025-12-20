@@ -10,16 +10,20 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Persistent storage path (for Render or other hosts)
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname);
+const DB_PATH = path.join(DATA_DIR, 'appointments.db');
+const UPLOAD_ROOT = path.join(DATA_DIR, 'uploads');
+
 // Ensure uploads directory exists
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
+if (!fs.existsSync(UPLOAD_ROOT)) {
+    fs.mkdirSync(UPLOAD_ROOT, { recursive: true });
 }
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/');
+        cb(null, UPLOAD_ROOT);
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -32,7 +36,7 @@ const upload = multer({
 });
 
 // Database setup
-const db = new Database('appointments.db');
+const db = new Database(DB_PATH);
 
 // Create tables if they don't exist
 db.exec(`
@@ -230,7 +234,7 @@ app.patch('/api/appointments/:id', isAuthenticated, (req, res) => {
 
 // Static files
 app.use(express.static(path.join(__dirname)));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(UPLOAD_ROOT));
 
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));

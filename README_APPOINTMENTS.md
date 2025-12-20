@@ -14,10 +14,12 @@ This project has been upgraded with a custom appointment booking system.
 3. Access the site: `http://localhost:3000`
 4. Access the Admin Dashboard: `http://localhost:3000/admin` (Default: admin / adria2025)
 
-## Deployment Notes
-- This site now requires a Node.js environment.
-- Ensure `appointments.db` is in a writable directory.
-- Update `.env` with a secure `SESSION_SECRET` and `ADMIN_PASSWORD`.
+## Deployment to Render.com
+1. **Push to GitHub**: Ensure your latest code is pushed to your repository.
+2. **Create a Web Service**: In Render, click **New +** > **Blueprint**.
+3. **Connect GitHub**: Select your repository. 
+4. **Deploy**: Render will use the `render.yaml` file to set up your Node.js server and a persistent 1GB disk for your database and photos.
+   - *Note*: Persistent disks require a paid Render plan (Starter or higher). If you want a free tier without persistence (database resets on restart), you can remove the `disk` section from `render.yaml`.
 
 ## Files Added/Modified
 - `server.js`: The Express & SQLite backend.
