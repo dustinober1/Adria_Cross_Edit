@@ -1,16 +1,12 @@
 services:
   - type: web
     name: adria-cross-edit
-    env: node
-    plan: free # Switch to free tier
-    buildCommand: npm install
-    startCommand: npm start
+    env: docker
+    plan: free
     envVars:
-      - key: NODE_VERSION
-        value: 18.0.0
       - key: SESSION_SECRET
         generateValue: true
       - key: ADMIN_PASSWORD
         value: adria2025
       - key: DATABASE_URL
-        sync: false # You will provide this from Supabase/Neon
+        sync: false
