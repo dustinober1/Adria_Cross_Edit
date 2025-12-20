@@ -58,12 +58,35 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
+  CREATE TABLE IF NOT EXISTS availability_config (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day_of_week INTEGER UNIQUE, -- 0 (Sunday) to 6 (Saturday)
+    slots TEXT DEFAULT '[]',     -- JSON array of strings: ["09:00 AM", "10:00 AM"]
+    is_enabled INTEGER DEFAULT 1
+  );
+
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL
   );
 `);
+
+// Initialize default availability if empty
+const initAvailability = () => {
+    const count = db.prepare('SELECT COUNT(*) as count FROM availability_config').get().count;
+    if (count === 0) {
+        const defaultSlots = JSON.stringify(["09:00 AM", "10:00 AM", "11:00 AM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM"]);
+        const stmt = db.prepare('INSERT INTO availability_config (day_of_week, slots, is_enabled) VALUES (?, ?, ?)');
+        for (let i = 1; i <= 5; i++) { // Mon-Fri
+            stmt.run(i, defaultSlots, 1);
+        }
+        // Weekends disabled by default
+        stmt.run(0, '[]', 0);
+        stmt.run(6, '[]', 0);
+    }
+};
+initAvailability();
 
 // Middleware
 app.use(express.json());
@@ -149,6 +172,50 @@ app.post('/api/logout', (req, res) => {
 app.get('/api/appointments', isAuthenticated, (req, res) => {
     const data = db.prepare('SELECT * FROM appointments ORDER BY created_at DESC').all();
     res.json(data);
+});
+
+// Public: Get available slots for a specific date
+app.get('/api/available-slots', (req, res) => {
+    const { date } = req.query;
+    if (!date) return res.status(400).json({ error: 'Date is required' });
+
+    const dayOfWeek = new Date(date).getUTCDay();
+    const config = db.prepare('SELECT * FROM availability_config WHERE day_of_week = ?').get(dayOfWeek);
+
+    if (!config || !config.is_enabled) {
+        return res.json([]);
+    }
+
+    const allSlots = JSON.parse(config.slots);
+
+    // Find which slots are already taken
+    const booked = db.prepare('SELECT time FROM appointments WHERE date = ? AND status != "cancelled"').all(date);
+    const bookedTimes = booked.map(b => b.time);
+
+    const available = allSlots.filter(slot => !bookedTimes.includes(slot));
+    res.json(available);
+});
+
+// Admin: Get availability config
+app.get('/api/availability', isAuthenticated, (req, res) => {
+    const config = db.prepare('SELECT * FROM availability_config ORDER BY day_of_week ASC').all();
+    const formatted = config.map(c => ({
+        ...c,
+        slots: JSON.parse(c.slots)
+    }));
+    res.json(formatted);
+});
+
+// Admin: Update availability config
+app.post('/api/availability', isAuthenticated, (req, res) => {
+    const { day_of_week, slots, is_enabled } = req.body;
+    try {
+        const stmt = db.prepare('UPDATE availability_config SET slots = ?, is_enabled = ? WHERE day_of_week = ?');
+        stmt.run(JSON.stringify(slots), is_enabled ? 1 : 0, day_of_week);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
 app.get('/api/intake', isAuthenticated, (req, res) => {

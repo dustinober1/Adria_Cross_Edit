@@ -224,6 +224,7 @@
             <div class="admin-tabs">
                 <button class="tab-btn active" onclick="switchTab('appointments')">Appointments</button>
                 <button class="tab-btn" onclick="switchTab('intake')">Intake Profiles</button>
+                <button class="tab-btn" onclick="switchTab('availability')">Availability Settings</button>
             </div>
 
             <!-- Appointments Tab -->
@@ -260,6 +261,18 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Availability Tab -->
+            <div id="availability-tab" class="tab-content">
+                <div class="table-card" style="max-width: 800px;">
+                    <h2>Manage Weekly Schedule</h2>
+                    <p style="color: #666; margin-bottom: 2rem;">Toggle days on/off and define your available time
+                        slots.</p>
+                    <div id="availability-container">
+                        <!-- Days will be loaded here -->
+                    </div>
+                </div>
+            </div>
         </section>
     </div>
 
@@ -270,6 +283,57 @@
             <div id="modal-data"></div>
         </div>
     </div>
+
+    <style>
+        .day-config-card {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            background: #fafafa;
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .slots-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .slot-pill {
+            background: white;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .remove-slot {
+            cursor: pointer;
+            font-weight: bold;
+            color: #dc3545;
+        }
+
+        .add-slot-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .day-disabled {
+            opacity: 0.5;
+        }
+    </style>
 
     <script>
         async function checkAuth() {
@@ -282,6 +346,7 @@
             document.getElementById('dashboard-section').style.display = 'block';
             loadAppointments();
             loadIntake();
+            loadAvailability();
         }
 
         async function loadAppointments() {
@@ -314,6 +379,76 @@
                 </tr>
             `).join('');
             window.allIntake = data;
+        }
+
+        async function loadAvailability() {
+            const res = await fetch('/api/availability');
+            const config = await res.json();
+            const container = document.getElementById('availability-container');
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+            container.innerHTML = config.map(c => `
+                <div class="day-config-card ${c.is_enabled ? '' : 'day-disabled'}">
+                    <div class="day-header">
+                        <h3>${dayNames[c.day_of_week]}</h3>
+                        <label>
+                            <input type="checkbox" ${c.is_enabled ? 'checked' : ''} onchange="toggleDay(${c.day_of_week}, this.checked)"> Enable Day
+                        </label>
+                    </div>
+                    ${c.is_enabled ? `
+                        <div class="slots-list">
+                            ${c.slots.map(s => `
+                                <div class="slot-pill">
+                                    ${s} <span class="remove-slot" onclick="removeSlot(${c.day_of_week}, '${s}')">&times;</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="add-slot-row">
+                            <input type="text" placeholder="e.g. 10:30 AM" id="new-slot-${c.day_of_week}">
+                            <button class="btn-view" onclick="addSlot(${c.day_of_week})">+ Add</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+            window.availabilityConfig = config;
+        }
+
+        async function toggleDay(day, enabled) {
+            const dayObj = window.availabilityConfig.find(c => c.day_of_week === day);
+            await fetch('/api/availability', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ day_of_week: day, slots: dayObj.slots, is_enabled: enabled })
+            });
+            loadAvailability();
+        }
+
+        async function addSlot(day) {
+            const input = document.getElementById(`new-slot-${day}`);
+            const slot = input.value.trim();
+            if (!slot) return;
+
+            const dayObj = window.availabilityConfig.find(c => c.day_of_week === day);
+            const newSlots = [...dayObj.slots, slot].sort();
+
+            await fetch('/api/availability', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ day_of_week: day, slots: newSlots, is_enabled: dayObj.is_enabled })
+            });
+            loadAvailability();
+        }
+
+        async function removeSlot(day, slot) {
+            const dayObj = window.availabilityConfig.find(c => c.day_of_week === day);
+            const newSlots = dayObj.slots.filter(s => s !== slot);
+
+            await fetch('/api/availability', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ day_of_week: day, slots: newSlots, is_enabled: dayObj.is_enabled })
+            });
+            loadAvailability();
         }
 
         function viewIntake(id) {

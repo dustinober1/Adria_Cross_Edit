@@ -226,14 +226,7 @@
                                 style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Preferred Time</label>
                             <select id="booking-time" name="time" required
                                 style="width: 100%; padding: 0.8rem; border: 2px solid #e8e8e8; border-radius: 10px; font-family: inherit;">
-                                <option value="">Select a time slot</option>
-                                <option value="09:00 AM">09:00 AM</option>
-                                <option value="10:00 AM">10:00 AM</option>
-                                <option value="11:00 AM">11:00 AM</option>
-                                <option value="01:00 PM">01:00 PM</option>
-                                <option value="02:00 PM">02:00 PM</option>
-                                <option value="03:00 PM">03:00 PM</option>
-                                <option value="04:00 PM">04:00 PM</option>
+                                <option value="">Select a date first</option>
                             </select>
                         </div>
 
@@ -258,6 +251,30 @@
             </div>
 
             <script>
+                const dateInput = document.getElementById('booking-date');
+                const timeSelect = document.getElementById('booking-time');
+
+                dateInput.addEventListener('change', async () => {
+                    const date = dateInput.value;
+                    if (!date) return;
+
+                    timeSelect.innerHTML = '<option value="">Checking availability...</option>';
+
+                    try {
+                        const response = await fetch(`/api/available-slots?date=${date}`);
+                        const slots = await response.json();
+
+                        if (slots.length === 0) {
+                            timeSelect.innerHTML = '<option value="">No slots available for this date</option>';
+                        } else {
+                            timeSelect.innerHTML = '<option value="">Select a time slot</option>' +
+                                slots.map(s => `<option value="${s}">${s}</option>`).join('');
+                        }
+                    } catch (error) {
+                        timeSelect.innerHTML = '<option value="">Error loading slots</option>';
+                    }
+                });
+
                 document.getElementById('custom-booking-form').addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const form = e.target;
