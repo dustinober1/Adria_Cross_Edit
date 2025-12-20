@@ -46,7 +46,7 @@ const allowedExternalDomains = [
   'schema.org',
   'www.instagram.com',
   'instagram.com',
-  'adriacross.com',
+  'adriacrossedit.com',
   'calendar.google.com',
   'docs.google.com',
 ];
