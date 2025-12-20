@@ -4,195 +4,523 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Security Headers -->
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
-    <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta name="description"
-        content="Complete the intake forms for Adria Cross styling services. Share your style preferences and goals for a personalized styling experience.">
-    <meta name="keywords"
-        content="styling intake form, style questionnaire, personal styling form, wardrobe consultation form, color analysis, closet edit">
-    <meta name="author" content="Adria Cross">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://www.adriacrossedit.com/intake-form.html">
-    <title>Styling Intake Forms | Adria Cross Personal Stylist</title>
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.adriacrossedit.com/intake-form.html">
-    <meta property="og:title" content="Styling Intake Forms | Adria Cross Personal Stylist">
-    <meta property="og:description"
-        content="Complete the intake forms for Adria Cross styling services. Share your style preferences and goals for a personalized styling experience.">
-    <meta property="og:image" content="https://www.adriacrossedit.com/images/intake-form.jpg">
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://www.adriacrossedit.com/intake-form.html">
-    <meta property="twitter:title" content="Styling Intake Forms | Adria Cross Personal Stylist">
-    <meta property="twitter:description"
-        content="Complete the intake forms for Adria Cross styling services. Share your style preferences and goals for a personalized styling experience.">
-    <meta property="twitter:image" content="https://www.adriacrossedit.com/images/intake-form.jpg">
-    <link rel="manifest" href="manifest.json">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>Style Intake Portal | Adria Cross Edit</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/landing.css">
     <style>
-        .form-container {
-            max-width: 1000px;
-            margin: 120px auto 40px auto;
-            padding: 2rem;
+        :root {
+            --gold: #c19a5d;
+            --gold-light: #d4a574;
+            --bg-cream: #fdfcfb;
+            --white: #ffffff;
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
         }
 
-        .form-embed {
-            width: 100%;
-            height: 800px;
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        body {
+            background-color: var(--bg-cream);
         }
 
-        .form-instructions {
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            background: #f9f7f2;
-            border-radius: 10px;
-            border-left: 4px solid #c19a5d;
+        .intake-container {
+            max-width: 850px;
+            margin: 140px auto 60px auto;
+            padding: 0 2rem;
         }
 
-        .form-instructions h3 {
-            color: #c19a5d;
-            margin-top: 0;
-        }
-
-        .form-selector {
+        .portal-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 4rem;
         }
 
-        .form-selector button {
-            background: transparent;
-            border: 2px solid #c19a5d;
-            color: #c19a5d;
-            padding: 0.8rem 1.5rem;
-            margin: 0 0.5rem;
-            border-radius: 25px;
-            cursor: pointer;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 600;
-            transition: all 0.3s;
-            outline: none;
+        .portal-header h1 {
+            font-size: 2.5rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
         }
 
-        .form-selector button.active {
-            background: #c19a5d;
-            color: white;
+        .form-card {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 4rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(184, 134, 11, 0.05);
         }
 
-        .form-selector button:hover {
-            background: #c19a5d;
-            color: white;
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
         }
 
-        .form-section {
+        .step-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #eee;
+            transition: var(--transition);
+        }
+
+        .step-dot.active {
+            background: var(--gold);
+            transform: scale(1.3);
+        }
+
+        .form-step {
             display: none;
+            animation: fadeIn 0.5s ease;
         }
 
-        .form-section.active {
+        .form-step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-block {
+            margin-bottom: 2.5rem;
+        }
+
+        .question-label {
+            display: block;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .question-hint {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        /* Input Styling */
+        input[type="text"],
+        input[type="email"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 1.2rem;
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: #fafafa;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--gold);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(193, 154, 93, 0.05);
+        }
+
+        /* Option Grids (Radios/Checks) */
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .option-item {
+            position: relative;
+        }
+
+        .option-item input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .option-label {
+            display: block;
+            padding: 1rem;
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .option-item input:checked+.option-label {
+            background: var(--gold);
+            color: white;
+            border-color: var(--gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(193, 154, 93, 0.2);
+        }
+
+        .btn-group {
+            margin-top: 4rem;
+            display: flex;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+
+        .btn-intake {
+            padding: 1.2rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-prev {
+            background: transparent;
+            color: #888;
+            border: 2px solid #eee;
+        }
+
+        .btn-next,
+        .btn-submit {
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
+            color: white;
+            flex-grow: 1;
+        }
+
+        .btn-intake:hover:not(:disabled) {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+
+        .btn-intake:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .upload-zone {
+            border: 2px dashed #eee;
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            background: #fafafa;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--gold);
+            background: #fff;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
             display: block;
         }
     </style>
 </head>
 
 <body>
-    <!-- Skip to main content link for accessibility -->
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-
-    <!-- Navigation Bar -->
-    <nav class="top-nav" role="navigation" aria-label="Main navigation">
+    <nav class="top-nav">
         <div class="nav-container">
             <div class="nav-logo">
                 <a href="index.html" class="has-logo">
-                    <img src="images/logo.png" alt="Adria Cross Edit Logo" class="logo-image" loading="lazy" width="50"
-                        height="50">
+                    <img src="images/logo.png" alt="Logo" class="logo-image">
                     <span class="logo-text">Adria Cross</span>
                 </a>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            <ul class="nav-menu" id="navMenu">
+            <ul class="nav-menu">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="services.html">Services</a></li>
-                <li><a href="blog.html">Blog</a></li>
                 <li><a href="contact.html">Contact</a></li>
             </ul>
         </div>
     </nav>
 
-    <main id="main-content" role="main">
-        <div class="article-container" style="max-width: 1000px;">
-            <h1>Styling Intake Forms</h1>
+    <main class="intake-container">
+        <div class="portal-header">
+            <h1>Color Analysis Profile</h1>
+            <p>Help me understand your natural palette to discover the colors that make you glow.</p>
+        </div>
 
-            <div class="form-instructions">
-                <div style="text-align: center; margin-bottom: 2rem;">
-                    <img src="images/intake-form.jpg" alt="Style Profile Intake"
-                        style="max-width: 100%; height: auto; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        <div class="form-card">
+            <div class="step-indicator">
+                <div class="step-dot active" data-step="1"></div>
+                <div class="step-dot" data-step="2"></div>
+                <div class="step-dot" data-step="3"></div>
+                <div class="step-dot" data-step="4"></div>
+                <div class="step-dot" data-step="5"></div>
+            </div>
+
+            <form id="intake-form" enctype="multipart/form-data">
+                <input type="hidden" name="form_type" value="color-analysis">
+
+                <!-- Step 1: Basics -->
+                <div class="form-step active" id="step-1">
+                    <div class="question-block">
+                        <label class="question-label" for="name">What is your full name? *</label>
+                        <input type="text" id="name" name="name" required placeholder="Full Name">
+                    </div>
+                    <div class="question-block">
+                        <label class="question-label" for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required placeholder="email@example.com">
+                    </div>
                 </div>
-                <h3>Complete Your Style Profile</h3>
-                <p>Please select the appropriate intake form based on the service you plan to receive. These forms help
-                    me understand your style preferences, lifestyle, and goals to provide you with personalized styling
-                    recommendations.</p>
-                <p>Each form typically takes 10-15 minutes to complete. Please answer all questions as thoroughly as
-                    possible for the best results.</p>
-            </div>
 
-            <div class="form-selector">
-                <button class="form-toggle active" data-form="color-analysis">Color Analysis</button>
-                <button class="form-toggle" data-form="closet-edit">Closet Edit</button>
-            </div>
+                <!-- Step 2: Hair & Eyes -->
+                <div class="form-step" id="step-2">
+                    <div class="question-block">
+                        <label class="question-label">What is your natural hair color? *</label>
+                        <div class="option-grid">
+                            <label class="option-item">
+                                <input type="radio" name="hair_color" value="Platinum/Light Blonde" required>
+                                <span class="option-label">Platinum/Light Blonde</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="hair_color" value="Golden/Strawberry Blonde">
+                                <span class="option-label">Golden/Strawberry Blonde</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="hair_color" value="Light Brown">
+                                <span class="option-label">Light Brown</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="hair_color" value="Medium/Dark Brown">
+                                <span class="option-label">Medium/Dark Brown</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="hair_color" value="Red/Auburn">
+                                <span class="option-label">Red/Auburn</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="hair_color" value="Black">
+                                <span class="option-label">Black</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="hair_color" value="Gray/White">
+                                <span class="option-label">Gray/White</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="question-block">
+                        <label class="question-label" for="hair_dyed">Is your hair currently dyed or highlighted?
+                            *</label>
+                        <input type="text" id="hair_dyed" name="hair_dyed_details"
+                            placeholder="If so, what color is it now?" required>
+                    </div>
+                    <div class="question-block">
+                        <label class="question-label">What is your natural eye color? *</label>
+                        <div class="option-grid">
+                            <label class="option-item"><input type="radio" name="eye_color" value="Blue" required><span
+                                    class="option-label">Blue</span></label>
+                            <label class="option-item"><input type="radio" name="eye_color" value="Green"><span
+                                    class="option-label">Green</span></label>
+                            <label class="option-item"><input type="radio" name="eye_color" value="Hazel"><span
+                                    class="option-label">Hazel</span></label>
+                            <label class="option-item"><input type="radio" name="eye_color" value="Gray"><span
+                                    class="option-label">Gray</span></label>
+                            <label class="option-item"><input type="radio" name="eye_color" value="Light Brown"><span
+                                    class="option-label">Light Brown</span></label>
+                            <label class="option-item"><input type="radio" name="eye_color" value="Dark Brown"><span
+                                    class="option-label">Dark Brown</span></label>
+                        </div>
+                    </div>
+                </div>
 
-            <div id="color-analysis" class="form-section active">
-                <h3>Color Analysis Intake Form</h3>
-                <iframe
-                    src="https://docs.google.com/forms/d/e/1FAIpQLSceQ454fbOTXPb4XWU8PHKIckOAq3e75XZdIK-mFsLKamohag/viewform?embedded=true"
-                    width="100%" height="1200" frameborder="0" marginheight="0" marginwidth="0"
-                    title="Color Analysis Intake Form" class="form-embed">
-                    Loading Color Analysis form...
-                </iframe>
-            </div>
+                <!-- Step 3: Wardrobe -->
+                <div class="form-step" id="step-3">
+                    <div class="question-block">
+                        <label class="question-label">What colors do you currently enjoy wearing? *</label>
+                        <span class="question-hint">List up to 5 colors</span>
+                        <textarea name="colors_enjoy" required rows="2"
+                            placeholder="Example: Navy, Olive Green, Blush..."></textarea>
+                    </div>
+                    <div class="question-block">
+                        <label class="question-label">Are there any colors you avoid or feel uncomfortable in? *</label>
+                        <textarea name="colors_avoid" required rows="2"
+                            placeholder="List colors you dislike..."></textarea>
+                    </div>
+                    <div class="question-block">
+                        <label class="question-label">What patterns do you enjoy wearing? *</label>
+                        <div class="option-grid">
+                            <label class="option-item"><input type="checkbox" name="patterns" value="Solids"><span
+                                    class="option-label">Solids</span></label>
+                            <label class="option-item"><input type="checkbox" name="patterns" value="Stripes"><span
+                                    class="option-label">Stripes</span></label>
+                            <label class="option-item"><input type="checkbox" name="patterns" value="Florals"><span
+                                    class="option-label">Florals</span></label>
+                            <label class="option-item"><input type="checkbox" name="patterns" value="Geometric"><span
+                                    class="option-label">Geometric</span></label>
+                            <label class="option-item"><input type="checkbox" name="patterns" value="Animal"><span
+                                    class="option-label">Animal Prints</span></label>
+                        </div>
+                    </div>
+                </div>
 
-            <div id="closet-edit" class="form-section">
-                <h3>Closet Edit Intake Form</h3>
-                <iframe
-                    src="https://docs.google.com/forms/d/e/1FAIpQLScfUh25QiP-trEt-2O1UCdeuodK2qZrhef0P4azxGGwuIEZTg/viewform?embedded=true"
-                    width="100%" height="1200" frameborder="0" marginheight="0" marginwidth="0"
-                    title="Closet Edit Intake Form" class="form-embed">
-                    Loading Closet Edit form...
-                </iframe>
-            </div>
+                <!-- Step 4: Goals -->
+                <div class="form-step" id="step-4">
+                    <div class="question-block">
+                        <label class="question-label">What is your primary goal for this analysis? *</label>
+                        <select name="goal" required>
+                            <option value="">Select a goal</option>
+                            <option value="daily">Find colors for daily wear</option>
+                            <option value="professional">Enhance professional wardrobe</option>
+                            <option value="cohesive">Create a cohesive palette</option>
+                            <option value="special">Prepare for a special event</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="question-block">
+                        <label class="question-label">How would you describe your personal style? *</label>
+                        <div class="option-grid">
+                            <label class="option-item"><input type="radio" name="style" value="Classic" required><span
+                                    class="option-label">Classic</span></label>
+                            <label class="option-item"><input type="radio" name="style" value="Modern"><span
+                                    class="option-label">Modern</span></label>
+                            <label class="option-item"><input type="radio" name="style" value="Minimalist"><span
+                                    class="option-label">Minimalist</span></label>
+                            <label class="option-item"><input type="radio" name="style" value="Bold"><span
+                                    class="option-label">Bold/Statement</span></label>
+                        </div>
+                    </div>
+                    <div class="question-block">
+                        <label class="question-label" for="preferences">Specific preferences or concerns?</label>
+                        <textarea id="preferences" name="concerns" rows="3"
+                            placeholder="Example: I want colors that make me look more vibrant..."></textarea>
+                    </div>
+                </div>
 
-            <div class="back-link" style="text-align: center; margin-top: 2rem;">
-                <a href="index.html"
-                    style="color: #c19a5d; text-decoration: none; font-weight: 600; transition: all 0.3s;">← Back to
-                    Home</a>
+                <!-- Step 5: Photos -->
+                <div class="form-step" id="step-5">
+                    <div class="question-block">
+                        <label class="question-label">Upload Your Photos *</label>
+                        <p class="question-hint">Please upload 1-3 photos in natural light without makeup or filters. A
+                            white top is preferred for accuracy.</p>
+                        <div class="upload-zone" onclick="document.getElementById('photo-upload').click()">
+                            <span class="upload-icon">📸</span>
+                            <span id="upload-text">Click to upload photos (Max 5 files)</span>
+                            <input type="file" id="photo-upload" name="photos" multiple accept="image/*"
+                                style="display: none;" onchange="updateUploadText(this)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-intake btn-prev" id="prevBtn" onclick="changeStep(-1)"
+                        disabled>Previous</button>
+                    <button type="button" class="btn-intake btn-next" id="nextBtn" onclick="changeStep(1)">Next
+                        Step</button>
+                    <button type="submit" class="btn-intake btn-submit" id="submitBtn" style="display: none;">Complete
+                        Profile</button>
+                </div>
+            </form>
+            <div id="status-msg"
+                style="margin-top: 2rem; text-align: center; display: none; padding: 1.5rem; border-radius: 12px;">
             </div>
         </div>
     </main>
 
-    <script src="js/logger.min.js"></script>
-    <script src="js/main.js"></script>
     <script>
-        // Form toggle functionality (specific to this page)
-        document.querySelectorAll('.form-toggle').forEach(button => {
-            button.addEventListener('click', function () {
-                document.querySelectorAll('.form-toggle').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.form-section').forEach(form => form.classList.remove('active'));
-                this.classList.add('active');
-                const formId = this.getAttribute('data-form');
-                document.getElementById(formId).classList.add('active');
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        function changeStep(n) {
+            if (n === 1 && !validateStep(currentStep)) return;
+
+            document.getElementById(`step-${currentStep}`).classList.remove('active');
+            document.querySelector(`.step-dot[data-step="${currentStep}"]`).classList.remove('active');
+
+            currentStep += n;
+
+            document.getElementById(`step-${currentStep}`).classList.add('active');
+            document.querySelector(`.step-dot[data-step="${currentStep}"]`).classList.add('active');
+
+            // Update buttons
+            document.getElementById('prevBtn').disabled = currentStep === 1;
+            if (currentStep === totalSteps) {
+                document.getElementById('nextBtn').style.display = 'none';
+                document.getElementById('submitBtn').style.display = 'block';
+            } else {
+                document.getElementById('nextBtn').style.display = 'block';
+                document.getElementById('submitBtn').style.display = 'none';
+            }
+        }
+
+        function validateStep(step) {
+            const currentStepEl = document.getElementById(`step-${step}`);
+            const required = currentStepEl.querySelectorAll('[required]');
+            let valid = true;
+
+            required.forEach(el => {
+                if (el.type === 'radio' || el.type === 'checkbox') {
+                    const name = el.getAttribute('name');
+                    if (!currentStepEl.querySelector(`input[name="${name}"]:checked`)) {
+                        valid = false;
+                        el.closest('.question-block').style.borderLeft = '3px solid #dc3545';
+                    } else {
+                        el.closest('.question-block').style.borderLeft = 'none';
+                    }
+                } else if (!el.value) {
+                    valid = false;
+                    el.style.borderColor = '#dc3545';
+                } else {
+                    el.style.borderColor = '#e8e8e8';
+                }
             });
+            return valid;
+        }
+
+        function updateUploadText(input) {
+            const count = input.files.length;
+            document.getElementById('upload-text').textContent = count > 0 ? `${count} file(s) selected` : 'Click to upload photos (Max 5 files)';
+        }
+
+        document.getElementById('intake-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = document.getElementById('submitBtn');
+            const statusMsg = document.getElementById('status-msg');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading...';
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/api/intake', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    statusMsg.style.display = 'block';
+                    statusMsg.style.background = '#d4edda';
+                    statusMsg.style.color = '#155724';
+                    statusMsg.textContent = 'Profile submitted successfully! I will reach out shortly.';
+                    form.style.opacity = '0.3';
+                    form.style.pointerEvents = 'none';
+                } else {
+                    throw new Error('Upload failed');
+                }
+            } catch (err) {
+                statusMsg.style.display = 'block';
+                statusMsg.style.background = '#f8d7da';
+                statusMsg.style.color = '#721c24';
+                statusMsg.textContent = 'Error submitting profile. Please try again.';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Complete Profile';
+            }
         });
     </script>
 </body>
