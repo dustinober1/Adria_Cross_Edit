@@ -1,5 +1,5 @@
 const express = require('express');
-const Database = require('better-sqlite3');
+const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const path = require('path');
@@ -10,17 +10,21 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Persistent storage path (for Render or other hosts)
-const DATA_DIR = process.env.DATA_DIR || path.join(__dirname);
-const DB_PATH = path.join(DATA_DIR, 'appointments.db');
-const UPLOAD_ROOT = path.join(DATA_DIR, 'uploads');
+// Database connection
+// For Render/Supabase, use DATABASE_URL. For local, you'll need a local Postgres or we can keep it flexible.
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
 
-// Ensure uploads directory exists
+// Multer setup for file uploads (Note: In Render free tier, these will reset on every deploy)
+const UPLOAD_ROOT = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOAD_ROOT)) {
     fs.mkdirSync(UPLOAD_ROOT, { recursive: true });
 }
 
-// Multer setup for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, UPLOAD_ROOT);
@@ -32,65 +36,70 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+    limits: { fileSize: 10 * 1024 * 1024 }
 });
 
-// Database setup
-const db = new Database(DB_PATH);
+// Initialize Tables
+const initDb = async () => {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS appointments (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                date TEXT NOT NULL,
+                time TEXT NOT NULL,
+                service TEXT,
+                message TEXT,
+                status TEXT DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
-// Create tables if they don't exist
-db.exec(`
-  CREATE TABLE IF NOT EXISTS appointments (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    date TEXT NOT NULL,
-    time TEXT NOT NULL,
-    service TEXT,
-    message TEXT,
-    status TEXT DEFAULT 'pending',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
+            CREATE TABLE IF NOT EXISTS intake_submissions (
+                id SERIAL PRIMARY KEY,
+                form_type TEXT NOT NULL,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                data TEXT NOT NULL,
+                files TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
-  CREATE TABLE IF NOT EXISTS intake_submissions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    form_type TEXT NOT NULL,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    data TEXT NOT NULL, -- JSON string of form data
-    files TEXT,        -- JSON string of filenames
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
+            CREATE TABLE IF NOT EXISTS availability_config (
+                id SERIAL PRIMARY KEY,
+                day_of_week INTEGER UNIQUE,
+                slots TEXT DEFAULT '[]',
+                is_enabled INTEGER DEFAULT 1
+            );
 
-  CREATE TABLE IF NOT EXISTS availability_config (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    day_of_week INTEGER UNIQUE, -- 0 (Sunday) to 6 (Saturday)
-    slots TEXT DEFAULT '[]',     -- JSON array of strings: ["09:00 AM", "10:00 AM"]
-    is_enabled INTEGER DEFAULT 1
-  );
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL
+            );
+        `);
 
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
-  );
-`);
-
-// Initialize default availability if empty
-const initAvailability = () => {
-    const count = db.prepare('SELECT COUNT(*) as count FROM availability_config').get().count;
-    if (count === 0) {
-        const defaultSlots = JSON.stringify(["09:00 AM", "10:00 AM", "11:00 AM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM"]);
-        const stmt = db.prepare('INSERT INTO availability_config (day_of_week, slots, is_enabled) VALUES (?, ?, ?)');
-        for (let i = 1; i <= 5; i++) { // Mon-Fri
-            stmt.run(i, defaultSlots, 1);
+        // Defaults
+        const userCheck = await pool.query('SELECT * FROM users WHERE username = $1', ['admin']);
+        if (userCheck.rows.length === 0) {
+            const hash = bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'adria2025', 10);
+            await pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', ['admin', hash]);
         }
-        // Weekends disabled by default
-        stmt.run(0, '[]', 0);
-        stmt.run(6, '[]', 0);
+
+        const availCheck = await pool.query('SELECT COUNT(*) FROM availability_config');
+        if (parseInt(availCheck.rows[0].count) === 0) {
+            const defaultSlots = JSON.stringify(["09:00 AM", "10:00 AM", "11:00 AM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM"]);
+            for (let i = 0; i < 7; i++) {
+                const enabled = (i > 0 && i < 6) ? 1 : 0;
+                const slots = enabled ? defaultSlots : '[]';
+                await pool.query('INSERT INTO availability_config (day_of_week, slots, is_enabled) VALUES ($1, $2, $3)', [i, slots, enabled]);
+            }
+        }
+    } catch (err) {
+        console.error('Error initializing database:', err);
     }
 };
-initAvailability();
+initDb();
 
 // Middleware
 app.use(express.json());
@@ -102,144 +111,82 @@ app.use(session({
     cookie: { secure: false }
 }));
 
-// Auth check middleware
 const isAuthenticated = (req, res, next) => {
-    if (req.session.userId) {
-        next();
-    } else {
-        res.status(401).json({ error: 'Unauthorized' });
-    }
+    if (req.session.userId) next();
+    else res.status(401).json({ error: 'Unauthorized' });
 };
-
-// Initialize admin user
-const initAdmin = () => {
-    const row = db.prepare('SELECT * FROM users WHERE username = ?').get('admin');
-    if (!row) {
-        const password = process.env.ADMIN_PASSWORD || 'adria2025';
-        const hash = bcrypt.hashSync(password, 10);
-        db.prepare('INSERT INTO users (username, password) VALUES (?, ?)').run('admin', hash);
-    }
-};
-initAdmin();
 
 // API Endpoints
-
-// Public: Book an appointment
-app.post('/api/appointments', (req, res) => {
+app.post('/api/appointments', async (req, res) => {
     const { name, email, date, time, service, message } = req.body;
-    const existing = db.prepare('SELECT id FROM appointments WHERE date = ? AND time = ? AND status != "cancelled"').get(date, time);
-    if (existing) {
-        return res.status(400).json({ error: 'This slot is already booked.' });
-    }
     try {
-        db.prepare('INSERT INTO appointments (name, email, date, time, service, message) VALUES (?, ?, ?, ?, ?, ?)').run(name, email, date, time, service, message);
-        res.status(201).json({ message: 'Appointment requested successfully!' });
-    } catch (err) {
-        res.status(500).json({ error: 'Database error' });
-    }
+        const existing = await pool.query('SELECT id FROM appointments WHERE date = $1 AND time = $2 AND status != $3', [date, time, 'cancelled']);
+        if (existing.rows.length > 0) return res.status(400).json({ error: 'Already booked.' });
+
+        await pool.query('INSERT INTO appointments (name, email, date, time, service, message) VALUES ($1, $2, $3, $4, $5, $6)', [name, email, date, time, service, message]);
+        res.status(201).json({ message: 'Success!' });
+    } catch (err) { res.status(500).json({ error: 'DB Error' }); }
 });
 
-// Public: Submit Intake Form
-app.post('/api/intake', upload.array('photos', 5), (req, res) => {
+app.post('/api/intake', upload.array('photos', 5), async (req, res) => {
     try {
         const { form_type, name, email, ...formData } = req.body;
         const filenames = req.files ? req.files.map(f => f.filename) : [];
-
-        const stmt = db.prepare('INSERT INTO intake_submissions (form_type, name, email, data, files) VALUES (?, ?, ?, ?, ?)');
-        stmt.run(form_type, name, email, JSON.stringify(formData), JSON.stringify(filenames));
-
-        res.status(201).json({ message: 'Intake form submitted successfully!' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Failed to submit form' });
-    }
+        await pool.query('INSERT INTO intake_submissions (form_type, name, email, data, files) VALUES ($1, $2, $3, $4, $5)', [form_type, name, email, JSON.stringify(formData), JSON.stringify(filenames)]);
+        res.status(201).json({ message: 'Success!' });
+    } catch (err) { res.status(500).json({ error: 'DB Error' }); }
 });
 
-// Admin Login
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
-    const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
-    if (user && bcrypt.compareSync(password, user.password)) {
-        req.session.userId = user.id;
+    const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    if (user.rows[0] && bcrypt.compareSync(password, user.rows[0].password)) {
+        req.session.userId = user.rows[0].id;
         res.json({ success: true });
-    } else {
-        res.status(401).json({ error: 'Invalid credentials' });
-    }
+    } else res.status(401).json({ error: 'Fail' });
 });
 
-app.post('/api/logout', (req, res) => {
-    req.session.destroy();
-    res.json({ success: true });
+app.post('/api/logout', (req, res) => { req.session.destroy(); res.json({ success: true }); });
+
+app.get('/api/appointments', isAuthenticated, async (req, res) => {
+    const data = await pool.query('SELECT * FROM appointments ORDER BY created_at DESC');
+    res.json(data.rows);
 });
 
-// Admin Data
-app.get('/api/appointments', isAuthenticated, (req, res) => {
-    const data = db.prepare('SELECT * FROM appointments ORDER BY created_at DESC').all();
-    res.json(data);
-});
-
-// Public: Get available slots for a specific date
-app.get('/api/available-slots', (req, res) => {
+app.get('/api/available-slots', async (req, res) => {
     const { date } = req.query;
-    if (!date) return res.status(400).json({ error: 'Date is required' });
-
     const dayOfWeek = new Date(date).getUTCDay();
-    const config = db.prepare('SELECT * FROM availability_config WHERE day_of_week = ?').get(dayOfWeek);
+    const config = await pool.query('SELECT * FROM availability_config WHERE day_of_week = $1', [dayOfWeek]);
+    if (!config.rows[0] || !config.rows[0].is_enabled) return res.json([]);
 
-    if (!config || !config.is_enabled) {
-        return res.json([]);
-    }
-
-    const allSlots = JSON.parse(config.slots);
-
-    // Find which slots are already taken
-    const booked = db.prepare('SELECT time FROM appointments WHERE date = ? AND status != "cancelled"').all(date);
-    const bookedTimes = booked.map(b => b.time);
-
-    const available = allSlots.filter(slot => !bookedTimes.includes(slot));
-    res.json(available);
+    const allSlots = JSON.parse(config.rows[0].slots);
+    const booked = await pool.query('SELECT time FROM appointments WHERE date = $1 AND status != $2', [date, 'cancelled']);
+    const bookedTimes = booked.rows.map(b => b.time);
+    res.json(allSlots.filter(s => !bookedTimes.includes(s)));
 });
 
-// Admin: Get availability config
-app.get('/api/availability', isAuthenticated, (req, res) => {
-    const config = db.prepare('SELECT * FROM availability_config ORDER BY day_of_week ASC').all();
-    const formatted = config.map(c => ({
-        ...c,
-        slots: JSON.parse(c.slots)
-    }));
-    res.json(formatted);
+app.get('/api/availability', isAuthenticated, async (req, res) => {
+    const data = await pool.query('SELECT * FROM availability_config ORDER BY day_of_week ASC');
+    res.json(data.rows.map(c => ({ ...c, slots: JSON.parse(c.slots) })));
 });
 
-// Admin: Update availability config
-app.post('/api/availability', isAuthenticated, (req, res) => {
+app.post('/api/availability', isAuthenticated, async (req, res) => {
     const { day_of_week, slots, is_enabled } = req.body;
-    try {
-        const stmt = db.prepare('UPDATE availability_config SET slots = ?, is_enabled = ? WHERE day_of_week = ?');
-        stmt.run(JSON.stringify(slots), is_enabled ? 1 : 0, day_of_week);
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: 'Database error' });
-    }
-});
-
-app.get('/api/intake', isAuthenticated, (req, res) => {
-    const data = db.prepare('SELECT * FROM intake_submissions ORDER BY created_at DESC').all();
-    res.json(data);
-});
-
-app.patch('/api/appointments/:id', isAuthenticated, (req, res) => {
-    db.prepare('UPDATE appointments SET status = ? WHERE id = ?').run(req.body.status, req.params.id);
+    await pool.query('UPDATE availability_config SET slots = $1, is_enabled = $2 WHERE day_of_week = $3', [JSON.stringify(slots), is_enabled ? 1 : 0, day_of_week]);
     res.json({ success: true });
 });
 
-// Static files
+app.get('/api/intake', isAuthenticated, async (req, res) => {
+    const data = await pool.query('SELECT * FROM intake_submissions ORDER BY created_at DESC');
+    res.json(data.rows);
+});
+
+app.patch('/api/appointments/:id', isAuthenticated, async (req, res) => {
+    await pool.query('UPDATE appointments SET status = $1 WHERE id = $2', [req.body.status, req.params.id]);
+    res.json({ success: true });
+});
+
 app.use(express.static(path.join(__dirname)));
 app.use('/uploads', express.static(UPLOAD_ROOT));
-
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin.html'));
-});
-
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+app.listen(port, () => console.log(`Run: http://localhost:${port}`));

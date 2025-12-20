@@ -2,7 +2,7 @@ services:
   - type: web
     name: adria-cross-edit
     env: node
-    plan: starter # Starter plan is required for persistent disks
+    plan: free # Switch to free tier
     buildCommand: npm install
     startCommand: npm start
     envVars:
@@ -11,10 +11,6 @@ services:
       - key: SESSION_SECRET
         generateValue: true
       - key: ADMIN_PASSWORD
-        value: adria2025 # Change this in the Render Dashboard
-      - key: DATA_DIR
-        value: /var/data
-    disk:
-      name: sqlite-data
-      mountPath: /var/data
-      sizeGB: 1
+        value: adria2025
+      - key: DATABASE_URL
+        sync: false # You will provide this from Supabase/Neon

@@ -14,12 +14,16 @@ This project has been upgraded with a custom appointment booking system.
 3. Access the site: `http://localhost:3000`
 4. Access the Admin Dashboard: `http://localhost:3000/admin` (Default: admin / adria2025)
 
-## Deployment to Render.com
-1. **Push to GitHub**: Ensure your latest code is pushed to your repository.
-2. **Create a Web Service**: In Render, click **New +** > **Blueprint**.
-3. **Connect GitHub**: Select your repository. 
-4. **Deploy**: Render will use the `render.yaml` file to set up your Node.js server and a persistent 1GB disk for your database and photos.
-   - *Note*: Persistent disks require a paid Render plan (Starter or higher). If you want a free tier without persistence (database resets on restart), you can remove the `disk` section from `render.yaml`.
+## Deployment to Render.com (Free Tier)
+1. **Prepare Database**: Create a free account at [Supabase.com](https://supabase.com) or [Neon.tech](https://neon.tech).
+2. **Get Connection String**: Copy your database connection string (it will start with `postgresql://...`).
+3. **Push to GitHub**: Ensure your latest code is pushed.
+4. **Create a Web Service**: In Render, click **New +** > **Blueprint**.
+5. **Connect GitHub**: Select your repository.
+6. **Configure Variables**: When prompted, paste your connection string into the `DATABASE_URL` field.
+7. **Deploy**: Render will set up the server for free. Your data will stay in the cloud database even if Render restarts.
+
+*Note: In the free tier, client photos in the `uploads` folder will still reset on every restart. For permanent photo storage, we can later add a cloud storage service like Cloudinary.*
 
 ## Files Added/Modified
 - `server.js`: The Express & SQLite backend.
