@@ -177,35 +177,141 @@
                 <p>Ready to transform your wardrobe and feel confident in your style? I'd love to hear from you!</p>
             </div>
 
-            <div class="article-section" id="calendar-section">
-                <h2>Schedule Your Free Style Consultation</h2>
-                <p>Select a time that works best for you (15 minutes, no obligation):</p>
-                <div id="calendar-container" style="text-align: center; margin: 2rem 0; position: relative;">
-                    <!-- Loading state -->
-                    <div id="calendar-loading" class="form-loading">
-                        <div class="loading-spinner"></div>
-                        <p>Loading booking calendar...</p>
-                    </div>
-                    <iframe id="booking-calendar"
-                        src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ3wUMcfi9PCbrbgE118d-hvfmKZwgdv39eg488EKFZ8jbFP-yJMlaNEaRHs2Lxe_6Fjz7E-WNSK"
-                        style="width: 100%; height: 800px; border: 0; opacity: 0; transition: opacity 0.3s;"
-                        frameborder="0" title="Book a consultation appointment"
-                        onload="this.style.opacity='1'; document.getElementById('calendar-loading').style.display='none';"></iframe>
-                    <!-- Fallback for slow/failed loads -->
-                    <noscript>
-                        <div class="form-error">
-                            <p>Calendar requires JavaScript. Please email us directly:</p>
-                            <a href="mailto:hello@adriacrossedit.com" class="btn-cta btn-primary-cta">📧 Email
-                                hello@adriacrossedit.com</a>
+            <div class="article-section" id="appointment-section">
+                <h2>Custom Style Consultation Booking</h2>
+                <p>Select your preferred date and time below to request a free 15-minute consultation.</p>
+
+                <div id="booking-form-container"
+                    style="background: white; padding: 2.5rem; border-radius: 15px; box-shadow: 0 4px 25px rgba(0,0,0,0.05); margin-top: 2rem;">
+                    <form id="custom-booking-form">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div class="form-group">
+                                <label for="booking-name"
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Full Name</label>
+                                <input type="text" id="booking-name" name="name" required placeholder="Your name">
+                            </div>
+                            <div class="form-group">
+                                <label for="booking-email"
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email
+                                    Address</label>
+                                <input type="email" id="booking-email" name="email" required
+                                    placeholder="hello@example.com">
+                            </div>
                         </div>
-                    </noscript>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div class="form-group">
+                                <label for="booking-service"
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Interested
+                                    Service</label>
+                                <select id="booking-service" name="service"
+                                    style="width: 100%; padding: 0.8rem; border: 2px solid #e8e8e8; border-radius: 10px; font-family: inherit;">
+                                    <option value="consultation">Free 15-Min Consult</option>
+                                    <option value="closet-edit">The Closet Edit</option>
+                                    <option value="color-analysis">In-Person Color Analysis</option>
+                                    <option value="luxe-shopping">Luxe Shopping Experience</option>
+                                    <option value="other">Other / General Inquiry</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="booking-date"
+                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Preferred
+                                    Date</label>
+                                <input type="date" id="booking-date" name="date" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label for="booking-time"
+                                style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Preferred Time</label>
+                            <select id="booking-time" name="time" required
+                                style="width: 100%; padding: 0.8rem; border: 2px solid #e8e8e8; border-radius: 10px; font-family: inherit;">
+                                <option value="">Select a time slot</option>
+                                <option value="09:00 AM">09:00 AM</option>
+                                <option value="10:00 AM">10:00 AM</option>
+                                <option value="11:00 AM">11:00 AM</option>
+                                <option value="01:00 PM">01:00 PM</option>
+                                <option value="02:00 PM">02:00 PM</option>
+                                <option value="03:00 PM">03:00 PM</option>
+                                <option value="04:00 PM">04:00 PM</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 2rem;">
+                            <label for="booking-message"
+                                style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Style Goals
+                                (Optional)</label>
+                            <textarea id="booking-message" name="message" rows="3"
+                                placeholder="Tell me a bit about what you're looking for..."
+                                style="width: 100%; padding: 0.8rem; border: 2px solid #e8e8e8; border-radius: 10px; font-family: inherit;"></textarea>
+                        </div>
+
+                        <button type="submit" id="submit-booking" class="btn"
+                            style="background: linear-gradient(135deg, #d4a574 0%, #c19a5d 100%); color: white; padding: 1.2rem; font-size: 1.1rem; border-radius: 12px; border: none; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.3s;">
+                            Request Appointment
+                        </button>
+                    </form>
+                    <div id="booking-status"
+                        style="margin-top: 1.5rem; text-align: center; display: none; padding: 1rem; border-radius: 8px;">
+                    </div>
                 </div>
-                <p style="text-align: center; color: #888; font-size: 0.9rem;">
-                    Having trouble? <a href="mailto:hello@adriacrossedit.com" style="color: #c19a5d;">Email me
-                        directly</a>
-                    to schedule.
-                </p>
             </div>
+
+            <script>
+                document.getElementById('custom-booking-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const form = e.target;
+                    const statusDiv = document.getElementById('booking-status');
+                    const submitBtn = document.getElementById('submit-booking');
+
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Submitting Request...';
+                    statusDiv.style.display = 'none';
+
+                    const formData = {
+                        name: form.elements['name'].value,
+                        email: form.elements['email'].value,
+                        service: form.elements['service'].value,
+                        date: form.elements['date'].value,
+                        time: form.elements['time'].value,
+                        message: form.elements['message'].value
+                    };
+
+                    try {
+                        const response = await fetch('/api/appointments', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(formData)
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            statusDiv.style.backgroundColor = '#d4edda';
+                            statusDiv.style.color = '#155724';
+                            statusDiv.textContent = result.message || 'Appointment requested successfully!';
+                            statusDiv.style.display = 'block';
+                            form.reset();
+                        } else {
+                            statusDiv.style.backgroundColor = '#f8d7da';
+                            statusDiv.style.color = '#721c24';
+                            statusDiv.textContent = result.error || 'Something went wrong. Please try again.';
+                            statusDiv.style.display = 'block';
+                        }
+                    } catch (error) {
+                        statusDiv.style.backgroundColor = '#f8d7da';
+                        statusDiv.style.color = '#721c24';
+                        statusDiv.textContent = 'Network error. Please try again later.';
+                        statusDiv.style.display = 'block';
+                    } finally {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Request Appointment';
+                    }
+                });
+
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('booking-date').setAttribute('min', today);
+            </script>
         </div>
 
         <div class="article-section">
