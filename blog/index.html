@@ -122,7 +122,13 @@
             <p style="text-align: center; margin-bottom: 2rem; color: #666;">Fashion tips, wardrobe inspiration, and
                 style advice</p>
 
-            <div class="blog-list">
+            <!-- Blog Search -->
+            <div class="search-container">
+                <input type="search" id="blogSearch" class="search-input" placeholder="Search articles..."
+                    aria-label="Search blog posts">
+            </div>
+
+            <div class="blog-list" id="blogList">
                 <!-- Blog Post 1 -->
                 <div class="blog-teaser">
                     <h2>How to Build a Capsule Wardrobe</h2>
@@ -180,6 +186,41 @@
             if (!e.target.closest('.top-nav')) {
                 navToggle.classList.remove('active');
                 navMenu.classList.remove('active');
+            }
+        });
+
+        // Blog search functionality
+        const searchInput = document.getElementById('blogSearch');
+        const blogList = document.getElementById('blogList');
+        const blogTeasers = blogList.querySelectorAll('.blog-teaser');
+
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+
+            blogTeasers.forEach(teaser => {
+                const title = teaser.querySelector('h2')?.textContent.toLowerCase() || '';
+                const content = teaser.textContent.toLowerCase();
+
+                if (title.includes(searchTerm) || content.includes(searchTerm)) {
+                    teaser.style.display = 'block';
+                } else {
+                    teaser.style.display = 'none';
+                }
+            });
+
+            // Check if any results are visible
+            const visibleTeasers = Array.from(blogTeasers).filter(t => t.style.display !== 'none');
+            const noResultsEl = blogList.querySelector('.no-results');
+
+            if (visibleTeasers.length === 0 && searchTerm !== '') {
+                if (!noResultsEl) {
+                    const noResults = document.createElement('p');
+                    noResults.className = 'no-results';
+                    noResults.textContent = 'No articles found matching your search.';
+                    blogList.appendChild(noResults);
+                }
+            } else if (noResultsEl) {
+                noResultsEl.remove();
             }
         });
     </script>

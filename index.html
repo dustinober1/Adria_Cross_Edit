@@ -31,6 +31,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/landing.css">
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID'); // Replace GA_MEASUREMENT_ID with your actual Google Analytics ID
+    </script>
+
     <style>
         .splash-container {
             max-width: 800px;
@@ -314,7 +324,73 @@
                 </a>
             </div>
         </div>
+
+        <!-- Testimonials Section -->
+        <section class="testimonials-section" aria-label="Client testimonials">
+            <div class="testimonials-header">
+                <h2>What My Clients Say</h2>
+                <p>Real transformations, real confidence</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">Adria completely transformed my wardrobe! I went from dreading getting
+                        dressed every morning to actually enjoying it. She helped me see my clothes in a whole new way
+                        and taught me how to put together outfits I never would have thought of.</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">S</div>
+                        <div class="testimonial-info">
+                            <h4>Sarah M.</h4>
+                            <span>Marketing Executive</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">Working with Adria was the best investment in myself I've made. She
+                        understood my lifestyle perfectly and created a wardrobe that works for everything from board
+                        meetings to school pickups. I feel confident and polished every single day.</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">J</div>
+                        <div class="testimonial-info">
+                            <h4>Jennifer L.</h4>
+                            <span>Business Owner & Mom</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">I was skeptical about hiring a stylist, but Adria made the whole process
+                        so easy and fun. The color analysis was eye-opening — I had no idea I was wearing the wrong
+                        colors! Now I get compliments constantly.</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">M</div>
+                        <div class="testimonial-info">
+                            <h4>Michelle K.</h4>
+                            <span>Entrepreneur</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Newsletter Signup -->
+        <section class="newsletter-section" aria-label="Newsletter signup">
+            <h3>Get Style Tips Delivered to Your Inbox</h3>
+            <p>Join my newsletter for exclusive wardrobe tips, seasonal trends, and special offers.</p>
+            <form class="newsletter-form" action="#" method="post">
+                <input type="email" name="email" placeholder="Enter your email address" required
+                    aria-label="Email address">
+                <button type="submit">Subscribe</button>
+            </form>
+            <p class="newsletter-privacy">No spam, ever. Unsubscribe anytime.</p>
+        </section>
     </main>
+
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark/light mode">
+        🌙
+    </button>
 
     <script src="js/logger.min.js"></script>
     <script>
@@ -342,6 +418,33 @@
                 navToggle.classList.remove('active');
                 navMenu.classList.remove('active');
             }
+        });
+
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+        // Check for saved preference or system preference
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme === 'dark' || (!currentTheme && prefersDarkScheme.matches)) {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.textContent = '☀️';
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            darkModeToggle.textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        // Newsletter form handling
+        document.querySelector('.newsletter-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = e.target.querySelector('input[type="email"]').value;
+            // Replace with your actual newsletter signup endpoint
+            alert('Thank you for subscribing! Check your inbox for a welcome email.');
+            e.target.reset();
         });
     </script>
 </body>
