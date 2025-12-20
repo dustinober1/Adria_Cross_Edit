@@ -9,6 +9,7 @@ require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+app.set('trust proxy', 1); // Required for sessions on Render
 
 // Database connection
 // For Render/Supabase, use DATABASE_URL. For local, you'll need a local Postgres or we can keep it flexible.
@@ -141,12 +142,19 @@ app.post('/api/intake', upload.array('photos', 5), async (req, res) => {
 });
 
 app.post('/api/login', async (req, res) => {
-    const { username, password } = req.body;
-    const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
-    if (user.rows[0] && bcrypt.compareSync(password, user.rows[0].password)) {
-        req.session.userId = user.rows[0].id;
-        res.json({ success: true });
-    } else res.status(401).json({ error: 'Fail' });
+    try {
+        const { username, password } = req.body;
+        const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        if (user.rows[0] && bcrypt.compareSync(password, user.rows[0].password)) {
+            req.session.userId = user.rows[0].id;
+            res.json({ success: true });
+        } else {
+            res.status(401).json({ error: 'Invalid username or password' });
+        }
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).json({ error: 'Server error. Please check DATABASE_URL.' });
+    }
 });
 
 app.post('/api/logout', (req, res) => { req.session.destroy(); res.json({ success: true }); });

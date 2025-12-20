@@ -501,7 +501,12 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: e.target[0].value, password: e.target[1].value })
             });
-            if (res.ok) showDashboard();
+            if (res.ok) {
+                showDashboard();
+            } else {
+                const err = await res.json();
+                alert(err.error || 'Login failed');
+            }
         });
 
         checkAuth();
