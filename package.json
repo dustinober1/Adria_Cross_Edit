@@ -2,7 +2,7 @@
   "name": "adria_cross_edit",
   "version": "1.0.0",
   "description": "This directory contains the original static HTML/CSS/JavaScript site that was live before the transformation to a full-stack application.",
-  "main": "link-checker.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
