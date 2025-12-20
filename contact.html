@@ -95,6 +95,40 @@
       }
     }
     </script>
+
+    <!-- FAQ Schema for Rich Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Do you offer virtual services?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes — every service can be completed virtually for your convenience."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I prepare for a Closet Edit?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Set aside a couple of hours, wear something comfortable, and be open to letting go of what no longer serves you. I'll handle the rest."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What areas do you serve?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "In-person services are available locally; travel fees apply beyond 30 miles. Virtual sessions are available worldwide."
+          }
+        }
+      ]
+    }
+    </script>
 </head>
 
 <body>
@@ -106,7 +140,8 @@
         <div class="nav-container">
             <div class="nav-logo">
                 <a href="index.html" class="has-logo">
-                    <img src="images/logo.png" alt="Adria Cross Edit Logo" class="logo-image">
+                    <img src="images/logo.png" alt="Adria Cross Edit Logo" class="logo-image" loading="lazy" width="50"
+                        height="50">
                     <span class="logo-text">Adria Cross</span>
                 </a>
             </div>
