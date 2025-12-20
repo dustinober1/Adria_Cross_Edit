@@ -197,6 +197,21 @@ app.patch('/api/appointments/:id', isAuthenticated, async (req, res) => {
     res.json({ success: true });
 });
 
+app.get('/api/db-test', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT NOW()');
+        res.json({ success: true, message: 'Database connected!', time: result.rows[0].now });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            error: err.message,
+            detail: err.detail || 'No details',
+            code: err.code,
+            hint: 'Ensure DATABASE_URL is correct in Render Environment Variables.'
+        });
+    }
+});
+
 app.use(express.static(path.join(__dirname)));
 app.use('/uploads', express.static(UPLOAD_ROOT));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
