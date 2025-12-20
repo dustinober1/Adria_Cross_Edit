@@ -12,11 +12,14 @@ const port = process.env.PORT || 3000;
 
 // Database connection
 // For Render/Supabase, use DATABASE_URL. For local, you'll need a local Postgres or we can keep it flexible.
+if (!process.env.DATABASE_URL) {
+    console.error('CRITICAL: DATABASE_URL environment variable is missing.');
+    console.error('Please add your Supabase/Neon connection string to Render Environment Variables.');
+}
+
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
 // Multer setup for file uploads (Note: In Render free tier, these will reset on every deploy)
