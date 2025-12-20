@@ -3,7 +3,7 @@
  * Centralized script for all common functionality
  */
 
-(function() {
+(function () {
     'use strict';
 
     // ============================================
@@ -157,7 +157,7 @@
             try {
                 // Simulate API call - replace with actual newsletter service integration
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                
+
                 // Show success message
                 showNotification('Thank you for subscribing! Check your inbox for a welcome email.', 'success');
                 form.reset();
@@ -222,16 +222,16 @@
             btn.addEventListener('click', () => {
                 const target = btn.getAttribute('data-target');
                 const formWrapper = document.getElementById(target);
-                
+
                 if (formWrapper) {
                     // Hide all form wrappers
                     document.querySelectorAll('.form-wrapper').forEach(wrapper => {
                         wrapper.style.display = 'none';
                     });
-                    
+
                     // Deactivate all toggle buttons
                     toggleBtns.forEach(b => b.classList.remove('active'));
-                    
+
                     // Show target and activate button
                     formWrapper.style.display = 'block';
                     btn.classList.add('active');
@@ -245,10 +245,10 @@
     // ============================================
     const initSmoothScroll = () => {
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
+            anchor.addEventListener('click', function (e) {
                 const href = this.getAttribute('href');
                 if (href === '#') return;
-                
+
                 const target = document.querySelector(href);
                 if (target) {
                     e.preventDefault();
@@ -265,11 +265,40 @@
     };
 
     // ============================================
-    // Lazy Loading for Instagram Iframes
+    // Lazy Loading for Instagram Iframes with Fallback
     // ============================================
     const initLazyInstagram = () => {
-        const instagramPosts = document.querySelectorAll('.instagram-post iframe[data-src]');
+        const instagramPosts = document.querySelectorAll('.instagram-post');
         if (instagramPosts.length === 0) return;
+
+        // Add fallback for each Instagram post
+        instagramPosts.forEach(post => {
+            const iframe = post.querySelector('iframe');
+            if (!iframe) return;
+
+            // Set a timeout for iframe load
+            const loadTimeout = setTimeout(() => {
+                // If iframe hasn't loaded properly, show fallback
+                if (!iframe.contentWindow || iframe.offsetHeight < 100) {
+                    showInstagramFallback(post);
+                }
+            }, 8000);
+
+            // Clear timeout on successful load
+            iframe.addEventListener('load', () => {
+                clearTimeout(loadTimeout);
+            });
+
+            // Handle iframe error
+            iframe.addEventListener('error', () => {
+                clearTimeout(loadTimeout);
+                showInstagramFallback(post);
+            });
+        });
+
+        // Handle data-src lazy loading
+        const lazyIframes = document.querySelectorAll('.instagram-post iframe[data-src]');
+        if (lazyIframes.length === 0) return;
 
         const loadInstagram = (entries, observer) => {
             entries.forEach(entry => {
@@ -288,14 +317,32 @@
                 threshold: 0.1
             });
 
-            instagramPosts.forEach(post => observer.observe(post));
+            lazyIframes.forEach(post => observer.observe(post));
         } else {
             // Fallback for older browsers
-            instagramPosts.forEach(post => {
+            lazyIframes.forEach(post => {
                 post.src = post.dataset.src;
                 post.removeAttribute('data-src');
             });
         }
+    };
+
+    // Instagram fallback display
+    const showInstagramFallback = (postElement) => {
+        postElement.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; 
+                        height: 100%; min-height: 280px; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); 
+                        border-radius: 8px; padding: 1.5rem; text-align: center;">
+                <span style="font-size: 2.5rem; margin-bottom: 0.5rem;">📸</span>
+                <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">Instagram content couldn't load</p>
+                <a href="https://www.instagram.com/adriacrossedit/" target="_blank" rel="noopener noreferrer"
+                   style="background: linear-gradient(135deg, #d4a574 0%, #c19a5d 100%); color: white; 
+                          padding: 0.6rem 1.2rem; border-radius: 20px; text-decoration: none; font-weight: 600;
+                          font-size: 0.85rem; transition: transform 0.2s;">
+                    View on Instagram
+                </a>
+            </div>
+        `;
     };
 
     // ============================================
@@ -307,7 +354,7 @@
 
         formIframes.forEach(iframe => {
             const wrapper = iframe.parentElement;
-            
+
             // Add loading state
             const loadingIndicator = document.createElement('div');
             loadingIndicator.className = 'form-loading';

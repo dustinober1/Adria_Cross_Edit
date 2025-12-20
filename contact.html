@@ -169,75 +169,94 @@
                 <p>Ready to transform your wardrobe and feel confident in your style? I'd love to hear from you!</p>
             </div>
 
-            <div class="article-section">
-                <h2>Schedule Your No Cost Consultation</h2>
-                <p>Select a time that works best for you:</p>
-                <div style="text-align: center; margin: 2rem 0;">
-                    <iframe
+            <div class="article-section" id="calendar-section">
+                <h2>Schedule Your Free Style Consultation</h2>
+                <p>Select a time that works best for you (15 minutes, no obligation):</p>
+                <div id="calendar-container" style="text-align: center; margin: 2rem 0; position: relative;">
+                    <!-- Loading state -->
+                    <div id="calendar-loading" class="form-loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading booking calendar...</p>
+                    </div>
+                    <iframe id="booking-calendar"
                         src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ3wUMcfi9PCbrbgE118d-hvfmKZwgdv39eg488EKFZ8jbFP-yJMlaNEaRHs2Lxe_6Fjz7E-WNSK"
-                        style="width: 100%; height: 800px; border: 0;" frameborder="0"
-                        title="Book a consultation appointment"></iframe>
+                        style="width: 100%; height: 800px; border: 0; opacity: 0; transition: opacity 0.3s;"
+                        frameborder="0" title="Book a consultation appointment"
+                        onload="this.style.opacity='1'; document.getElementById('calendar-loading').style.display='none';"></iframe>
+                    <!-- Fallback for slow/failed loads -->
+                    <noscript>
+                        <div class="form-error">
+                            <p>Calendar requires JavaScript. Please email us directly:</p>
+                            <a href="mailto:hello@adriacross.com" class="btn-cta btn-primary-cta">📧 Email
+                                hello@adriacross.com</a>
+                        </div>
+                    </noscript>
+                </div>
+                <p style="text-align: center; color: #888; font-size: 0.9rem;">
+                    Having trouble? <a href="mailto:hello@adriacross.com" style="color: #c19a5d;">Email me directly</a>
+                    to schedule.
+                </p>
+            </div>
+        </div>
+
+        <div class="article-section">
+            <h2>Email</h2>
+            <p>Feel free to reach out via email:</p>
+            <p style="font-weight: 600; color: #c19a5d; font-size: 1.1rem; text-align: center;"><a
+                    href="mailto:hello@adriacross.com"
+                    style="color: #c19a5d; text-decoration: none;">hello@adriacross.com</a></p>
+        </div>
+
+        <div class="article-section">
+            <h2>Styling Intake Forms</h2>
+            <p>Complete the appropriate intake form based on your selected service to help me understand your style
+                preferences and goals:</p>
+            <div style="text-align: center; margin: 2rem 0;">
+                <a href="intake-form.html" class="btn-cta btn-primary-cta"
+                    style="padding: 1rem 2.5rem; border-radius: 25px; font-family: 'Montserrat', sans-serif; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; background: linear-gradient(135deg, #d4a574 0%, #c19a5d 100%); color: white; border: none; transition: all 0.3s; margin: 0 auto;">
+                    📝 Complete Intake Form
+                </a>
+            </div>
+        </div>
+
+
+
+        <div class="article-section">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-item" style="margin-bottom: 0.5rem;">
+                <div class="faq-question">
+                    Do you offer virtual services?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    Yes — every service can be completed virtually for your convenience.
                 </div>
             </div>
 
-            <div class="article-section">
-                <h2>Email</h2>
-                <p>Feel free to reach out via email:</p>
-                <p style="font-weight: 600; color: #c19a5d; font-size: 1.1rem; text-align: center;"><a
-                        href="mailto:hello@adriacross.com"
-                        style="color: #c19a5d; text-decoration: none;">hello@adriacross.com</a></p>
-            </div>
-
-            <div class="article-section">
-                <h2>Styling Intake Forms</h2>
-                <p>Complete the appropriate intake form based on your selected service to help me understand your style
-                    preferences and goals:</p>
-                <div style="text-align: center; margin: 2rem 0;">
-                    <a href="intake-form.html" class="btn-cta btn-primary-cta"
-                        style="padding: 1rem 2.5rem; border-radius: 25px; font-family: 'Montserrat', sans-serif; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; background: linear-gradient(135deg, #d4a574 0%, #c19a5d 100%); color: white; border: none; transition: all 0.3s; margin: 0 auto;">
-                        📝 Complete Intake Form
-                    </a>
+            <div class="faq-item" style="margin-bottom: 0.5rem;">
+                <div class="faq-question">
+                    How do I prepare for a Closet Edit?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    Set aside a couple of hours, wear something comfortable, and be open to letting go of what no
+                    longer
+                    serves you. I'll handle the rest.
                 </div>
             </div>
 
-
-
-            <div class="article-section">
-                <h2>Frequently Asked Questions</h2>
-                <div class="faq-item" style="margin-bottom: 0.5rem;">
-                    <div class="faq-question">
-                        Do you offer virtual services?
-                        <span class="faq-toggle">+</span>
-                    </div>
-                    <div class="faq-answer">
-                        Yes — every service can be completed virtually for your convenience.
-                    </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    What areas do you serve?
+                    <span class="faq-toggle">+</span>
                 </div>
-
-                <div class="faq-item" style="margin-bottom: 0.5rem;">
-                    <div class="faq-question">
-                        How do I prepare for a Closet Edit?
-                        <span class="faq-toggle">+</span>
-                    </div>
-                    <div class="faq-answer">
-                        Set aside a couple of hours, wear something comfortable, and be open to letting go of what no
-                        longer
-                        serves you. I'll handle the rest.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question">
-                        What areas do you serve?
-                        <span class="faq-toggle">+</span>
-                    </div>
-                    <div class="faq-answer">
-                        In-person services are available locally; travel fees apply beyond 30 miles. Virtual sessions
-                        are
-                        available worldwide.
-                    </div>
+                <div class="faq-answer">
+                    In-person services are available locally; travel fees apply beyond 30 miles. Virtual sessions
+                    are
+                    available worldwide.
                 </div>
             </div>
+        </div>
         </div>
     </main>
 
