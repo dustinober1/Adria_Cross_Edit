@@ -173,48 +173,14 @@
     </main>
 
     <script src="js/logger.min.js"></script>
+    <script src="js/main.js"></script>
     <script>
-        // Mobile menu toggle
-        const navToggle = document.getElementById('navToggle');
-        const navMenu = document.getElementById('navMenu');
-        const navLinks = document.querySelectorAll('#navMenu a');
-
-        navToggle.addEventListener('click', () => {
-            navToggle.classList.toggle('active');
-            navMenu.classList.toggle('active');
-        });
-
-        // Close menu when a link is clicked
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                navToggle.classList.remove('active');
-                navMenu.classList.remove('active');
-            });
-        });
-
-        // Close menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.top-nav')) {
-                navToggle.classList.remove('active');
-                navMenu.classList.remove('active');
-            }
-        });
-
-        // Form toggle functionality
+        // Form toggle functionality (specific to this page)
         document.querySelectorAll('.form-toggle').forEach(button => {
             button.addEventListener('click', function () {
-                // Remove active class from all buttons and forms
-                document.querySelectorAll('.form-toggle').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                document.querySelectorAll('.form-section').forEach(form => {
-                    form.classList.remove('active');
-                });
-
-                // Add active class to clicked button
+                document.querySelectorAll('.form-toggle').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.form-section').forEach(form => form.classList.remove('active'));
                 this.classList.add('active');
-
-                // Show corresponding form
                 const formId = this.getAttribute('data-form');
                 document.getElementById(formId).classList.add('active');
             });

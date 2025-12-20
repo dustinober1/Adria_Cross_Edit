@@ -251,72 +251,7 @@
     </button>
 
     <script src="js/logger.min.js"></script>
-    <script>
-        // Mobile menu toggle
-        const navToggle = document.getElementById('navToggle');
-        const navMenu = document.getElementById('navMenu');
-        const navLinks = document.querySelectorAll('#navMenu a');
-
-        navToggle.addEventListener('click', () => {
-            navToggle.classList.toggle('active');
-            navMenu.classList.toggle('active');
-        });
-
-        // Close menu when a link is clicked
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                navToggle.classList.remove('active');
-                navMenu.classList.remove('active');
-            });
-        });
-
-        // Close menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.top-nav')) {
-                navToggle.classList.remove('active');
-                navMenu.classList.remove('active');
-            }
-        });
-
-        // Dark mode toggle
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme === 'dark' || (!currentTheme && prefersDarkScheme.matches)) {
-            document.body.classList.add('dark-mode');
-            darkModeToggle.textContent = '☀️';
-        }
-        darkModeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            darkModeToggle.textContent = isDark ? '☀️' : '🌙';
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        });
-
-        // Initialize FAQ accordions
-        document.querySelectorAll('.faq-question').forEach(question => {
-            question.addEventListener('click', () => {
-                const answer = question.nextElementSibling;
-                const toggle = question.querySelector('.faq-toggle');
-
-                if (answer.classList.contains('show')) {
-                    answer.classList.remove('show');
-                    toggle.textContent = '+';
-                } else {
-                    // Close other open FAQ items
-                    document.querySelectorAll('.faq-answer.show').forEach(item => {
-                        item.classList.remove('show');
-                    });
-                    document.querySelectorAll('.faq-toggle').forEach(t => {
-                        t.textContent = '+';
-                    });
-
-                    answer.classList.add('show');
-                    toggle.textContent = '−';
-                }
-            });
-        });
-    </script>
+    <script src="js/main.js"></script>
 </body>
 
 </html>

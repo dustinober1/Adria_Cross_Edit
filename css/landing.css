@@ -1925,6 +1925,142 @@ body.dark-mode .service-card {
 }
 
 /* ==========================================
+   NOTIFICATION SYSTEM
+   ========================================== */
+.site-notification {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    max-width: 400px;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+}
+
+.site-notification.visible {
+    transform: translateX(0);
+}
+
+.site-notification.fade-out {
+    transform: translateX(120%);
+}
+
+.site-notification--success {
+    border-left: 4px solid #4CAF50;
+}
+
+.site-notification--error {
+    border-left: 4px solid #f44336;
+}
+
+.site-notification--info {
+    border-left: 4px solid var(--primary-color);
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 0;
+    line-height: 1;
+}
+
+.notification-close:hover {
+    color: var(--text-primary);
+}
+
+/* ==========================================
+   FORM LOADING STATES
+   ========================================== */
+.form-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--text-muted);
+    gap: 1rem;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.form-error {
+    text-align: center;
+    padding: 2rem;
+    background: var(--surface-alt);
+    border-radius: var(--radius-md);
+}
+
+.form-error p {
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+}
+
+/* iframe loading state */
+iframe[src*="docs.google.com/forms"] {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* ==========================================
+   TOUCH TARGET IMPROVEMENTS (Mobile Accessibility)
+   ========================================== */
+@media (max-width: 768px) {
+
+    .btn,
+    .btn-cta,
+    button,
+    .nav-menu a,
+    .footer-nav a,
+    .footer-social-links a {
+        min-height: 44px;
+        min-width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .nav-toggle {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Instagram feed mobile scroll fix */
+    .instagram-feed {
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .instagram-post {
+        scroll-snap-align: start;
+        flex: 0 0 85vw;
+        max-width: 300px;
+    }
+}
+
+/* ==========================================
    PRINT STYLES
    ========================================== */
 @media print {
