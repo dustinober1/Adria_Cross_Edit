@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
@@ -8,6 +9,7 @@ const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 const nodemailer = require('nodemailer');
+const sqlite3 = require('sqlite3');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -24,10 +26,142 @@ if (!process.env.ADMIN_PASSWORD) {
     console.warn('CRITICAL: ADMIN_PASSWORD not set. Admin login will use insecure default until set.');
 }
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
-});
+let pool;
+let db;
+
+// Initialize database based on DATABASE_URL
+if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) {
+    // SQLite configuration
+    const sqlite = require('sqlite');
+    const { open } = require('sqlite');
+
+    const dbPath = process.env.DATABASE_URL.replace('sqlite:', '');
+    let db;
+
+    // Create wrapper pool-like interface for SQLite
+    pool = {
+        query: async (sql, params = []) => {
+            try {
+                if (!db) {
+                    throw new Error('Database not initialized');
+                }
+                if (sql.trim().toLowerCase().startsWith('select')) {
+                    const result = await db.all(sql, params);
+                    return { rows: result };
+                } else {
+                    await db.run(sql, params);
+                    return { rows: [] };
+                }
+            } catch (error) {
+                throw error;
+            }
+        }
+    };
+
+    // Initialize SQLite database
+    async function initSqliteDb() {
+        try {
+            db = await open({
+                filename: dbPath,
+                driver: sqlite3.Database
+            });
+
+            await db.exec(`
+                CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT UNIQUE NOT NULL,
+                    password TEXT NOT NULL,
+                    is_client BOOLEAN DEFAULT FALSE,
+                    verification_code TEXT
+                );
+
+                CREATE TABLE IF NOT EXISTS clothing_categories (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT UNIQUE NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS clothing_items (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    session_id TEXT,
+                    user_id INTEGER,
+                    category_id INTEGER,
+                    image_path TEXT NOT NULL,
+                    color_tags TEXT,
+                    style_tags TEXT,
+                    season_tags TEXT,
+                    brand TEXT,
+                    pattern TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    expires_at DATETIME
+                );
+
+                CREATE TABLE IF NOT EXISTS appointments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    email TEXT NOT NULL,
+                    date TEXT NOT NULL,
+                    time TEXT NOT NULL,
+                    service TEXT,
+                    message TEXT,
+                    status TEXT DEFAULT 'pending',
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+
+                CREATE TABLE IF NOT EXISTS intake_submissions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    form_type TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    email TEXT NOT NULL,
+                    data TEXT NOT NULL,
+                    files TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+
+                CREATE TABLE IF NOT EXISTS availability_config (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    day_of_week INTEGER UNIQUE,
+                    slots TEXT DEFAULT '[]',
+                    is_enabled INTEGER DEFAULT 1
+                );
+
+                CREATE TABLE IF NOT EXISTS availability_overrides (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    date TEXT UNIQUE NOT NULL,
+                    slots TEXT DEFAULT '[]',
+                    is_enabled INTEGER DEFAULT 1
+                );
+            `);
+
+            // Insert default categories
+            await db.run(`INSERT OR IGNORE INTO clothing_categories (name) VALUES ('tops')`);
+            await db.run(`INSERT OR IGNORE INTO clothing_categories (name) VALUES ('bottoms')`);
+            await db.run(`INSERT OR IGNORE INTO clothing_categories (name) VALUES ('shoes')`);
+            await db.run(`INSERT OR IGNORE INTO clothing_categories (name) VALUES ('accessories')`);
+
+            // Create default admin user if not exists
+            const adminCheck = await db.get('SELECT * FROM users WHERE username = ?', ['admin']);
+            if (!adminCheck) {
+                const password = process.env.ADMIN_PASSWORD || 'adria2025';
+                const hash = bcrypt.hashSync(password, 10);
+                await db.run('INSERT INTO users (username, password) VALUES (?, ?)', ['admin', hash]);
+            }
+
+            console.log('SQLite database initialized successfully');
+        } catch (err) {
+            console.error('Error initializing SQLite database:', err);
+        }
+    }
+
+    // Initialize SQLite database immediately
+    initSqliteDb();
+} else {
+    // PostgreSQL configuration
+    const { Pool } = require('pg');
+    pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+    });
+}
 
 // Rate Limiting
 const loginLimiter = rateLimit({
@@ -150,7 +284,10 @@ const initDb = async () => {
     }
 };
 
-initDb();
+// Only initialize PostgreSQL if not using SQLite
+if (!process.env.DATABASE_URL || !process.env.DATABASE_URL.startsWith('sqlite:')) {
+    initDb();
+}
 
 // ============================================
 // Email Configuration
@@ -184,6 +321,7 @@ const sendEmail = async (to, subject, html) => {
 };
 
 // Middleware
+app.use(cors()); // Enable CORS for all routes
 app.use(express.json({ limit: '10kb' })); // Limit JSON size
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(session({
@@ -338,6 +476,432 @@ app.patch('/api/appointments/:id', isAuthenticated, async (req, res) => {
     res.json({ success: true });
 });
 
+// ============================================
+// Clothing Matcher - Database Initialization
+// ============================================
+const initClothingMatcherDb = async () => {
+    try {
+        // Extend users table for client status
+        await pool.query(`
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS is_client BOOLEAN DEFAULT FALSE;
+                `);
+
+        await pool.query(`
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_code TEXT;
+                `);
+
+        // Create clothing categories
+        await pool.query(`
+                    CREATE TABLE IF NOT EXISTS clothing_categories (
+                        id SERIAL PRIMARY KEY,
+                        name TEXT UNIQUE NOT NULL
+                    );
+                `);
+
+        // Create clothing items table
+        await pool.query(`
+                    CREATE TABLE IF NOT EXISTS clothing_items (
+                        id SERIAL PRIMARY KEY,
+                        session_id TEXT,
+                        user_id INTEGER REFERENCES users(id),
+                        category_id INTEGER REFERENCES clothing_categories(id),
+                        image_path TEXT NOT NULL,
+                        color_tags TEXT[],
+                        style_tags TEXT[],
+                        season_tags TEXT[],
+                        brand TEXT,
+                        pattern TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        expires_at TIMESTAMP
+                    );
+                `);
+
+        // Insert default categories
+        const categoryCheck = await pool.query('SELECT COUNT(*) FROM clothing_categories');
+        if (parseInt(categoryCheck.rows[0].count) === 0) {
+            await pool.query(`
+                        INSERT INTO clothing_categories (name) VALUES 
+                        ('tops'), ('bottoms'), ('shoes'), ('accessories');
+                    `);
+        }
+
+        console.log('Clothing matcher database initialized successfully');
+    } catch (err) {
+        console.error('Error initializing clothing matcher database:', err);
+    }
+};
+
+// Initialize clothing matcher database
+if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) {
+    // SQLite already initialized above
+} else {
+    initClothingMatcherDb();
+}
+
+// ============================================
+// Clothing Matcher Helper Functions
+// ============================================
+const checkClientStatus = async (userId) => {
+    if (!userId) return false;
+    const result = await pool.query('SELECT is_client FROM users WHERE id = $1', [userId]);
+    return result.rows[0]?.is_client || false;
+};
+
+const checkUploadLimit = async (categoryId, userId = null, sessionId = null) => {
+    const isClient = await checkClientStatus(userId);
+    if (isClient) return { allowed: true, used: 0, limit: 'unlimited' };
+
+    const countResult = await pool.query(`
+                SELECT COUNT(*) as count FROM clothing_items 
+                WHERE category_id = $1 
+                AND (user_id = $2 OR session_id = $3)
+                AND (expires_at IS NULL OR expires_at > datetime('now'))
+            `, [categoryId, userId, sessionId]);
+
+    // Handle both PostgreSQL (countResult.rows[0].count) and SQLite wrappers
+    const countRow = countResult.rows[0];
+    const used = parseInt(countRow?.count || countRow?.['COUNT(*)'] || 0);
+    return {
+        allowed: used < 2,
+        used: used,
+        limit: 2
+    };
+};
+
+const generateSessionId = () => {
+    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+};
+
+const calculateMatchScore = (item1, item2) => {
+    let score = 0;
+
+    // Color compatibility (40% weight)
+    if (item1.color_tags && item2.color_tags) {
+        const commonColors = item1.color_tags.filter(color =>
+            item2.color_tags.includes(color)
+        );
+        score += (commonColors.length / Math.max(item1.color_tags.length, item2.color_tags.length)) * 40;
+    }
+
+    // Style compatibility (30% weight)
+    if (item1.style_tags && item2.style_tags) {
+        const commonStyles = item1.style_tags.filter(style =>
+            item2.style_tags.includes(style)
+        );
+        score += (commonStyles.length / Math.max(item1.style_tags.length, item2.style_tags.length)) * 30;
+    }
+
+    // Pattern mixing rules (20% weight)
+    if (item1.pattern && item2.pattern) {
+        if (item1.pattern === 'solid' && item2.pattern !== 'solid') score += 20;
+        else if (item2.pattern === 'solid' && item1.pattern !== 'solid') score += 20;
+        else if (item1.pattern === item2.pattern && item1.pattern !== 'solid') score -= 10;
+        else score += 10;
+    }
+
+    // Season compatibility (10% weight)
+    if (item1.season_tags && item2.season_tags) {
+        const commonSeasons = item1.season_tags.filter(season =>
+            item2.season_tags.includes(season)
+        );
+        score += (commonSeasons.length / Math.max(item1.season_tags.length, item2.season_tags.length)) * 10;
+    }
+
+    return Math.min(100, Math.max(0, score));
+};
+
+// ============================================
+// Clothing Matcher API Endpoints
+// ============================================
+
+// Client verification
+app.post('/api/clothing/verify-client', async (req, res) => {
+    try {
+        const { email, verification_code } = req.body;
+
+        const user = await pool.query(
+            'SELECT id FROM users WHERE username = $1 AND verification_code = $2 AND is_client = TRUE',
+            [email, verification_code]
+        );
+
+        if (user.rows.length > 0) {
+            req.session.userId = user.rows[0].id;
+            req.session.isClient = true;
+
+            // Clear verification code after use
+            await pool.query(
+                'UPDATE users SET verification_code = NULL WHERE id = $1',
+                [user.rows[0].id]
+            );
+
+            res.json({ success: true, isClient: true });
+        } else {
+            res.status(400).json({ error: 'Invalid verification code' });
+        }
+    } catch (err) {
+        console.error('Verification error:', err);
+        res.status(500).json({ error: 'Verification failed' });
+    }
+});
+
+// Request verification code
+app.post('/api/clothing/request-verification', async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        // Generate 6-digit code
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Update user with verification code
+        await pool.query(
+            'UPDATE users SET verification_code = $1 WHERE username = $2',
+            [code, email]
+        );
+
+        // Send verification email
+        const emailHtml = `<h3>Clothing Matcher Access</h3><p>Your verification code is: <strong>${code}</strong></p><p>Enter this code to unlock unlimited uploads and premium features.</p>`;
+        await sendEmail(email, 'Your Clothing Matcher Verification Code', emailHtml);
+
+        res.json({ success: true, message: 'Verification code sent to your email' });
+    } catch (err) {
+        console.error('Request verification error:', err);
+        res.status(500).json({ error: 'Failed to send verification code' });
+    }
+});
+
+// Upload clothing item
+app.post('/api/clothing/upload', upload.single('image'), async (req, res) => {
+    try {
+        const { category_id, color_tags, style_tags, season_tags, brand, pattern } = req.body;
+        const userId = req.session.userId || null;
+
+        // Generate or get session ID for non-authenticated users
+        let sessionId = req.session.sessionId;
+        if (!userId && !sessionId) {
+            sessionId = generateSessionId();
+            req.session.sessionId = sessionId;
+        }
+
+        // Check upload limits
+        const limitCheck = await checkUploadLimit(category_id, userId, sessionId);
+        if (!limitCheck.allowed) {
+            return res.status(400).json({
+                error: 'Upload limit reached',
+                used: limitCheck.used,
+                limit: limitCheck.limit
+            });
+        }
+
+        // Process tags
+        const colors = color_tags ? color_tags.split(',').map(t => t.trim()).filter(t => t) : [];
+        const styles = style_tags ? style_tags.split(',').map(t => t.trim()).filter(t => t) : [];
+        const seasons = season_tags ? season_tags.split(',').map(t => t.trim()).filter(t => t) : [];
+
+        // Set expiry for session items (1 week)
+        const expiresAt = userId ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+        const result = await pool.query(`
+                    INSERT INTO clothing_items 
+                    (session_id, user_id, category_id, image_path, color_tags, style_tags, season_tags, brand, pattern, expires_at)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                    RETURNING *
+                `, [sessionId, userId, category_id, req.file.filename, colors, styles, seasons, brand, pattern, expiresAt]);
+
+        res.json({
+            success: true,
+            item: result.rows[0],
+            limitStatus: limitCheck
+        });
+    } catch (err) {
+        console.error('Upload error:', err);
+        res.status(500).json({ error: 'Upload failed' });
+    }
+});
+
+// Get user's clothing items
+app.get('/api/clothing/', async (req, res) => {
+    try {
+        const userId = req.session.userId || null;
+        const sessionId = req.session.sessionId || null;
+        const categoryId = req.query.category_id;
+
+        let query = `
+                    SELECT ci.*, cc.name as category_name 
+                    FROM clothing_items ci 
+                    JOIN clothing_categories cc ON ci.category_id = cc.id 
+                    WHERE (ci.user_id = $1 OR ci.session_id = $2)
+                    AND (ci.expires_at IS NULL OR ci.expires_at > datetime('now'))
+                `;
+        let params = [userId, sessionId];
+
+        if (categoryId) {
+            query += ' AND ci.category_id = $3';
+            params.push(categoryId);
+        }
+
+        query += ' ORDER BY ci.created_at DESC';
+
+        const result = await pool.query(query, params);
+        res.json({ items: result.rows });
+    } catch (err) {
+        console.error('Get clothing error:', err);
+        res.status(500).json({ error: 'Failed to retrieve clothing' });
+    }
+});
+
+// Check upload limits
+app.get('/api/clothing/check-limit', async (req, res) => {
+    try {
+        const userId = req.session.userId || null;
+        const sessionId = req.session.sessionId || null;
+
+        const categories = await pool.query('SELECT * FROM clothing_categories');
+        const limits = {};
+
+        for (const category of categories.rows) {
+            limits[category.name] = await checkUploadLimit(category.id, userId, sessionId);
+        }
+
+        res.json({
+            isClient: userId ? await checkClientStatus(userId) : false,
+            limits
+        });
+    } catch (err) {
+        console.error('Check limit error:', err);
+        res.status(500).json({ error: 'Failed to check limits' });
+    }
+});
+
+// Alias for robustness
+app.get('/api/clothing/limits', async (req, res) => {
+    // Re-use logic from check-limit
+    try {
+        const userId = req.session.userId || null;
+        const sessionId = req.session.sessionId || null;
+        const categories = await pool.query('SELECT * FROM clothing_categories');
+        const limits = {};
+        for (const category of categories.rows) {
+            limits[category.name] = await checkUploadLimit(category.id, userId, sessionId);
+        }
+        res.json({
+            isClient: userId ? await checkClientStatus(userId) : false,
+            limits
+        });
+    } catch (err) {
+        console.error('Check limit error (alias):', err);
+        res.status(500).json({ error: 'Failed to check limits' });
+    }
+});
+
+// Get clothing categories
+app.get('/api/clothing/categories', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM clothing_categories ORDER BY name');
+        res.json({ categories: result.rows });
+    } catch (err) {
+        console.error('Get categories error:', err);
+        res.status(500).json({ error: 'Failed to get categories' });
+    }
+});
+
+// Get matching items
+app.get('/api/matches', async (req, res) => {
+    try {
+        const userId = req.session.userId || null;
+        const sessionId = req.session.sessionId || null;
+        const excludeId = req.query.exclude_id;
+
+        // Get user's items
+        const itemsQuery = `
+                    SELECT * FROM clothing_items 
+                    WHERE (user_id = $1 OR session_id = $2)
+                    AND (expires_at IS NULL OR expires_at > datetime('now'))
+                `;
+        const itemsResult = await pool.query(itemsQuery, [userId, sessionId]);
+        const userItems = itemsResult.rows;
+
+        if (userItems.length < 2) {
+            return res.json({ match: null, message: 'Upload more items to get matches' });
+        }
+
+        // Find a match (exclude current item if specified)
+        const availableItems = excludeId
+            ? userItems.filter(item => item.id !== parseInt(excludeId))
+            : userItems;
+
+        if (availableItems.length < 1) {
+            return res.json({ match: null, message: 'No more items to match' });
+        }
+
+        // Simple matching: find items with different categories for variety
+        const currentItem = excludeId
+            ? userItems.find(item => item.id === parseInt(excludeId))
+            : availableItems[Math.floor(Math.random() * availableItems.length)];
+
+        const potentialMatches = availableItems.filter(item =>
+            item.id !== currentItem.id &&
+            item.category_id !== currentItem.category_id
+        );
+
+        if (potentialMatches.length === 0) {
+            // Fallback: same category if no different categories available
+            potentialMatches.push(...availableItems.filter(item => item.id !== currentItem.id));
+        }
+
+        if (potentialMatches.length > 0) {
+            // Calculate match scores and pick best one
+            const scoredMatches = potentialMatches.map(item => ({
+                item: item,
+                score: calculateMatchScore(currentItem, item)
+            }));
+
+            scoredMatches.sort((a, b) => b.score - a.score);
+            const bestMatch = scoredMatches[0];
+
+            res.json({
+                current_item: currentItem,
+                match: bestMatch.item,
+                score: bestMatch.score
+            });
+        } else {
+            res.json({ match: null, message: 'No matches available' });
+        }
+    } catch (err) {
+        console.error('Match error:', err);
+        res.status(500).json({ error: 'Failed to find match' });
+    }
+});
+
+// Delete clothing item
+app.delete('/api/clothing/:id', async (req, res) => {
+    try {
+        const userId = req.session.userId || null;
+        const sessionId = req.session.sessionId || null;
+        const itemId = req.params.id;
+
+        const result = await pool.query(`
+                    DELETE FROM clothing_items 
+                    WHERE id = $1 AND (user_id = $2 OR session_id = $3)
+                    RETURNING image_path
+                `, [itemId, userId, sessionId]);
+
+        if (result.rows.length > 0) {
+            // Delete file from filesystem
+            const filePath = path.join(UPLOAD_ROOT, result.rows[0].image_path);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+
+            res.json({ success: true });
+        } else {
+            res.status(404).json({ error: 'Item not found' });
+        }
+    } catch (err) {
+        console.error('Delete error:', err);
+        res.status(500).json({ error: 'Failed to delete item' });
+    }
+});
+
 // Create Blog Post
 app.post('/api/blog', isAuthenticated, async (req, res) => {
     try {
@@ -439,9 +1003,25 @@ app.post('/api/blog', isAuthenticated, async (req, res) => {
     }
 });
 
+// Ensure session for clothing matcher
+app.use('/clothing-matcher', (req, res, next) => {
+    if (!req.session.userId) {
+        req.session.userId = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        console.log('Created anonymous session for clothing matcher:', req.session.userId);
+    }
+    next();
+});
+
+// Clothing Matcher routes (must come before static files)
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+app.get('/clothing-matcher', (req, res) => res.sendFile(path.join(__dirname, 'clothing-matcher', 'index.html')));
+app.get('/clothing-matcher/', (req, res) => res.sendFile(path.join(__dirname, 'clothing-matcher', 'index.html')));
+
+// Serve static files for clothing-matcher
+app.use('/clothing-matcher', express.static(path.join(__dirname, 'clothing-matcher')));
+
 app.use(express.static(path.join(__dirname)));
 app.use('/uploads', express.static(UPLOAD_ROOT));
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

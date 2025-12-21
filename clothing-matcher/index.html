@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clothing Matcher - Adria Cross</title>
+    <meta name="description"
+        content="Upload your clothing items and get perfect outfit combinations with our AI-powered matching system.">
+    <link rel="stylesheet" href="/css/landing.min.css">
+    <link rel="stylesheet" href="/clothing-matcher/css/matcher.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="top-nav" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="/" class="has-logo">
+                    <img src="/images/logo.webp" alt="Adria Cross Edit Logo" class="logo-image" width="50"
+                        height="50">
+                    <span class="logo-text">Adria Cross</span>
+                </a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/about.html">About</a></li>
+                <li><a href="/services.html">Services</a></li>
+                <li><a href="/blog.html">Blog</a></li>
+                <li><a href="/clothing-matcher/" class="active">Clothing Matcher</a></li>
+                <li><a href="/contact.html">Contact</a></li>
+                <li><button class="search-btn search-trigger" aria-label="Open search">🔍</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main id="main-content" role="main">
+        <div class="matcher-container">
+            <!-- Initial Loading State -->
+            <div id="initialLoading" style="text-align: center; padding: 3rem; display: block;">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">👗</div>
+                <p>Loading your clothing matcher...</p>
+            </div>
+
+            <!-- Header -->
+            <div class="matcher-header">
+                <h1 class="matcher-title">👗 Clothing Matcher</h1>
+                <p class="matcher-subtitle">Upload your wardrobe and discover perfect outfit combinations</p>
+            </div>
+
+            <!-- Client Verification Section -->
+            <div class="verification-section" id="verificationSection" style="display: none;">
+                <h2 class="verification-title">🎯 Unlock Unlimited Access</h2>
+                <p style="text-align: center; margin-bottom: 1.5rem; color: var(--text-light);">
+                    Are you an existing client? Enter your email and verification code to unlock unlimited uploads and
+                    premium features.
+                </p>
+                <form class="verification-form" id="verificationForm">
+                    <input type="email" id="clientEmail" placeholder="Your email address" class="form-input" required>
+                    <button type="submit" class="btn btn-primary">Request Code</button>
+                </form>
+                <div id="codeEntrySection" style="display: none; margin-top: 1.5rem;">
+                    <input type="text" id="verificationCode" placeholder="Enter 6-digit code" class="form-input"
+                        maxlength="6" style="text-align: center; letter-spacing: 2px; font-size: 1.2rem;">
+                    <button type="button" class="btn btn-primary"
+                        onclick="app.actions.verifyCode(document.getElementById('clientEmail').value, document.getElementById('verificationCode').value)">Verify</button>
+                </div>
+            </div>
+
+            <!-- Category Limits Display -->
+            <div class="limits-display" id="limitsDisplay" style="display: none;">
+                <h3 class="limits-title">📊 Your Upload Limits</h3>
+                <div class="limits-grid">
+                    <!-- Limits will be populated by JavaScript -->
+                </div>
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button class="btn btn-secondary"
+                        onclick="document.getElementById('verificationSection').style.display = 'block'; document.getElementById('limitsDisplay').style.display = 'none';">
+                        Verify Client Access
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="matcher-nav">
+                <button class="nav-tab" data-view="upload" onclick="app.views.show('upload')">
+                    📤 Upload Items
+                </button>
+                <button class="nav-tab" data-view="wardrobe" onclick="app.views.show('wardrobe')">
+                    👔 My Wardrobe
+                </button>
+                <button class="nav-tab" data-view="matcher" onclick="app.views.show('matcher')">
+                    💕 Find Matches
+                </button>
+            </div>
+
+            <!-- Upload View -->
+            <div class="upload-view" id="uploadView" style="display: none;">
+                <div class="upload-section">
+                    <h2 style="text-align: center; margin-bottom: 2rem; color: var(--primary-color);">
+                        📸 Upload Your Clothing
+                    </h2>
+
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📤</div>
+                        <p class="upload-text">Drag & drop images here or click to browse</p>
+                        <p style="font-size: 0.9rem; color: var(--text-lighter);">Maximum file size: 5MB</p>
+                        <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png,image/webp"
+                            style="display: none;">
+                    </div>
+
+                    <form class="upload-form" id="uploadForm">
+                        <div class="form-group">
+                            <label class="form-label">Category *</label>
+                            <select class="form-select" id="categorySelect" required>
+                                <option value="">Select category...</option>
+                                <!-- Categories will be populated by JavaScript -->
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Brand (optional)</label>
+                            <input type="text" class="form-input" id="brandInput" placeholder="e.g., Nike, Zara, H&M">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Pattern *</label>
+                            <select class="form-select" id="patternSelect" required>
+                                <option value="">Select pattern...</option>
+                                <option value="solid">Solid</option>
+                                <option value="striped">Striped</option>
+                                <option value="plaid">Plaid</option>
+                                <option value="floral">Floral</option>
+                                <option value="geometric">Geometric</option>
+                                <option value="abstract">Abstract/Print</option>
+                                <option value="textured">Textured</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Colors (comma-separated)</label>
+                            <input type="text" class="form-input" id="colorsInput"
+                                placeholder="e.g., blue, black, white">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Style (comma-separated)</label>
+                            <input type="text" class="form-input" id="stylesInput"
+                                placeholder="e.g., casual, formal, business">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Season (comma-separated)</label>
+                            <input type="text" class="form-input" id="seasonsInput"
+                                placeholder="e.g., spring, summer, fall, winter">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="uploadButton" disabled>
+                            📤 Upload Item
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Wardrobe View -->
+            <div class="wardrobe-view" id="wardrobeView" style="display: none;">
+                <div class="matcher-header">
+                    <h2 class="matcher-title">👔 Your Wardrobe</h2>
+                    <p class="matcher-subtitle">Manage your clothing collection</p>
+                </div>
+
+                <div class="wardrobe-grid" id="wardrobeGrid">
+                    <!-- Wardrobe items will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Matcher View -->
+            <div class="matcher-view" id="matcherView" style="display: none;">
+                <div class="match-header">
+                    <h2 class="match-title">💕 Find Your Perfect Match</h2>
+                    <p class="match-subtitle">Swipe right to like, left to pass, or skip to see another option</p>
+                </div>
+
+                <div class="match-container" id="matchContainer">
+                    <!-- Match card will be populated by JavaScript -->
+                </div>
+
+                <div class="match-controls" id="matchControls">
+                    <button class="match-button skip" onclick="app.actions.handleMatch('skip')">
+                        ⏭️ Skip
+                    </button>
+                    <button class="match-button dislike" onclick="app.actions.handleMatch('dislike')">
+                        👎 Dislike
+                    </button>
+                    <button class="match-button like" onclick="app.actions.handleMatch('like')">
+                        💖 Like
+                    </button>
+                </div>
+
+                <div class="match-score" id="matchScore">
+                    <!-- Match score will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer" role="contentinfo">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h3>Adria Cross</h3>
+                <p>Personal Stylist helping you discover your perfect style through smart clothing matching.</p>
+            </div>
+            <nav class="footer-nav" aria-label="Footer navigation">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/about.html">About Me</a></li>
+                    <li><a href="/services.html">Services</a></li>
+                    <li><a href="/blog.html">Style Blog</a></li>
+                    <li><a href="/clothing-matcher/" class="active">Clothing Matcher</a></li>
+                    <li><a href="/contact.html">Contact</a></li>
+                    <li><button class="search-btn search-trigger" aria-label="Open search">🔍</button></li>
+                </ul>
+            </nav>
+            <div class="footer-contact">
+                <h4>Get In Touch</h4>
+                <p>📧 <a href="mailto:hello@adriacrossedit.com">hello@adriacrossedit.com</a></p>
+                <p>📍 Available for in-person & virtual styling</p>
+                <p>📅 <a href="/contact.html#calendar-section">Book a Free Consultation</a></p>
+            </div>
+            <div class="footer-social">
+                <h4>Follow Along</h4>
+                <div class="footer-social-links">
+                    <a href="https://www.instagram.com/adriacrossedit/" target="_blank" aria-label="Instagram"
+                        title="Follow on Instagram">📸</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-copyright">© 2025 Adria Cross. All rights reserved.</p>
+            <div class="footer-legal">
+                <a href="/privacy-policy.html">Privacy Policy</a>
+                <a href="/terms-of-service.html">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark/light mode">
+        🌙
+    </button>
+
+    <script src="/js/main.min.js"></script>
+    <script src="/clothing-matcher/js/matcher.js"></script>
+</body>
+
+</html>

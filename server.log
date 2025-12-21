@@ -1,0 +1,6 @@
+[dotenv@17.2.3] injecting env (4) from .env -- tip: ⚙️  override existing env vars with { override: true }
+Run: http://localhost:3000
+SQLite database initialized successfully
+Created anonymous session for clothing matcher: anon_1766288908403_53259ooed
+Created anonymous session for clothing matcher: anon_1766289074089_3x9shm5rr
+Created anonymous session for clothing matcher: anon_1766289160634_x594s1bn5
