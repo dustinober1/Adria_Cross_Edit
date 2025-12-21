@@ -373,7 +373,7 @@ app.post('/api/blog', isAuthenticated, async (req, res) => {
 <body>
     <nav class="top-nav">
         <div class="nav-container">
-            <div class="nav-logo"><a href="../index.html" class="has-logo"><img src="../images/logo.webp" class="logo-image"><span class="logo-text">Adria Cross</span></a></div>
+            <div class="nav-logo"><a href="../index.html" class="has-logo"><img src="../images/icon-152x152.png" class="logo-image"><span class="logo-text">Adria Cross</span></a></div>
             <ul class="nav-menu">
                 <li><a href="../index.html">Home</a></li>
                 <li><a href="../about.html">About</a></li>

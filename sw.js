@@ -1,4 +1,4 @@
-const CACHE_NAME = 'adria-cross-v2';
+const CACHE_NAME = 'adria-cross-v3';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
@@ -9,7 +9,7 @@ const ASSETS_TO_CACHE = [
     '/blog.html',
     '/css/landing.min.css',
     '/js/main.min.js',
-    '/images/logo.webp',
+    '/images/icon-152x152.png',
     '/images/adria-stylist.webp',
     // Add other critical assets here
 ];
