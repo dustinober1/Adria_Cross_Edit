@@ -8,6 +8,12 @@
     <title>Admin Dashboard | Adria Cross Edit</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/landing.min.css">
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <!-- Google Fonts for Editor -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&family=Lora:wght@400;700&family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --primary: #c19a5d;
@@ -538,6 +544,274 @@
             color: white;
             border-color: var(--primary);
         }
+
+        /* Quill Editor Styles */
+        .ql-toolbar.ql-snow {
+            border: 1px solid #ddd;
+            border-radius: 8px 8px 0 0;
+            background: #fafafa;
+        }
+
+        .ql-container.ql-snow {
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            min-height: 300px;
+            font-size: 1rem;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .ql-editor {
+            min-height: 300px;
+            line-height: 1.8;
+        }
+
+        .ql-snow .ql-picker.ql-font {
+            width: 150px;
+        }
+
+        .ql-font-montserrat {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .ql-font-georgia {
+            font-family: 'Georgia', serif;
+        }
+
+        .ql-font-playfair {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .ql-font-lora {
+            font-family: 'Lora', serif;
+        }
+
+        .ql-font-roboto {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .ql-font-opensans {
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .ql-font-arial {
+            font-family: Arial, sans-serif;
+        }
+
+        .ql-font-times {
+            font-family: 'Times New Roman', serif;
+        }
+
+        .ql-font-courier {
+            font-family: 'Courier New', monospace;
+        }
+
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value=montserrat]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value=montserrat]::before {
+            content: 'Montserrat';
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value=georgia]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value=georgia]::before {
+            content: 'Georgia';
+            font-family: 'Georgia', serif;
+        }
+
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value=playfair]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value=playfair]::before {
+            content: 'Playfair Display';
+            font-family: 'Playfair Display', serif;
+        }
+
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value=lora]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value=lora]::before {
+            content: 'Lora';
+            font-family: 'Lora', serif;
+        }
+
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value=roboto]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value=roboto]::before {
+            content: 'Roboto';
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value=opensans]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value=opensans]::before {
+            content: 'Open Sans';
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value=arial]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value=arial]::before {
+            content: 'Arial';
+            font-family: Arial, sans-serif;
+        }
+
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value=times]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value=times]::before {
+            content: 'Times New Roman';
+            font-family: 'Times New Roman', serif;
+        }
+
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value=courier]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value=courier]::before {
+            content: 'Courier New';
+            font-family: 'Courier New', monospace;
+        }
+
+        .blog-image-upload {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #f8f8f8;
+            border-radius: 8px;
+            border: 2px dashed #ddd;
+        }
+
+        .blog-image-upload input[type="file"] {
+            display: none;
+        }
+
+        .blog-image-upload label {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .blog-image-upload label:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .uploaded-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .uploaded-image-thumb {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .uploaded-image-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .uploaded-image-thumb .insert-btn {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(193, 154, 93, 0.9);
+            color: white;
+            border: none;
+            padding: 0.3rem;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        /* Invoice Styles */
+        .invoice-card {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .invoice-card:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .invoice-number {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .invoice-status {
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .invoice-status.SENT {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .invoice-status.PAID {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .invoice-status.CANCELED {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .invoice-status.UNPAID {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .invoice-status.DRAFT {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .invoice-form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .invoice-form input,
+        .invoice-form textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .invoice-form label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 0.3rem;
+            display: block;
+        }
+
+        .invoice-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .invoice-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
@@ -581,6 +855,49 @@
                 <button class="tab-btn" onclick="switchTab('intake')">Intake Profiles</button>
                 <button class="tab-btn" onclick="switchTab('availability')">Availability Settings</button>
                 <button class="tab-btn" onclick="switchTab('blog')">Blog Posts</button>
+                <button class="tab-btn" onclick="switchTab('invoices')">💳 Invoices</button>
+            </div>
+
+            <!-- Invoices Tab -->
+            <div id="invoices-tab" class="tab-content">
+                <div class="table-card" style="max-width: 900px;">
+                    <h2>💳 Create & Manage Invoices</h2>
+                    <p style="color: #666; margin-bottom: 1.5rem;">Send invoices to clients via Square. They'll receive
+                        an email with a link to pay online.</p>
+
+                    <form id="invoice-form" class="invoice-form" style="margin-bottom: 2rem;">
+                        <div class="invoice-grid">
+                            <div>
+                                <label for="inv-email">Client Email *</label>
+                                <input type="email" id="inv-email" required placeholder="client@email.com">
+                            </div>
+                            <div>
+                                <label for="inv-name">Client Name</label>
+                                <input type="text" id="inv-name" placeholder="Client Name (optional)">
+                            </div>
+                        </div>
+                        <div class="invoice-grid">
+                            <div>
+                                <label for="inv-amount">Amount ($) *</label>
+                                <input type="number" id="inv-amount" required min="1" step="0.01" placeholder="100.00">
+                            </div>
+                            <div>
+                                <label for="inv-due">Due Date</label>
+                                <input type="date" id="inv-due">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="inv-desc">Description *</label>
+                            <textarea id="inv-desc" rows="2" required
+                                placeholder="Style consultation, wardrobe audit, etc."></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary">📤 Create & Send Invoice</button>
+                    </form>
+                    <div id="invoice-status" style="margin-bottom: 1.5rem;"></div>
+
+                    <h3 style="margin-bottom: 1rem;">Recent Invoices</h3>
+                    <div id="invoices-list"></div>
+                </div>
             </div>
 
             <!-- Blog Tab -->
@@ -596,14 +913,21 @@
                             placeholder="Short Summary (2-3 sentences for the index page)" required
                             style="width: 100%; padding: 1rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 8px;">
 
+                        <!-- Featured Image Upload -->
+                        <div class="blog-image-upload">
+                            <label for="blog-featured-image">📷 Upload Images</label>
+                            <input type="file" id="blog-featured-image" accept="image/*" multiple>
+                            <span style="margin-left: 1rem; color: #888; font-size: 0.9rem;">Upload images to insert
+                                into your post</span>
+                            <div class="uploaded-images" id="uploaded-images-container"></div>
+                        </div>
+
                         <div style="margin-bottom: 1rem;">
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #666;">Article
-                                Content (HTML allowed)</label>
-                            <textarea id="blog-content" rows="15" required
-                                placeholder="Write your article here. Use <h3> for headings, <p> for paragraphs, and <ul>/<li> for lists."
-                                style="width: 100%; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; font-family: monospace; font-size: 0.95rem; line-height: 1.5;"></textarea>
-                            <p style="font-size: 0.85rem; color: #888; margin-top: 0.5rem;">Tip: You can use basic HTML
-                                tags for formatting.</p>
+                                Content</label>
+                            <div id="blog-editor"></div>
+                            <p style="font-size: 0.85rem; color: #888; margin-top: 0.5rem;">Use the toolbar above to
+                                format your text, add images, and style your content.</p>
                         </div>
 
                         <div class="form-actions" style="display: flex; gap: 1rem;">
@@ -1124,6 +1448,17 @@
             const btn = e.target.querySelector('button');
             const status = document.getElementById('blog-status');
 
+            // Validate content
+            const content = quill.root.innerHTML;
+            if (!content || content === '<p><br></p>') {
+                status.textContent = '❌ Please add some content to your blog post.';
+                status.style.color = '#721c24';
+                status.style.background = '#f8d7da';
+                status.style.padding = '1rem';
+                status.style.display = 'block';
+                return;
+            }
+
             btn.disabled = true;
             btn.textContent = 'Publishing...';
             status.style.display = 'none';
@@ -1131,7 +1466,7 @@
             const payload = {
                 title: document.getElementById('blog-title').value,
                 summary: document.getElementById('blog-summary').value,
-                content: document.getElementById('blog-content').value
+                content: content
             };
 
             try {
@@ -1149,6 +1484,8 @@
                     status.style.padding = '1rem';
                     status.style.display = 'block';
                     e.target.reset();
+                    quill.setContents([]);
+                    document.getElementById('uploaded-images-container').innerHTML = '';
                 } else {
                     throw new Error('Failed to publish');
                 }
@@ -1165,6 +1502,181 @@
         });
 
         checkAuth();
+    </script>
+
+    <!-- Quill.js Rich Text Editor -->
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    <script>
+        // Register custom fonts
+        const Font = Quill.import('formats/font');
+        Font.whitelist = ['montserrat', 'georgia', 'playfair', 'lora', 'roboto', 'opensans', 'arial', 'times', 'courier'];
+        Quill.register(Font, true);
+
+        // Initialize Quill editor
+        const quill = new Quill('#blog-editor', {
+            theme: 'snow',
+            placeholder: 'Write your article here...',
+            modules: {
+                toolbar: [
+                    [{ 'font': Font.whitelist }],
+                    [{ 'size': ['small', false, 'large', 'huge'] }],
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'align': [] }],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    [{ 'indent': '-1' }, { 'indent': '+1' }],
+                    ['blockquote'],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            }
+        });
+
+        // Image upload handling
+        const imageInput = document.getElementById('blog-featured-image');
+        const imagesContainer = document.getElementById('uploaded-images-container');
+
+        imageInput.addEventListener('change', async (e) => {
+            const files = e.target.files;
+
+            for (let file of files) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                try {
+                    const res = await fetch('/api/blog/upload-image', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+
+                        // Create thumbnail
+                        const thumb = document.createElement('div');
+                        thumb.className = 'uploaded-image-thumb';
+                        thumb.innerHTML = `
+                            <img src="${data.url}" alt="Uploaded image">
+                            <button class="insert-btn" onclick="insertImage('${data.url}')">Insert</button>
+                        `;
+                        imagesContainer.appendChild(thumb);
+                    }
+                } catch (err) {
+                    console.error('Image upload failed:', err);
+                }
+            }
+
+            imageInput.value = '';
+        });
+
+        function insertImage(url) {
+            const range = quill.getSelection() || { index: quill.getLength() };
+            quill.insertEmbed(range.index, 'image', url);
+            quill.setSelection(range.index + 1);
+        }
+    </script>
+
+    <!-- Invoice Management -->
+    <script>
+        // Load invoices when switching to invoices tab
+        async function loadInvoices() {
+            const listEl = document.getElementById('invoices-list');
+            if (!listEl) return;
+
+            listEl.innerHTML = '<p style="color:#888;">Loading invoices...</p>';
+
+            try {
+                const res = await fetch('/api/invoices');
+                if (!res.ok) {
+                    if (res.status === 503) {
+                        listEl.innerHTML = '<p style="color:#888;">Square not configured. Add SQUARE_ACCESS_TOKEN to environment variables.</p>';
+                        return;
+                    }
+                    throw new Error('Failed to load');
+                }
+
+                const data = await res.json();
+
+                if (!data.invoices || data.invoices.length === 0) {
+                    listEl.innerHTML = '<p style="color:#888;">No invoices yet. Create your first invoice above.</p>';
+                    return;
+                }
+
+                listEl.innerHTML = data.invoices.map(inv => `
+                    <div class="invoice-card">
+                        <div class="invoice-header">
+                            <span class="invoice-number">${inv.invoiceNumber || inv.id.slice(0, 8)}</span>
+                            <span class="invoice-status ${inv.status}">${inv.status}</span>
+                        </div>
+                        <p><strong>${inv.title || 'Invoice'}</strong></p>
+                        <p style="color:#666; font-size:0.9rem;">${inv.description || ''}</p>
+                        <p style="color:#888; font-size:0.85rem;">
+                            Due: ${inv.dueDate || 'N/A'} • 
+                            Created: ${new Date(inv.createdAt).toLocaleDateString()}
+                            ${inv.publicUrl ? `• <a href="${inv.publicUrl}" target="_blank">View Invoice</a>` : ''}
+                        </p>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                listEl.innerHTML = '<p style="color:#c00;">Failed to load invoices.</p>';
+            }
+        }
+
+        // Invoice form submission
+        document.getElementById('invoice-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const btn = e.target.querySelector('button');
+            const statusEl = document.getElementById('invoice-status');
+
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+            statusEl.innerHTML = '';
+
+            const payload = {
+                customerEmail: document.getElementById('inv-email').value,
+                customerName: document.getElementById('inv-name').value,
+                amount: parseFloat(document.getElementById('inv-amount').value),
+                dueDate: document.getElementById('inv-due').value,
+                description: document.getElementById('inv-desc').value
+            };
+
+            try {
+                const res = await fetch('/api/invoices/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    statusEl.innerHTML = `<div style="background:#d4edda; color:#155724; padding:1rem; border-radius:8px;">
+                        ✅ Invoice ${data.invoiceNumber} sent successfully!</div>`;
+                    e.target.reset();
+                    loadInvoices();
+                } else {
+                    throw new Error(data.error || 'Failed to create invoice');
+                }
+            } catch (err) {
+                statusEl.innerHTML = `<div style="background:#f8d7da; color:#721c24; padding:1rem; border-radius:8px;">
+                    ❌ ${err.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📤 Create & Send Invoice';
+            }
+        });
+
+        // Update switchTab to load invoices
+        const originalSwitchTab = switchTab;
+        switchTab = function (tab) {
+            originalSwitchTab(tab);
+            if (tab === 'invoices') {
+                loadInvoices();
+            }
+        };
     </script>
 </body>
 

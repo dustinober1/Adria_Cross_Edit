@@ -93,8 +93,8 @@
         <div class="nav-container">
             <div class="nav-logo">
                 <a href="index.html" class="has-logo">
-                    <img src="images/icon-144x144.webp" alt="Adria Cross Edit Logo" class="logo-image" loading="lazy" width="50"
-                        height="50">
+                    <img src="images/icon-144x144.webp" alt="Adria Cross Edit Logo" class="logo-image" loading="lazy"
+                        width="50" height="50">
                     <span class="logo-text">Adria Cross</span>
                 </a>
             </div>
@@ -340,6 +340,25 @@
                         📝 Already Booked? Complete Intake Form
                     </a>
                 </div>
+                <!-- Quick Pay Option -->
+                <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #eee;">
+                    <p style="color: #666; margin-bottom: 1rem;">💳 Ready to pay for a service?</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center;">
+                        <button class="btn-cta btn-secondary-cta" onclick="openPaymentModal(175, 'Color Analysis')"
+                            style="padding: 0.6rem 1rem; font-size: 0.9rem;">
+                            Pay $175 - Color Analysis
+                        </button>
+                        <button class="btn-cta btn-secondary-cta"
+                            onclick="openPaymentModal(350, 'Closet Edit - 2 Hours')"
+                            style="padding: 0.6rem 1rem; font-size: 0.9rem;">
+                            Pay $350 - Closet Edit
+                        </button>
+                        <button class="btn-cta btn-secondary-cta" onclick="openPaymentModal(250, 'One-Event Styling')"
+                            style="padding: 0.6rem 1rem; font-size: 0.9rem;">
+                            Pay $250 - Event Styling
+                        </button>
+                    </div>
+                </div>
                 <p style="text-align: center; font-size: 0.9rem; color: #888; margin-top: 1rem;">
                     ✓ No obligation • ✓ Virtual or in-person • ✓ 100% satisfaction guaranteed
                 </p>
@@ -396,6 +415,7 @@
     </button>
 
     <script src="js/main.min.js"></script>
+    <script src="js/payments.js"></script>
 </body>
 
 </html>

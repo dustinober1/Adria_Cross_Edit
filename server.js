@@ -11,6 +11,31 @@ require('dotenv').config();
 const nodemailer = require('nodemailer');
 const sqlite3 = require('sqlite3');
 
+// ============================================
+// Square SDK Configuration
+// ============================================
+const { Client, Environment } = require('square');
+
+let squareClient = null;
+let paymentsApi = null;
+let invoicesApi = null;
+let customersApi = null;
+
+if (process.env.SQUARE_ACCESS_TOKEN) {
+    squareClient = new Client({
+        accessToken: process.env.SQUARE_ACCESS_TOKEN,
+        environment: process.env.SQUARE_ENVIRONMENT === 'production'
+            ? Environment.Production
+            : Environment.Sandbox
+    });
+    paymentsApi = squareClient.paymentsApi;
+    invoicesApi = squareClient.invoicesApi;
+    customersApi = squareClient.customersApi;
+    console.log(`Square SDK initialized in ${process.env.SQUARE_ENVIRONMENT || 'sandbox'} mode`);
+} else {
+    console.warn('SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.');
+}
+
 const app = express();
 const port = process.env.PORT || 3000;
 app.set('trust proxy', 1);
@@ -902,6 +927,52 @@ app.delete('/api/clothing/:id', async (req, res) => {
     }
 });
 
+// ============================================
+// Blog Image Upload
+// ============================================
+const BLOG_UPLOAD_ROOT = path.join(__dirname, 'uploads', 'blog');
+if (!fs.existsSync(BLOG_UPLOAD_ROOT)) {
+    fs.mkdirSync(BLOG_UPLOAD_ROOT, { recursive: true });
+}
+
+const blogStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, BLOG_UPLOAD_ROOT);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'blog-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const blogUpload = multer({
+    storage: blogStorage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit for blog images
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|webp|gif/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+        if (extname && mimetype) {
+            return cb(null, true);
+        }
+        cb(new Error('Only images (JPEG, PNG, WebP, GIF) are allowed!'));
+    }
+});
+
+// Upload blog image endpoint
+app.post('/api/blog/upload-image', isAuthenticated, blogUpload.single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const url = `/uploads/blog/${req.file.filename}`;
+    res.json({
+        success: true,
+        url: url,
+        filename: req.file.filename
+    });
+});
+
 // Create Blog Post
 app.post('/api/blog', isAuthenticated, async (req, res) => {
     try {
@@ -1000,6 +1071,193 @@ app.post('/api/blog', isAuthenticated, async (req, res) => {
     } catch (err) {
         console.error('Blog Error:', err);
         res.status(500).json({ error: 'Failed to publish post.' });
+    }
+});
+
+// ============================================
+// Square Payment & Invoice Endpoints
+// ============================================
+
+// Get Square Application ID (for frontend SDK initialization)
+app.get('/api/square/config', (req, res) => {
+    if (!process.env.SQUARE_APPLICATION_ID) {
+        return res.status(503).json({ error: 'Square not configured' });
+    }
+    res.json({
+        applicationId: process.env.SQUARE_APPLICATION_ID,
+        locationId: process.env.SQUARE_LOCATION_ID,
+        environment: process.env.SQUARE_ENVIRONMENT || 'sandbox'
+    });
+});
+
+// Process a payment
+app.post('/api/payments/create', async (req, res) => {
+    if (!paymentsApi) {
+        return res.status(503).json({ error: 'Payment processing not available' });
+    }
+
+    try {
+        const { sourceId, amount, currency, customerEmail, description } = req.body;
+
+        if (!sourceId || !amount) {
+            return res.status(400).json({ error: 'Missing required fields: sourceId and amount' });
+        }
+
+        const idempotencyKey = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        const paymentResult = await paymentsApi.createPayment({
+            sourceId: sourceId,
+            idempotencyKey: idempotencyKey,
+            amountMoney: {
+                amount: BigInt(Math.round(amount * 100)), // Convert to cents
+                currency: currency || 'USD'
+            },
+            locationId: process.env.SQUARE_LOCATION_ID,
+            note: description || 'Adria Cross Style Consultation',
+            buyerEmailAddress: customerEmail
+        });
+
+        // Send confirmation email
+        if (customerEmail) {
+            const emailHtml = `
+                <h2>Payment Confirmation</h2>
+                <p>Thank you for your payment!</p>
+                <p><strong>Amount:</strong> $${amount.toFixed(2)}</p>
+                <p><strong>Description:</strong> ${description || 'Style Consultation'}</p>
+                <p><strong>Transaction ID:</strong> ${paymentResult.result.payment.id}</p>
+                <p>We look forward to working with you!</p>
+                <p>Best,<br>Adria Cross</p>
+            `;
+            sendEmail(customerEmail, 'Payment Confirmation - Adria Cross', emailHtml)
+                .catch(err => console.error('Payment confirmation email failed:', err));
+        }
+
+        res.json({
+            success: true,
+            paymentId: paymentResult.result.payment.id,
+            status: paymentResult.result.payment.status
+        });
+
+    } catch (err) {
+        console.error('Payment Error:', err);
+        res.status(500).json({
+            error: 'Payment failed',
+            details: err.result?.errors || err.message
+        });
+    }
+});
+
+// Create and send an invoice
+app.post('/api/invoices/create', isAuthenticated, async (req, res) => {
+    if (!invoicesApi || !customersApi) {
+        return res.status(503).json({ error: 'Invoice creation not available' });
+    }
+
+    try {
+        const { customerEmail, customerName, amount, description, dueDate } = req.body;
+
+        if (!customerEmail || !amount || !description) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        // Create or find customer
+        let customerId;
+        try {
+            const searchResult = await customersApi.searchCustomers({
+                query: {
+                    filter: {
+                        emailAddress: { exact: customerEmail }
+                    }
+                }
+            });
+
+            if (searchResult.result.customers && searchResult.result.customers.length > 0) {
+                customerId = searchResult.result.customers[0].id;
+            } else {
+                const createResult = await customersApi.createCustomer({
+                    emailAddress: customerEmail,
+                    givenName: customerName || 'Client'
+                });
+                customerId = createResult.result.customer.id;
+            }
+        } catch (customerErr) {
+            console.error('Customer creation error:', customerErr);
+            return res.status(500).json({ error: 'Failed to create customer' });
+        }
+
+        const idempotencyKey = `inv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        // Create the invoice
+        const invoiceResult = await invoicesApi.createInvoice({
+            invoice: {
+                locationId: process.env.SQUARE_LOCATION_ID,
+                primaryRecipient: { customerId: customerId },
+                paymentRequests: [{
+                    requestType: 'BALANCE',
+                    dueDate: dueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    automaticPaymentSource: 'NONE'
+                }],
+                invoiceNumber: `ACE-${Date.now()}`,
+                title: 'Style Consultation Services',
+                description: description,
+                scheduledAt: new Date().toISOString()
+            },
+            idempotencyKey: idempotencyKey
+        });
+
+        const invoiceId = invoiceResult.result.invoice.id;
+        const invoiceVersion = invoiceResult.result.invoice.version;
+
+        // Publish (send) the invoice
+        await invoicesApi.publishInvoice(invoiceId, {
+            version: invoiceVersion,
+            idempotencyKey: `pub_${idempotencyKey}`
+        });
+
+        res.json({
+            success: true,
+            invoiceId: invoiceId,
+            invoiceNumber: invoiceResult.result.invoice.invoiceNumber,
+            status: 'SENT'
+        });
+
+    } catch (err) {
+        console.error('Invoice Error:', err);
+        res.status(500).json({
+            error: 'Invoice creation failed',
+            details: err.result?.errors || err.message
+        });
+    }
+});
+
+// List invoices (admin only)
+app.get('/api/invoices', isAuthenticated, async (req, res) => {
+    if (!invoicesApi) {
+        return res.status(503).json({ error: 'Invoice listing not available' });
+    }
+
+    try {
+        const result = await invoicesApi.listInvoices({
+            locationId: process.env.SQUARE_LOCATION_ID,
+            limit: 50
+        });
+
+        const invoices = (result.result.invoices || []).map(inv => ({
+            id: inv.id,
+            invoiceNumber: inv.invoiceNumber,
+            title: inv.title,
+            description: inv.description,
+            status: inv.status,
+            dueDate: inv.paymentRequests?.[0]?.dueDate,
+            createdAt: inv.createdAt,
+            publicUrl: inv.publicUrl
+        }));
+
+        res.json({ invoices });
+
+    } catch (err) {
+        console.error('List Invoices Error:', err);
+        res.status(500).json({ error: 'Failed to list invoices' });
     }
 });
 
