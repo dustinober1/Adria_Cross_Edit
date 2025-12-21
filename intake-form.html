@@ -243,7 +243,7 @@
         <div class="nav-container">
             <div class="nav-logo">
                 <a href="index.html" class="has-logo">
-                    <img src="images/logo.png" alt="Logo" class="logo-image">
+                    <img src="images/logo.webp" alt="Logo" class="logo-image">
                     <span class="logo-text">Adria Cross</span>
                 </a>
             </div>
@@ -252,6 +252,7 @@
                 <li><a href="about.html">About</a></li>
                 <li><a href="services.html">Services</a></li>
                 <li><a href="contact.html">Contact</a></li>
+                <li><button class="search-btn search-trigger" aria-label="Open search">🔍</button></li>
             </ul>
         </div>
     </nav>
@@ -503,6 +504,17 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Uploading...';
 
+            const email = form.querySelector('input[name="email"]').value;
+            if (window.validateEmail && !window.validateEmail(email)) {
+                statusMsg.style.display = 'block';
+                statusMsg.style.background = '#f8d7da';
+                statusMsg.style.color = '#721c24';
+                statusMsg.textContent = 'Please enter a valid email address.';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Complete Profile';
+                return;
+            }
+
             const formData = new FormData(form);
 
             try {
@@ -515,7 +527,17 @@
                     statusMsg.style.display = 'block';
                     statusMsg.style.background = '#d4edda';
                     statusMsg.style.color = '#155724';
-                    statusMsg.textContent = 'Profile submitted successfully! I will reach out shortly.';
+                    statusMsg.textContent = 'Profile submitted! A confirmation email has been sent.';
+
+                    // Analytics: Track Conversion
+                    if (typeof gtag === 'function') {
+                        gtag('event', 'generate_lead', {
+                            'event_category': 'form',
+                            'event_label': 'intake_submission',
+                            'value': 0
+                        });
+                    }
+
                     form.style.opacity = '0.3';
                     form.style.pointerEvents = 'none';
                 } else {
@@ -547,7 +569,8 @@
                     <li><a href="services.html">Services</a></li>
                     <li><a href="blog.html">Style Blog</a></li>
                     <li><a href="contact.html">Contact</a></li>
-                </ul>
+                    <li><button class="search-btn search-trigger" aria-label="Open search">🔍</button></li>
+            </ul>
             </nav>
             <div class="footer-contact">
                 <h4>Get In Touch</h4>
@@ -571,6 +594,13 @@
             </div>
         </div>
     </footer>
+    <script src="js/main.min.js"></script>
+    <script>
+        // Ensure main.js is loaded or define fallback
+        if (!window.validateEmail) {
+            window.validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+    </script>
 </body>
 
 </html>

@@ -152,7 +152,7 @@
         <div class="nav-container">
             <div class="nav-logo">
                 <a href="index.html" class="has-logo">
-                    <img src="images/logo.png" alt="Adria Cross Edit Logo" class="logo-image" loading="lazy" width="50"
+                    <img src="images/logo.webp" alt="Adria Cross Edit Logo" class="logo-image" loading="lazy" width="50"
                         height="50">
                     <span class="logo-text">Adria Cross</span>
                 </a>
@@ -168,6 +168,7 @@
                 <li><a href="services.html">Services</a></li>
                 <li><a href="blog.html">Blog</a></li>
                 <li><a href="contact.html" class="active">Contact</a></li>
+                <li><button class="search-btn search-trigger" aria-label="Open search">🔍</button></li>
             </ul>
         </div>
     </nav>
@@ -178,7 +179,7 @@
 
             <div class="article-section">
                 <div style="text-align: center; margin-bottom: 2rem;">
-                    <img src="images/contact-stylist.jpg" alt="Contact Adria Cross"
+                    <img src="images/contact-stylist.webp" alt="Contact Adria Cross"
                         style="max-width: 100%; height: auto; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
                 </div>
                 <h2>Get in Touch</h2>
@@ -303,6 +304,14 @@
                         message: form.elements['message'].value
                     };
 
+                    if (window.validateEmail && !window.validateEmail(formData.email)) {
+                        statusDiv.style.backgroundColor = '#f8d7da';
+                        statusDiv.style.color = '#721c24';
+                        statusDiv.textContent = 'Please enter a valid email address.';
+                        statusDiv.style.display = 'block';
+                        return;
+                    }
+
                     try {
                         const response = await fetch('/api/appointments', {
                             method: 'POST',
@@ -315,8 +324,18 @@
                         if (response.ok) {
                             statusDiv.style.backgroundColor = '#d4edda';
                             statusDiv.style.color = '#155724';
-                            statusDiv.textContent = result.message || 'Appointment requested successfully!';
+                            statusDiv.textContent = 'Appointment requested! A confirmation email has been sent.';
                             statusDiv.style.display = 'block';
+
+                            // Analytics: Track Conversion
+                            if (typeof gtag === 'function') {
+                                gtag('event', 'generate_lead', {
+                                    'event_category': 'form',
+                                    'event_label': 'consultation_request',
+                                    'value': 0
+                                });
+                            }
+
                             form.reset();
                         } else {
                             statusDiv.style.backgroundColor = '#f8d7da';
@@ -417,7 +436,8 @@
                     <li><a href="services.html">Services</a></li>
                     <li><a href="blog.html">Style Blog</a></li>
                     <li><a href="contact.html">Contact</a></li>
-                </ul>
+                    <li><button class="search-btn search-trigger" aria-label="Open search">🔍</button></li>
+            </ul>
             </nav>
             <div class="footer-contact">
                 <h4>Get In Touch</h4>

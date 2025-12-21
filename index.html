@@ -46,130 +46,7 @@
         gtag('config', 'G-KY9029WBWZ');
     </script>
 
-    <style>
-        .splash-container {
-            max-width: 800px;
-            margin: 120px auto 40px auto;
-            text-align: center;
-            padding: 2rem;
-        }
 
-        .welcome-section {
-            margin: 3rem 0;
-            padding: 2rem;
-            background: var(--surface);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-md);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .welcome-section::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(193, 154, 93, 0.03) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: float 10s ease-in-out infinite;
-        }
-
-        .welcome-section h1 {
-            color: #c19a5d;
-            font-size: 2.8rem;
-            margin-bottom: 1rem;
-        }
-
-        .welcome-section .subtitle {
-            color: #666;
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            font-style: italic;
-        }
-
-        .welcome-section p {
-            color: #444;
-            font-size: 1.1rem;
-            line-height: 1.8;
-            margin-bottom: 1.5rem;
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 2rem;
-        }
-
-        .btn-cta {
-            padding: 1rem 2.5rem;
-            border-radius: 25px;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary-cta {
-            background: linear-gradient(135deg, #d4a574 0%, #c19a5d 100%);
-            color: white;
-            border: none;
-        }
-
-        .btn-primary-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(193, 154, 93, 0.35);
-        }
-
-        .btn-secondary-cta {
-            background: transparent;
-            border: 2px solid #c19a5d;
-            color: #c19a5d;
-        }
-
-        .btn-secondary-cta:hover {
-            background: #c19a5d;
-            color: white;
-            box-shadow: 0 8px 20px rgba(193, 154, 93, 0.35);
-        }
-
-        .instagram-feed {
-            -ms-overflow-style: thin;
-        }
-
-        .instagram-feed::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .instagram-feed::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        .instagram-feed::-webkit-scrollbar-thumb {
-            background: #c19a5d;
-            border-radius: 4px;
-        }
-
-        .instagram-feed::-webkit-scrollbar-thumb:hover {
-            background: #d4a574;
-        }
-
-        .instagram-post {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .instagram-post:hover {
-            transform: scale(1.03);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        }
-    </style>
 
     <!-- Structured Data / JSON-LD -->
     <script type="application/ld+json">
@@ -238,7 +115,7 @@
         <div class="nav-container">
             <div class="nav-logo">
                 <a href="index.html" class="has-logo">
-                    <img src="images/logo.png" alt="Adria Cross Edit Logo" class="logo-image" loading="lazy" width="50"
+                    <img src="images/logo.webp" alt="Adria Cross Edit Logo" class="logo-image" loading="lazy" width="50"
                         height="50">
                     <span class="logo-text">Adria Cross</span>
                 </a>
@@ -254,6 +131,7 @@
                 <li><a href="services.html">Services</a></li>
                 <li><a href="blog.html">Blog</a></li>
                 <li><a href="contact.html">Contact</a></li>
+                <li><button class="search-btn search-trigger" aria-label="Open search">🔍</button></li>
             </ul>
         </div>
     </nav>
@@ -261,7 +139,7 @@
     <main id="main-content" role="main">
         <div class="splash-container">
             <div class="welcome-section">
-                <img src="images/adria-stylist.jpg" alt="Adria Cross - Personal Stylist" class="hero-image"
+                <img src="images/adria-stylist.webp" alt="Adria Cross - Personal Stylist" class="hero-image"
                     style="width: 200px; height: 200px; border-radius: 50%; object-fit: cover; margin-bottom: 2rem; border: 4px solid #c19a5d;">
                 <h1>Adria Cross</h1>
                 <p class="subtitle"><em>Personal Stylist</em></p>
@@ -410,7 +288,8 @@
                     <li><a href="services.html">Services</a></li>
                     <li><a href="blog.html">Style Blog</a></li>
                     <li><a href="contact.html">Contact</a></li>
-                </ul>
+                    <li><button class="search-btn search-trigger" aria-label="Open search">🔍</button></li>
+            </ul>
             </nav>
             <div class="footer-contact">
                 <h4>Get In Touch</h4>

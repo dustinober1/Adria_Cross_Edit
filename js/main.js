@@ -138,17 +138,41 @@
     };
 
     // ============================================
+    // Global Validation Helpers
+    // ============================================
+    window.validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    // ============================================
     // Newsletter Form Handling
     // ============================================
     const initNewsletterForm = () => {
         const form = document.querySelector('.newsletter-form');
         if (!form) return;
 
+        const emailInput = form.querySelector('input[type="email"]');
+        const submitBtn = form.querySelector('button[type="submit"]');
+
+        // Real-time validation
+        emailInput.addEventListener('input', () => {
+            if (emailInput.value && !window.validateEmail(emailInput.value)) {
+                emailInput.style.borderColor = '#dc3545';
+            } else {
+                emailInput.style.borderColor = '';
+            }
+        });
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const emailInput = form.querySelector('input[type="email"]');
-            const submitBtn = form.querySelector('button[type="submit"]');
             const email = emailInput.value;
+
+            if (!window.validateEmail(email)) {
+                showNotification('Please enter a valid email address.', 'error');
+                emailInput.focus();
+                return;
+            }
 
             // Disable form during submission
             submitBtn.disabled = true;
@@ -407,5 +431,138 @@
 
     // Export showNotification for external use
     window.showNotification = showNotification;
+
+    // ============================================
+    // Search Functionality
+    // ============================================
+    const initSearch = () => {
+        // 1. Inject Search Modal
+        const searchModalHTML = `
+            <div id="searchModal" class="search-modal" role="dialog" aria-modal="true" aria-label="Search">
+                <div class="search-container">
+                    <div class="search-header">
+                        <h3>Search Adria Cross</h3>
+                        <button id="closeSearch" class="close-search" aria-label="Close search">&times;</button>
+                    </div>
+                    <div class="search-input-wrapper">
+                        <span class="search-icon-input">🔍</span>
+                        <input type="text" id="searchInput" class="search-input" placeholder="What are you looking for..." aria-label="Search site content">
+                    </div>
+                    <div id="searchResults" class="search-results">
+                        <!-- Results will appear here -->
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', searchModalHTML);
+
+        const modal = document.getElementById('searchModal');
+        const input = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('searchResults');
+        const closeBtn = document.getElementById('closeSearch');
+        let searchIndex = [];
+
+        // 2. Fetch Index
+        const loadSearchIndex = async () => {
+            if (searchIndex.length > 0) return;
+            try {
+                const response = await fetch('/search.json');
+                searchIndex = await response.json();
+            } catch (err) {
+                console.error('Failed to load search index', err);
+            }
+        };
+
+        // 3. Search Logic
+        const performSearch = (query) => {
+            if (!query) {
+                resultsContainer.innerHTML = '';
+                return;
+            }
+
+            const lowerQuery = query.toLowerCase();
+            const results = searchIndex.filter(item => {
+                return item.title.toLowerCase().includes(lowerQuery) ||
+                    item.keywords.toLowerCase().includes(lowerQuery) ||
+                    item.summary.toLowerCase().includes(lowerQuery);
+            });
+
+            if (results.length === 0) {
+                resultsContainer.innerHTML = `<p style="text-align:center; color:#888;">No results found for "${query}"</p>`;
+            } else {
+                resultsContainer.innerHTML = results.map(item => `
+                    <a href="${item.url}" class="search-result-item">
+                        <span class="search-result-title">
+                            <span class="search-result-category">${item.category}</span>
+                            ${item.title}
+                        </span>
+                        <span class="search-result-summary">${item.summary}</span>
+                    </a>
+                `).join('');
+            }
+        };
+
+        // 4. Event Listeners
+        document.addEventListener('click', (e) => {
+            // Open Search
+            if (e.target.closest('.search-trigger')) {
+                e.preventDefault();
+                loadSearchIndex(); // Load data only when needed
+                modal.classList.add('active');
+                input.focus();
+                document.body.style.overflow = 'hidden'; // Prevent scrolling
+            }
+
+            // Close Search (Button or Overlay)
+            if (e.target === modal || e.target.closest('#closeSearch')) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Type to Search
+        input.addEventListener('input', (e) => {
+            performSearch(e.target.value);
+        });
+    };
+
+    // Initialize Search
+    initSearch();
+
+    // ============================================
+    // Service Worker Registration
+    // ============================================
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then((registration) => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, (err) => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+        });
+    }
+
+    // ============================================
+    // PWA Install Tracking
+    // ============================================
+    window.addEventListener('appinstalled', () => {
+        console.log('PWA was installed');
+        if (typeof gtag === 'function') {
+            gtag('event', 'pwa_install', {
+                'event_category': 'pwa',
+                'event_label': 'install',
+                'value': 0
+            });
+        }
+    });
 
 })();

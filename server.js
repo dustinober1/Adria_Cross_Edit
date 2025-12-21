@@ -7,6 +7,7 @@ const multer = require('multer');
 const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
+const nodemailer = require('nodemailer');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -148,7 +149,39 @@ const initDb = async () => {
         console.error('Error initializing database:', err);
     }
 };
+
 initDb();
+
+// ============================================
+// Email Configuration
+// ============================================
+const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    secure: false, // true for 465, false for other ports
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
+const sendEmail = async (to, subject, html) => {
+    if (!process.env.EMAIL_HOST) {
+        console.warn('Email not configured (EMAIL_HOST missing). Skipping email.');
+        return;
+    }
+    try {
+        await transporter.sendMail({
+            from: process.env.EMAIL_FROM || '"Adria Cross" <hello@adriacrossedit.com>',
+            to,
+            subject,
+            html
+        });
+        console.log(`Email sent to ${to}`);
+    } catch (error) {
+        console.error('Error sending email:', error);
+    }
+};
 
 // Middleware
 app.use(express.json({ limit: '10kb' })); // Limit JSON size
@@ -184,7 +217,18 @@ app.post('/api/appointments', appointmentLimiter, async (req, res) => {
         if (existing.rows.length > 0) return res.status(400).json({ error: 'Already booked.' });
 
         await pool.query('INSERT INTO appointments (name, email, date, time, service, message) VALUES ($1, $2, $3, $4, $5, $6)', [name, email, date, time, service, message]);
-        res.status(201).json({ message: 'Success!' });
+
+        // Send Confirmation Emails
+        const adminHtml = `<h3>New Appointment Request</h3><p><strong>Name:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Date:</strong> ${date} at ${time}</p><p><strong>Service:</strong> ${service}</p><p><strong>Message:</strong> ${message}</p>`;
+        const userHtml = `<h3>Appointment Request Received</h3><p>Hi ${name},</p><p>Thanks for requesting an appointment for <strong>${service}</strong> on ${date} at ${time}.</p><p>I will review your request and get back to you shortly to confirm.</p><p>Best,<br>Adria Cross</p>`;
+
+        // Fire and forget email sending
+        Promise.all([
+            sendEmail(process.env.ADMIN_EMAIL || 'hello@adriacrossedit.com', `New Booking: ${name} - ${date}`, adminHtml),
+            sendEmail(email, 'Appointment Request Received - Adria Cross', userHtml)
+        ]).catch(err => console.error('Email sending failed', err));
+
+        res.status(201).json({ message: 'Success! Confirmation email sent.' });
     } catch (err) { res.status(500).json({ error: 'DB Error' }); }
 });
 
@@ -196,7 +240,17 @@ app.post('/api/intake', upload.array('photos', 5), async (req, res) => {
         }
         const filenames = req.files ? req.files.map(f => f.filename) : [];
         await pool.query('INSERT INTO intake_submissions (form_type, name, email, data, files) VALUES ($1, $2, $3, $4, $5)', [form_type, name, email, JSON.stringify(formData), JSON.stringify(filenames)]);
-        res.status(201).json({ message: 'Success!' });
+
+        // Send Notification Emails
+        const adminHtml = `<h3>New Intake Form Submission</h3><p><strong>Type:</strong> ${form_type}</p><p><strong>Name:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p>See admin panel for full details.</p>`;
+        const userHtml = `<h3>Profile Received</h3><p>Hi ${name},</p><p>Thank you for submitting your style profile. I have received your information and photos.</p><p>I'll be in touch soon!</p><p>Best,<br>Adria Cross</p>`;
+
+        Promise.all([
+            sendEmail(process.env.ADMIN_EMAIL || 'hello@adriacrossedit.com', `New Intake: ${name} (${form_type})`, adminHtml),
+            sendEmail(email, 'Style Profile Received - Adria Cross', userHtml)
+        ]).catch(err => console.error('Email sending failed', err));
+
+        res.status(201).json({ message: 'Success! Confirmation email sent.' });
     } catch (err) { res.status(500).json({ error: 'DB Error' }); }
 });
 
@@ -282,6 +336,107 @@ app.get('/api/intake', isAuthenticated, async (req, res) => {
 app.patch('/api/appointments/:id', isAuthenticated, async (req, res) => {
     await pool.query('UPDATE appointments SET status = $1 WHERE id = $2', [req.body.status, req.params.id]);
     res.json({ success: true });
+});
+
+// Create Blog Post
+app.post('/api/blog', isAuthenticated, async (req, res) => {
+    try {
+        const { title, summary, content } = req.body;
+        if (!title || !summary || !content) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const filename = `${slug}.html`;
+        const filePath = path.join(__dirname, 'blog', filename);
+        const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        // 1. Generate HTML Content
+        const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title} | Adria Cross Style Blog</title>
+    <meta name="description" content="${summary}">
+    <link rel="stylesheet" href="../css/landing.min.css">
+    <style>
+        .blog-post-header { text-align: center; margin-top: 8rem; margin-bottom: 3rem; padding: 0 1rem; }
+        .blog-post-header h1 { color: #d4a574; font-size: 2.5rem; font-family: 'Montserrat', sans-serif; margin-bottom: 1rem; }
+        .blog-meta { color: #888; font-size: 0.9rem; font-family: 'Montserrat', sans-serif; }
+        .blog-content { max-width: 800px; margin: 0 auto 4rem auto; padding: 2rem; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(212, 165, 116, 0.08); font-family: 'Montserrat', sans-serif; line-height: 1.8; color: #444; }
+        .blog-content h2, .blog-content h3 { color: #c19a5d; margin-top: 2rem; margin-bottom: 1rem; }
+        .blog-content ul { margin-left: 1.5rem; margin-bottom: 1.5rem; }
+        .back-link { display: block; margin: 2rem auto; text-align: center; font-weight: 600; color: #c19a5d; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-logo"><a href="../index.html" class="has-logo"><img src="../images/logo.webp" class="logo-image"><span class="logo-text">Adria Cross</span></a></div>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../blog.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <main>
+        <article>
+            <div class="blog-post-header">
+                <h1>${title}</h1>
+                <p class="blog-meta">Published on ${dateStr} • By Adria Cross</p>
+            </div>
+            <div class="blog-content">
+                ${content}
+                <a href="../blog.html" class="back-link">← Back to Blog</a>
+            </div>
+        </article>
+    </main>
+    <footer class="site-footer"><div class="footer-bottom"><p class="footer-copyright">© 2025 Adria Cross. All rights reserved.</p></div></footer>
+</body>
+</html>`;
+
+        fs.writeFileSync(filePath, htmlContent);
+
+        // 2. Update Index (blog.html)
+        const indexPath = path.join(__dirname, 'blog.html');
+        let indexHtml = fs.readFileSync(indexPath, 'utf8');
+
+        const newSummary = `
+            <article class="blog-article">
+                <h2><a href="blog/${filename}" style="text-decoration: none; color: inherit;">${title}</a></h2>
+                <p class="blog-meta">Published on ${dateStr}</p>
+                <p>${summary}</p>
+                <a href="blog/${filename}" class="btn-cta btn-secondary-cta" style="padding: 0.5rem 1rem; font-size: 0.9rem; margin-top: 1rem; display: inline-block;">Read Article →</a>
+            </article>`;
+
+        // Insert after comment
+        indexHtml = indexHtml.replace('<!-- Blog Article Summaries -->', '<!-- Blog Article Summaries -->\n' + newSummary);
+        fs.writeFileSync(indexPath, indexHtml);
+
+        // 3. Update Search Index
+        const searchPath = path.join(__dirname, 'search.json');
+        if (fs.existsSync(searchPath)) {
+            const searchData = JSON.parse(fs.readFileSync(searchPath, 'utf8'));
+            searchData.push({
+                title: title,
+                category: "Blog",
+                url: `/blog/${filename}`,
+                keywords: "blog, " + title.toLowerCase(),
+                summary: summary
+            });
+            fs.writeFileSync(searchPath, JSON.stringify(searchData, null, 2));
+        }
+
+        res.status(201).json({ success: true, url: `/blog/${filename}` });
+
+    } catch (err) {
+        console.error('Blog Error:', err);
+        res.status(500).json({ error: 'Failed to publish post.' });
+    }
 });
 
 app.use(express.static(path.join(__dirname)));
