@@ -227,22 +227,14 @@ app.get('/api/available-slots', async (req, res) => {
     const { date } = req.query;
     if (!date) return res.json([]);
 
-    // Check for override first
+    // Check for override (now the ONLY source of truth)
     const override = await pool.query('SELECT * FROM availability_overrides WHERE date = $1', [date]);
     let allSlots = [];
-    let isEnabled = true;
+    let isEnabled = false; // Default to unavailable
 
     if (override.rows[0]) {
         allSlots = JSON.parse(override.rows[0].slots);
         isEnabled = override.rows[0].is_enabled === 1;
-    } else {
-        // Fallback to weekly config
-        const dayOfWeek = new Date(date).getUTCDay();
-        const config = await pool.query('SELECT * FROM availability_config WHERE day_of_week = $1', [dayOfWeek]);
-        if (config.rows[0]) {
-            allSlots = JSON.parse(config.rows[0].slots);
-            isEnabled = config.rows[0].is_enabled === 1;
-        }
     }
 
     if (!isEnabled) return res.json([]);

@@ -267,8 +267,9 @@
                 <div class="table-card" style="max-width: 1000px;">
                     <div class="availability-header">
                         <h2>📅 Availability Calendar</h2>
-                        <p style="color: #666; margin-bottom: 1rem;">Click on any date to customize your availability.
-                            Dates with custom settings are highlighted.</p>
+                        <p style="color: #666; margin-bottom: 1rem;">All dates are <strong>unavailable by
+                                default</strong>. Click on any date to set your available hours. You can set any times
+                            throughout the full 24 hours.</p>
                     </div>
 
                     <!-- Calendar Navigation -->
@@ -294,20 +295,10 @@
 
                     <!-- Legend -->
                     <div class="calendar-legend">
-                        <div class="legend-item"><span class="legend-dot available"></span> Default Available</div>
-                        <div class="legend-item"><span class="legend-dot custom"></span> Custom Override</div>
-                        <div class="legend-item"><span class="legend-dot unavailable"></span> Unavailable</div>
-                        <div class="legend-item"><span class="legend-dot booked"></span> Appointments Booked</div>
-                    </div>
-
-                    <!-- Weekly Defaults Section -->
-                    <div class="weekly-defaults-section">
-                        <h3>🗓️ Weekly Defaults</h3>
-                        <p style="color: #666; margin-bottom: 1rem;">These are your recurring weekly time slots.
-                            Override them on specific dates using the calendar above.</p>
-                        <div id="availability-container">
-                            <!-- Days will be loaded here -->
+                        <div class="legend-item"><span class="legend-dot available"></span> Available (slots set)</div>
+                        <div class="legend-item"><span class="legend-dot unavailable"></span> Unavailable (default)
                         </div>
+                        <div class="legend-item"><span class="legend-dot booked"></span> Has Bookings</div>
                     </div>
                 </div>
             </div>
@@ -316,29 +307,48 @@
 
     <!-- Date Override Modal -->
     <div id="date-modal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-content" style="max-width: 550px;">
             <span class="close-modal" onclick="closeDateModal()">&times;</span>
-            <h2 id="date-modal-title">Customize Availability</h2>
+            <h2 id="date-modal-title">Set Availability</h2>
             <p id="date-modal-subtitle" style="color: #666; margin-bottom: 1.5rem;"></p>
 
             <div class="date-modal-toggle">
                 <label>
                     <input type="checkbox" id="date-enabled-toggle" onchange="toggleDateEnabled()">
-                    <span id="date-enabled-label">Available on this date</span>
+                    <span id="date-enabled-label">Make this date available for bookings</span>
                 </label>
             </div>
 
             <div id="date-slots-container">
+                <p style="font-weight: 600; margin-bottom: 0.5rem;">Time Slots (24-hour flexibility)</p>
                 <div class="slots-list" id="date-slots-list"></div>
+
+                <!-- Quick Add Buttons -->
+                <div style="margin: 1rem 0;">
+                    <p style="font-size: 0.85rem; color: #888; margin-bottom: 0.5rem;">Quick add:</p>
+                    <div class="quick-times">
+                        <button class="quick-time-btn" onclick="quickAddSlot('9:00 AM')">9 AM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('10:00 AM')">10 AM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('11:00 AM')">11 AM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('12:00 PM')">12 PM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('1:00 PM')">1 PM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('2:00 PM')">2 PM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('3:00 PM')">3 PM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('4:00 PM')">4 PM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('5:00 PM')">5 PM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('6:00 PM')">6 PM</button>
+                    </div>
+                </div>
+
                 <div class="add-slot-row" style="margin-top: 1rem;">
-                    <input type="text" placeholder="e.g. 10:30 AM" id="new-date-slot"
+                    <input type="text" placeholder="Custom time (e.g. 7:30 PM)" id="new-date-slot"
                         style="flex: 1; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
-                    <button class="btn-view" onclick="addDateSlot()">+ Add Slot</button>
+                    <button class="btn-view" onclick="addDateSlot()">+ Add</button>
                 </div>
             </div>
 
             <div class="date-modal-actions">
-                <button class="btn-secondary" onclick="resetToDefault()">Reset to Weekly Default</button>
+                <button class="btn-secondary" onclick="clearAllSlots()">Clear All Slots</button>
                 <button class="btn-primary" onclick="saveDateOverride()">Save Changes</button>
             </div>
         </div>
@@ -683,6 +693,29 @@
                 flex-direction: column;
             }
         }
+
+        /* Quick Time Buttons */
+        .quick-times {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .quick-time-btn {
+            padding: 0.4rem 0.8rem;
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-time-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
     </style>
 
     <script>
@@ -702,7 +735,6 @@
             document.getElementById('dashboard-section').style.display = 'block';
             loadAppointments();
             loadIntake();
-            loadAvailability();
             loadOverrides();
         }
 
@@ -722,7 +754,7 @@
                     </td>
                 </tr>
             `).join('');
-            renderCalendar(); // Re-render to show booked dates
+            renderCalendar();
         }
 
         async function loadIntake() {
@@ -750,41 +782,11 @@
             renderCalendar();
         }
 
-        async function loadAvailability() {
-            const res = await fetch('/api/availability');
-            const config = await res.json();
-            const container = document.getElementById('availability-container');
-            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-            container.innerHTML = config.map(c => `
-                <div class="day-config-card ${c.is_enabled ? '' : 'day-disabled'}">
-                    <div class="day-header">
-                        <h3>${dayNames[c.day_of_week]}</h3>
-                        <label>
-                            <input type="checkbox" ${c.is_enabled ? 'checked' : ''} onchange="toggleDay(${c.day_of_week}, this.checked)"> Enable Day
-                        </label>
-                    </div>
-                    ${c.is_enabled ? `
-                        <div class="slots-list">
-                            ${c.slots.map(s => `
-                                <div class="slot-pill">
-                                    ${s} <span class="remove-slot" onclick="removeSlot(${c.day_of_week}, '${s}')">&times;</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="add-slot-row">
-                            <input type="text" placeholder="e.g. 10:30 AM" id="new-slot-${c.day_of_week}">
-                            <button class="btn-view" onclick="addSlot(${c.day_of_week})">+ Add</button>
-                        </div>
-                    ` : ''}
-                </div>
-            `).join('');
-            window.availabilityConfig = config;
-            renderCalendar();
-        }
-
         // Calendar Functions
         function renderCalendar() {
+            const calendarBody = document.getElementById('calendar-body');
+            if (!calendarBody) return;
+
             const year = currentCalendarDate.getFullYear();
             const month = currentCalendarDate.getMonth();
             const today = new Date();
@@ -792,7 +794,8 @@
 
             // Update title
             const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-            document.getElementById('calendar-month-title').textContent = `${monthNames[month]} ${year}`;
+            const titleEl = document.getElementById('calendar-month-title');
+            if (titleEl) titleEl.textContent = `${monthNames[month]} ${year}`;
 
             // Get first day of month and total days
             const firstDay = new Date(year, month, 1).getDay();
@@ -809,7 +812,6 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateObj = new Date(year, month, day);
                 const dateStr = formatDate(dateObj);
-                const dayOfWeek = dateObj.getDay();
 
                 let classes = ['cal-day'];
                 let indicators = [];
@@ -825,28 +827,18 @@
                     classes.push('past');
                 }
 
-                // Check for override or weekly default
-                const hasOverride = overrides[dateStr];
-                const weeklyConfig = window.availabilityConfig?.find(c => c.day_of_week === dayOfWeek);
+                // Check for date override (all dates unavailable by default)
+                const dateOverride = overrides ? overrides[dateStr] : null;
 
-                if (hasOverride) {
-                    if (hasOverride.is_enabled && hasOverride.slots.length > 0) {
-                        indicators.push('custom');
-                        slotCount = hasOverride.slots.length;
-                    } else {
-                        indicators.push('unavailable');
-                    }
-                } else if (weeklyConfig) {
-                    if (weeklyConfig.is_enabled && weeklyConfig.slots.length > 0) {
-                        indicators.push('available');
-                        slotCount = weeklyConfig.slots.length;
-                    } else {
-                        indicators.push('unavailable');
-                    }
+                if (dateOverride && dateOverride.is_enabled && dateOverride.slots && dateOverride.slots.length > 0) {
+                    indicators.push('available');
+                    slotCount = dateOverride.slots.length;
+                } else {
+                    indicators.push('unavailable');
                 }
 
                 // Check for booked appointments
-                const bookedCount = appointments.filter(a => a.date === dateStr && a.status !== 'cancelled').length;
+                const bookedCount = appointments ? appointments.filter(a => a.date === dateStr && a.status !== 'cancelled').length : 0;
                 if (bookedCount > 0) {
                     indicators.push('booked');
                 }
@@ -870,7 +862,7 @@
                 html += '<div class="cal-day empty"></div>';
             }
 
-            document.getElementById('calendar-body').innerHTML = html;
+            calendarBody.innerHTML = html;
         }
 
         function changeMonth(delta) {
@@ -888,8 +880,6 @@
         // Date Modal Functions
         function openDateModal(dateStr) {
             const dateObj = new Date(dateStr + 'T00:00:00');
-            const dayOfWeek = dateObj.getUTCDay();
-            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
             const formattedDate = dateObj.toLocaleDateString('en-US', {
                 weekday: 'long',
@@ -901,36 +891,34 @@
             document.getElementById('date-modal-title').textContent = formattedDate;
 
             // Get current slots for this date
-            const hasOverride = overrides[dateStr];
-            const weeklyConfig = window.availabilityConfig?.find(c => c.day_of_week === dayOfWeek);
+            const dateConfig = overrides[dateStr];
 
             let slots = [];
-            let isEnabled = true;
-            let isCustom = false;
+            let isEnabled = false;
 
-            if (hasOverride) {
-                slots = [...hasOverride.slots];
-                isEnabled = hasOverride.is_enabled;
-                isCustom = true;
-                document.getElementById('date-modal-subtitle').textContent = 'This date has custom availability settings.';
-            } else if (weeklyConfig) {
-                slots = [...weeklyConfig.slots];
-                isEnabled = weeklyConfig.is_enabled;
-                document.getElementById('date-modal-subtitle').textContent = `Using default ${dayNames[dayOfWeek]} schedule.`;
+            if (dateConfig) {
+                slots = [...dateConfig.slots];
+                isEnabled = dateConfig.is_enabled;
+                document.getElementById('date-modal-subtitle').textContent = isEnabled
+                    ? `Current availability: ${slots.length} slots`
+                    : 'This date is currently unavailable.';
+            } else {
+                document.getElementById('date-modal-subtitle').textContent = 'No availability set for this date.';
             }
 
             selectedDateData = {
                 date: dateStr,
-                dayOfWeek: dayOfWeek,
                 slots: slots,
-                is_enabled: isEnabled,
-                isCustom: isCustom
+                is_enabled: isEnabled
             };
 
             document.getElementById('date-enabled-toggle').checked = isEnabled;
-            toggleDateEnabled();
-            renderDateSlots();
+            // Visual feedback only
+            const container = document.getElementById('date-slots-container');
+            container.style.opacity = isEnabled ? '1' : '0.8';
+            container.style.pointerEvents = 'auto'; // Always allow editing
 
+            renderDateSlots();
             document.getElementById('date-modal').style.display = 'block';
         }
 
@@ -942,8 +930,7 @@
         function toggleDateEnabled() {
             const enabled = document.getElementById('date-enabled-toggle').checked;
             const container = document.getElementById('date-slots-container');
-            container.style.opacity = enabled ? '1' : '0.5';
-            container.style.pointerEvents = enabled ? 'auto' : 'none';
+            container.style.opacity = enabled ? '1' : '0.8';
 
             if (selectedDateData) {
                 selectedDateData.is_enabled = enabled;
@@ -954,11 +941,21 @@
             if (!selectedDateData) return;
 
             const list = document.getElementById('date-slots-list');
-            list.innerHTML = selectedDateData.slots.map(s => `
-                <div class="slot-pill">
-                    ${s} <span class="remove-slot" onclick="removeDateSlot('${s}')">&times;</span>
-                </div>
-            `).join('');
+
+            // Sort slots (parsing times like "9:00 AM", "2:00 PM")
+            const sortedSlots = selectedDateData.slots.sort((a, b) => {
+                return new Date('1970/01/01 ' + a) - new Date('1970/01/01 ' + b);
+            });
+
+            if (sortedSlots.length === 0) {
+                list.innerHTML = '<p style="color:#888; font-style:italic; margin-bottom:1rem;">No time slots added.</p>';
+            } else {
+                list.innerHTML = sortedSlots.map(s => `
+                    <div class="slot-pill">
+                        ${s} <span class="remove-slot" onclick="removeDateSlot('${s}')">&times;</span>
+                    </div>
+                `).join('');
+            }
         }
 
         function addDateSlot() {
@@ -966,16 +963,45 @@
             const slot = input.value.trim();
             if (!slot || !selectedDateData) return;
 
-            selectedDateData.slots.push(slot);
-            selectedDateData.slots.sort();
+            if (!selectedDateData.slots.includes(slot)) {
+                selectedDateData.slots.push(slot);
+                // Auto-enable if adding slots
+                if (!selectedDateData.is_enabled) {
+                    selectedDateData.is_enabled = true;
+                    document.getElementById('date-enabled-toggle').checked = true;
+                    toggleDateEnabled();
+                }
+                renderDateSlots();
+            }
             input.value = '';
-            renderDateSlots();
+        }
+
+        function quickAddSlot(time) {
+            if (!selectedDateData) return;
+            if (!selectedDateData.slots.includes(time)) {
+                selectedDateData.slots.push(time);
+                // Auto-enable
+                if (!selectedDateData.is_enabled) {
+                    selectedDateData.is_enabled = true;
+                    document.getElementById('date-enabled-toggle').checked = true;
+                    toggleDateEnabled();
+                }
+                renderDateSlots();
+            }
         }
 
         function removeDateSlot(slot) {
             if (!selectedDateData) return;
             selectedDateData.slots = selectedDateData.slots.filter(s => s !== slot);
             renderDateSlots();
+        }
+
+        function clearAllSlots() {
+            if (!selectedDateData) return;
+            if (confirm('Clear all slots for this date?')) {
+                selectedDateData.slots = [];
+                renderDateSlots();
+            }
         }
 
         async function saveDateOverride() {
@@ -995,54 +1021,7 @@
             closeDateModal();
         }
 
-        async function resetToDefault() {
-            if (!selectedDateData) return;
 
-            await fetch(`/api/availability-overrides/${selectedDateData.date}`, {
-                method: 'DELETE'
-            });
-
-            await loadOverrides();
-            closeDateModal();
-        }
-
-        async function toggleDay(day, enabled) {
-            const dayObj = window.availabilityConfig.find(c => c.day_of_week === day);
-            await fetch('/api/availability', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ day_of_week: day, slots: dayObj.slots, is_enabled: enabled })
-            });
-            loadAvailability();
-        }
-
-        async function addSlot(day) {
-            const input = document.getElementById(`new-slot-${day}`);
-            const slot = input.value.trim();
-            if (!slot) return;
-
-            const dayObj = window.availabilityConfig.find(c => c.day_of_week === day);
-            const newSlots = [...dayObj.slots, slot].sort();
-
-            await fetch('/api/availability', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ day_of_week: day, slots: newSlots, is_enabled: dayObj.is_enabled })
-            });
-            loadAvailability();
-        }
-
-        async function removeSlot(day, slot) {
-            const dayObj = window.availabilityConfig.find(c => c.day_of_week === day);
-            const newSlots = dayObj.slots.filter(s => s !== slot);
-
-            await fetch('/api/availability', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ day_of_week: day, slots: newSlots, is_enabled: dayObj.is_enabled })
-            });
-            loadAvailability();
-        }
 
         function viewIntake(id) {
             const sub = window.allIntake.find(s => s.id === id);
