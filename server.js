@@ -112,6 +112,13 @@ const initDb = async () => {
                 is_enabled INTEGER DEFAULT 1
             );
 
+            CREATE TABLE IF NOT EXISTS availability_overrides (
+                id SERIAL PRIMARY KEY,
+                date TEXT UNIQUE NOT NULL,
+                slots TEXT DEFAULT '[]',
+                is_enabled INTEGER DEFAULT 1
+            );
+
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 username TEXT UNIQUE NOT NULL,
@@ -219,14 +226,49 @@ app.get('/api/appointments', isAuthenticated, async (req, res) => {
 app.get('/api/available-slots', async (req, res) => {
     const { date } = req.query;
     if (!date) return res.json([]);
-    const dayOfWeek = new Date(date).getUTCDay();
-    const config = await pool.query('SELECT * FROM availability_config WHERE day_of_week = $1', [dayOfWeek]);
-    if (!config.rows[0] || !config.rows[0].is_enabled) return res.json([]);
 
-    const allSlots = JSON.parse(config.rows[0].slots);
+    // Check for override first
+    const override = await pool.query('SELECT * FROM availability_overrides WHERE date = $1', [date]);
+    let allSlots = [];
+    let isEnabled = true;
+
+    if (override.rows[0]) {
+        allSlots = JSON.parse(override.rows[0].slots);
+        isEnabled = override.rows[0].is_enabled === 1;
+    } else {
+        // Fallback to weekly config
+        const dayOfWeek = new Date(date).getUTCDay();
+        const config = await pool.query('SELECT * FROM availability_config WHERE day_of_week = $1', [dayOfWeek]);
+        if (config.rows[0]) {
+            allSlots = JSON.parse(config.rows[0].slots);
+            isEnabled = config.rows[0].is_enabled === 1;
+        }
+    }
+
+    if (!isEnabled) return res.json([]);
+
     const booked = await pool.query('SELECT time FROM appointments WHERE date = $1 AND status != $2', [date, 'cancelled']);
     const bookedTimes = booked.rows.map(b => b.time);
     res.json(allSlots.filter(s => !bookedTimes.includes(s)));
+});
+
+app.get('/api/availability-overrides', isAuthenticated, async (req, res) => {
+    const data = await pool.query('SELECT * FROM availability_overrides');
+    res.json(data.rows.map(r => ({ ...r, slots: JSON.parse(r.slots) })));
+});
+
+app.post('/api/availability-overrides', isAuthenticated, async (req, res) => {
+    const { date, slots, is_enabled } = req.body;
+    await pool.query(
+        'INSERT INTO availability_overrides (date, slots, is_enabled) VALUES ($1, $2, $3) ON CONFLICT (date) DO UPDATE SET slots = $2, is_enabled = $3',
+        [date, JSON.stringify(slots), is_enabled ? 1 : 0]
+    );
+    res.json({ success: true });
+});
+
+app.delete('/api/availability-overrides/:date', isAuthenticated, async (req, res) => {
+    await pool.query('DELETE FROM availability_overrides WHERE date = $1', [req.params.date]);
+    res.json({ success: true });
 });
 
 app.get('/api/availability', isAuthenticated, async (req, res) => {

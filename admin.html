@@ -264,16 +264,84 @@
 
             <!-- Availability Tab -->
             <div id="availability-tab" class="tab-content">
-                <div class="table-card" style="max-width: 800px;">
-                    <h2>Manage Weekly Schedule</h2>
-                    <p style="color: #666; margin-bottom: 2rem;">Toggle days on/off and define your available time
-                        slots.</p>
-                    <div id="availability-container">
-                        <!-- Days will be loaded here -->
+                <div class="table-card" style="max-width: 1000px;">
+                    <div class="availability-header">
+                        <h2>📅 Availability Calendar</h2>
+                        <p style="color: #666; margin-bottom: 1rem;">Click on any date to customize your availability.
+                            Dates with custom settings are highlighted.</p>
+                    </div>
+
+                    <!-- Calendar Navigation -->
+                    <div class="calendar-nav">
+                        <button class="cal-nav-btn" onclick="changeMonth(-1)">◀ Previous</button>
+                        <h3 id="calendar-month-title"></h3>
+                        <button class="cal-nav-btn" onclick="changeMonth(1)">Next ▶</button>
+                    </div>
+
+                    <!-- Month Calendar Grid -->
+                    <div class="calendar-grid">
+                        <div class="calendar-header">
+                            <div class="cal-day-name">Sun</div>
+                            <div class="cal-day-name">Mon</div>
+                            <div class="cal-day-name">Tue</div>
+                            <div class="cal-day-name">Wed</div>
+                            <div class="cal-day-name">Thu</div>
+                            <div class="cal-day-name">Fri</div>
+                            <div class="cal-day-name">Sat</div>
+                        </div>
+                        <div id="calendar-body" class="calendar-body"></div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="calendar-legend">
+                        <div class="legend-item"><span class="legend-dot available"></span> Default Available</div>
+                        <div class="legend-item"><span class="legend-dot custom"></span> Custom Override</div>
+                        <div class="legend-item"><span class="legend-dot unavailable"></span> Unavailable</div>
+                        <div class="legend-item"><span class="legend-dot booked"></span> Appointments Booked</div>
+                    </div>
+
+                    <!-- Weekly Defaults Section -->
+                    <div class="weekly-defaults-section">
+                        <h3>🗓️ Weekly Defaults</h3>
+                        <p style="color: #666; margin-bottom: 1rem;">These are your recurring weekly time slots.
+                            Override them on specific dates using the calendar above.</p>
+                        <div id="availability-container">
+                            <!-- Days will be loaded here -->
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
+    </div>
+
+    <!-- Date Override Modal -->
+    <div id="date-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-modal" onclick="closeDateModal()">&times;</span>
+            <h2 id="date-modal-title">Customize Availability</h2>
+            <p id="date-modal-subtitle" style="color: #666; margin-bottom: 1.5rem;"></p>
+
+            <div class="date-modal-toggle">
+                <label>
+                    <input type="checkbox" id="date-enabled-toggle" onchange="toggleDateEnabled()">
+                    <span id="date-enabled-label">Available on this date</span>
+                </label>
+            </div>
+
+            <div id="date-slots-container">
+                <div class="slots-list" id="date-slots-list"></div>
+                <div class="add-slot-row" style="margin-top: 1rem;">
+                    <input type="text" placeholder="e.g. 10:30 AM" id="new-date-slot"
+                        style="flex: 1; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
+                    <button class="btn-view" onclick="addDateSlot()">+ Add Slot</button>
+                </div>
+            </div>
+
+            <div class="date-modal-actions">
+                <button class="btn-secondary" onclick="resetToDefault()">Reset to Weekly Default</button>
+                <button class="btn-primary" onclick="saveDateOverride()">Save Changes</button>
+            </div>
+        </div>
     </div>
 
     <!-- Details Modal -->
@@ -333,9 +401,297 @@
         .day-disabled {
             opacity: 0.5;
         }
+
+        /* Calendar Styles */
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f8f6f3 0%, #fff 100%);
+            border-radius: 12px;
+        }
+
+        .cal-nav-btn {
+            padding: 0.6rem 1.2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .cal-nav-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        #calendar-month-title {
+            font-size: 1.4rem;
+            color: var(--text);
+            margin: 0;
+        }
+
+        .calendar-grid {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        }
+
+        .cal-day-name {
+            padding: 1rem;
+            text-align: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .calendar-body {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+
+        .cal-day {
+            min-height: 80px;
+            padding: 0.75rem;
+            border: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            background: white;
+        }
+
+        .cal-day:hover {
+            background: #fdf9f5;
+            transform: scale(1.02);
+            z-index: 1;
+            box-shadow: 0 4px 15px rgba(193, 154, 93, 0.2);
+        }
+
+        .cal-day.empty {
+            background: #fafafa;
+            cursor: default;
+        }
+
+        .cal-day.empty:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .cal-day.today {
+            background: linear-gradient(135deg, #fff9f0 0%, #fff5e6 100%);
+            border-color: var(--primary);
+        }
+
+        .cal-day.past {
+            opacity: 0.5;
+            background: #f5f5f5;
+        }
+
+        .cal-day-number {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text);
+            margin-bottom: 0.3rem;
+        }
+
+        .cal-day.today .cal-day-number {
+            color: var(--primary);
+        }
+
+        .cal-day-indicator {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            margin-top: 0.3rem;
+        }
+
+        .cal-indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .cal-indicator-dot.available {
+            background: #28a745;
+        }
+
+        .cal-indicator-dot.custom {
+            background: var(--primary);
+        }
+
+        .cal-indicator-dot.unavailable {
+            background: #dc3545;
+        }
+
+        .cal-indicator-dot.booked {
+            background: #6c757d;
+        }
+
+        .cal-slot-count {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .calendar-legend {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            padding: 1rem;
+            background: #f8f8f8;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.available {
+            background: #28a745;
+        }
+
+        .legend-dot.custom {
+            background: var(--primary);
+        }
+
+        .legend-dot.unavailable {
+            background: #dc3545;
+        }
+
+        .legend-dot.booked {
+            background: #6c757d;
+        }
+
+        .weekly-defaults-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #eee;
+        }
+
+        .weekly-defaults-section h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Date Modal Styles */
+        .date-modal-toggle {
+            background: #f8f8f8;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .date-modal-toggle label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .date-modal-toggle input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+        }
+
+        .date-modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 0.9rem 1.5rem;
+            background: linear-gradient(135deg, #d4a574 0%, #c19a5d 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(193, 154, 93, 0.3);
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 0.9rem 1.5rem;
+            background: white;
+            color: var(--text);
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .cal-day {
+                min-height: 60px;
+                padding: 0.5rem;
+            }
+
+            .cal-day-number {
+                font-size: 0.85rem;
+            }
+
+            .calendar-legend {
+                gap: 0.75rem;
+            }
+
+            .legend-item {
+                font-size: 0.75rem;
+            }
+
+            .date-modal-actions {
+                flex-direction: column;
+            }
+        }
     </style>
 
     <script>
+        // Calendar State
+        let currentCalendarDate = new Date();
+        let overrides = {};
+        let appointments = [];
+        let selectedDateData = null;
+
         async function checkAuth() {
             const res = await fetch('/api/appointments');
             if (res.ok) showDashboard();
@@ -347,11 +703,13 @@
             loadAppointments();
             loadIntake();
             loadAvailability();
+            loadOverrides();
         }
 
         async function loadAppointments() {
             const res = await fetch('/api/appointments');
             const data = await res.json();
+            appointments = data;
             const body = document.getElementById('appointments-body');
             body.innerHTML = data.map(app => `
                 <tr>
@@ -364,6 +722,7 @@
                     </td>
                 </tr>
             `).join('');
+            renderCalendar(); // Re-render to show booked dates
         }
 
         async function loadIntake() {
@@ -379,6 +738,16 @@
                 </tr>
             `).join('');
             window.allIntake = data;
+        }
+
+        async function loadOverrides() {
+            const res = await fetch('/api/availability-overrides');
+            const data = await res.json();
+            overrides = {};
+            data.forEach(o => {
+                overrides[o.date] = { slots: o.slots, is_enabled: o.is_enabled === 1 };
+            });
+            renderCalendar();
         }
 
         async function loadAvailability() {
@@ -411,6 +780,230 @@
                 </div>
             `).join('');
             window.availabilityConfig = config;
+            renderCalendar();
+        }
+
+        // Calendar Functions
+        function renderCalendar() {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Update title
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('calendar-month-title').textContent = `${monthNames[month]} ${year}`;
+
+            // Get first day of month and total days
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            let html = '';
+
+            // Empty cells before first day
+            for (let i = 0; i < firstDay; i++) {
+                html += '<div class="cal-day empty"></div>';
+            }
+
+            // Days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateObj = new Date(year, month, day);
+                const dateStr = formatDate(dateObj);
+                const dayOfWeek = dateObj.getDay();
+
+                let classes = ['cal-day'];
+                let indicators = [];
+                let slotCount = 0;
+
+                // Check if today
+                if (dateObj.toDateString() === today.toDateString()) {
+                    classes.push('today');
+                }
+
+                // Check if past
+                if (dateObj < today) {
+                    classes.push('past');
+                }
+
+                // Check for override or weekly default
+                const hasOverride = overrides[dateStr];
+                const weeklyConfig = window.availabilityConfig?.find(c => c.day_of_week === dayOfWeek);
+
+                if (hasOverride) {
+                    if (hasOverride.is_enabled && hasOverride.slots.length > 0) {
+                        indicators.push('custom');
+                        slotCount = hasOverride.slots.length;
+                    } else {
+                        indicators.push('unavailable');
+                    }
+                } else if (weeklyConfig) {
+                    if (weeklyConfig.is_enabled && weeklyConfig.slots.length > 0) {
+                        indicators.push('available');
+                        slotCount = weeklyConfig.slots.length;
+                    } else {
+                        indicators.push('unavailable');
+                    }
+                }
+
+                // Check for booked appointments
+                const bookedCount = appointments.filter(a => a.date === dateStr && a.status !== 'cancelled').length;
+                if (bookedCount > 0) {
+                    indicators.push('booked');
+                }
+
+                html += `
+                    <div class="${classes.join(' ')}" onclick="openDateModal('${dateStr}')">
+                        <div class="cal-day-number">${day}</div>
+                        <div class="cal-day-indicator">
+                            ${indicators.map(i => `<span class="cal-indicator-dot ${i}"></span>`).join('')}
+                        </div>
+                        ${slotCount > 0 ? `<div class="cal-slot-count">${slotCount} slots</div>` : ''}
+                        ${bookedCount > 0 ? `<div class="cal-slot-count">${bookedCount} booked</div>` : ''}
+                    </div>
+                `;
+            }
+
+            // Fill remaining cells to complete the grid
+            const totalCells = firstDay + daysInMonth;
+            const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+            for (let i = 0; i < remaining; i++) {
+                html += '<div class="cal-day empty"></div>';
+            }
+
+            document.getElementById('calendar-body').innerHTML = html;
+        }
+
+        function changeMonth(delta) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Date Modal Functions
+        function openDateModal(dateStr) {
+            const dateObj = new Date(dateStr + 'T00:00:00');
+            const dayOfWeek = dateObj.getUTCDay();
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+            const formattedDate = dateObj.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            document.getElementById('date-modal-title').textContent = formattedDate;
+
+            // Get current slots for this date
+            const hasOverride = overrides[dateStr];
+            const weeklyConfig = window.availabilityConfig?.find(c => c.day_of_week === dayOfWeek);
+
+            let slots = [];
+            let isEnabled = true;
+            let isCustom = false;
+
+            if (hasOverride) {
+                slots = [...hasOverride.slots];
+                isEnabled = hasOverride.is_enabled;
+                isCustom = true;
+                document.getElementById('date-modal-subtitle').textContent = 'This date has custom availability settings.';
+            } else if (weeklyConfig) {
+                slots = [...weeklyConfig.slots];
+                isEnabled = weeklyConfig.is_enabled;
+                document.getElementById('date-modal-subtitle').textContent = `Using default ${dayNames[dayOfWeek]} schedule.`;
+            }
+
+            selectedDateData = {
+                date: dateStr,
+                dayOfWeek: dayOfWeek,
+                slots: slots,
+                is_enabled: isEnabled,
+                isCustom: isCustom
+            };
+
+            document.getElementById('date-enabled-toggle').checked = isEnabled;
+            toggleDateEnabled();
+            renderDateSlots();
+
+            document.getElementById('date-modal').style.display = 'block';
+        }
+
+        function closeDateModal() {
+            document.getElementById('date-modal').style.display = 'none';
+            selectedDateData = null;
+        }
+
+        function toggleDateEnabled() {
+            const enabled = document.getElementById('date-enabled-toggle').checked;
+            const container = document.getElementById('date-slots-container');
+            container.style.opacity = enabled ? '1' : '0.5';
+            container.style.pointerEvents = enabled ? 'auto' : 'none';
+
+            if (selectedDateData) {
+                selectedDateData.is_enabled = enabled;
+            }
+        }
+
+        function renderDateSlots() {
+            if (!selectedDateData) return;
+
+            const list = document.getElementById('date-slots-list');
+            list.innerHTML = selectedDateData.slots.map(s => `
+                <div class="slot-pill">
+                    ${s} <span class="remove-slot" onclick="removeDateSlot('${s}')">&times;</span>
+                </div>
+            `).join('');
+        }
+
+        function addDateSlot() {
+            const input = document.getElementById('new-date-slot');
+            const slot = input.value.trim();
+            if (!slot || !selectedDateData) return;
+
+            selectedDateData.slots.push(slot);
+            selectedDateData.slots.sort();
+            input.value = '';
+            renderDateSlots();
+        }
+
+        function removeDateSlot(slot) {
+            if (!selectedDateData) return;
+            selectedDateData.slots = selectedDateData.slots.filter(s => s !== slot);
+            renderDateSlots();
+        }
+
+        async function saveDateOverride() {
+            if (!selectedDateData) return;
+
+            await fetch('/api/availability-overrides', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    date: selectedDateData.date,
+                    slots: selectedDateData.slots,
+                    is_enabled: selectedDateData.is_enabled
+                })
+            });
+
+            await loadOverrides();
+            closeDateModal();
+        }
+
+        async function resetToDefault() {
+            if (!selectedDateData) return;
+
+            await fetch(`/api/availability-overrides/${selectedDateData.date}`, {
+                method: 'DELETE'
+            });
+
+            await loadOverrides();
+            closeDateModal();
         }
 
         async function toggleDay(day, enabled) {
@@ -489,6 +1082,11 @@
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             event.target.classList.add('active');
             document.getElementById(`${tab}-tab`).classList.add('active');
+
+            // Render calendar when switching to availability tab
+            if (tab === 'availability') {
+                renderCalendar();
+            }
         }
 
         function closeModal() { document.getElementById('details-modal').style.display = 'none'; }
