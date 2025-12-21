@@ -1,34 +1,33 @@
-# Adria Cross Edit - Appointment System
+# Adria Cross Edit - Appointment & Admin System
 
-This project has been upgraded with a custom appointment booking system.
+This project is a full-stack web application with a professional booking system and owner dashboard.
 
 ## Features
-- **Custom Booking Form**: Replaced Google Calendar with a branded, integrated form.
-- **SQLite Database**: Appointments are stored in `appointments.db`.
-- **Admin Dashboard**: Password-protected area to view and manage requests.
-- **Double-Booking Protection**: Prevent simultaneous bookings for the same slot.
+- **Custom Booking Form**: Branded appointment selection.
+- **Dynamic Availability**: Owner can manage their weekly schedule from the dashboard.
+- **Color Analysis Intake**: Multi-step intake form with photo upload support.
+- **Admin Portal**: Password-protected area to view appointments, manage intake forms, and edit the schedule.
+- **PostgreSQL Database**: Persistent storage via Neon.tech or Supabase.
+- **Dockerized**: Containerized for 100% environment consistency.
 
-## How to Run Locally
-1. Install dependencies: `npm install`
-2. Start the server: `npm start`
-3. Access the site: `http://localhost:3000`
-4. Access the Admin Dashboard: `http://localhost:3000/admin` (Default: admin / adria2025)
+## How to Run Locally (Docker)
+1. Ensure Docker Desktop is running.
+2. Build the image: `docker build -t adria-site .`
+3. Run the container:
+   ```bash
+   docker run -p 3000:3000 -e DATABASE_URL="your_neon_url" adria-site
+   ```
+4. Access at `http://localhost:3000`
 
 ## Deployment to Render.com (Free Tier)
-1. **Prepare Database**: Create a free account at [Supabase.com](https://supabase.com) or [Neon.tech](https://neon.tech).
-2. **Get Connection String**: Copy your database connection string (it will start with `postgresql://...`).
-3. **Push to GitHub**: Ensure your latest code is pushed.
-4. **Create a Web Service**: In Render, click **New +** > **Blueprint**.
-5. **Connect GitHub**: Select your repository.
-6. **Configure Variables**: When prompted, paste your connection string into the `DATABASE_URL` field.
-7. **Deploy**: Render will set up the server for free. Your data will stay in the cloud database even if Render restarts.
+1. **Push to GitHub**: All necessary `Dockerfile` and `render.yaml` files are already in the repo.
+2. **Create a Blueprint**: In Render, click **New +** > **Blueprint**.
+3. **Connect Repository**: Select this GitHub repository.
+4. **Environment Variable**: Add your `DATABASE_URL` from Neon.tech in the Render dashboard.
+5. **Deploy**: Render will build the Docker container and host it for free.
 
-*Note: In the free tier, client photos in the `uploads` folder will still reset on every restart. For permanent photo storage, we can later add a cloud storage service like Cloudinary.*
-
-## Files Added/Modified
-- `server.js`: The Express & SQLite backend.
-- `admin.html`: The owner's management interface.
-- `contact.html`: Updated with the new booking form.
-- `package.json`: Updated with dependencies and start script.
-- `.env`: Configuration for secrets and credentials.
-- `appointments.db`: Local database file (created on first run).
+## Tech Stack
+- **Frontend**: Vanilla HTML5, CSS3, JavaScript.
+- **Backend**: Node.js, Express.
+- **Database**: PostgreSQL (via Neon).
+- **Hosting**: Render.com (Docker Environment).
