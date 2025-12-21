@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Adria Cross Edit</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/landing.min.css">
     <style>
         :root {
@@ -183,218 +183,7 @@
             background: #d4edda;
             color: #155724;
         }
-    </style>
-</head>
 
-<body>
-    <nav class="top-nav">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <a href="index.html" class="has-logo">
-                    <img src="images/logo.webp" alt="Logo" class="logo-image">
-                    <span class="logo-text">Adria Cross</span>
-                </a>
-            </div>
-            <div style="font-weight: 700; color: var(--primary);">OWNER PORTAL</div>
-        </div>
-    </nav>
-
-    <div class="admin-container">
-        <!-- Login -->
-        <section id="login-section">
-            <h2>Welcome Back</h2>
-            <form id="login-form">
-                <input type="text" id="username" placeholder="Username" required
-                    style="width:100%; padding:1rem; margin-bottom:1rem; border:1px solid #eee; border-radius:8px;">
-                <input type="password" id="password" placeholder="Password" required
-                    style="width:100%; padding:1rem; margin-bottom:1rem; border:1px solid #eee; border-radius:8px;">
-                <button type="submit"
-                    style="width:100%; padding:1rem; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Login</button>
-            </form>
-        </section>
-
-        <!-- Dashboard -->
-        <section id="dashboard-section">
-            <div class="dashboard-header">
-                <h1>Owner Dashboard</h1>
-                <button onclick="logout()"
-                    style="padding:0.5rem 1rem; background:none; border:1px solid #ccc; border-radius:5px; cursor:pointer;">Logout</button>
-            </div>
-
-            <div class="admin-tabs">
-                <button class="tab-btn active" onclick="switchTab('appointments')">Appointments</button>
-                <button class="tab-btn" onclick="switchTab('intake')">Intake Profiles</button>
-                <button class="tab-btn" onclick="switchTab('availability')">Availability Settings</button>
-                <button class="tab-btn" onclick="switchTab('blog')">Blog Posts</button>
-            </div>
-
-            <!-- Blog Tab -->
-            <div id="blog-tab" class="tab-content">
-                <div class="table-card" style="max-width: 800px;">
-                    <h2>📝 Write New Blog Post</h2>
-                    <form id="blog-form" style="margin-top: 1.5rem;">
-                        <input type="text" id="blog-title"
-                            placeholder="Article Title (e.g. 5 Ways to style a white tee)" required
-                            style="width: 100%; padding: 1rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 8px; font-weight: 700; font-size: 1.1rem;">
-
-                        <input type="text" id="blog-summary"
-                            placeholder="Short Summary (2-3 sentences for the index page)" required
-                            style="width: 100%; padding: 1rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 8px;">
-
-                        <div style="margin-bottom: 1rem;">
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #666;">Article
-                                Content (HTML allowed)</label>
-                            <textarea id="blog-content" rows="15" required
-                                placeholder="Write your article here. Use <h3> for headings, <p> for paragraphs, and <ul>/<li> for lists."
-                                style="width: 100%; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; font-family: monospace; font-size: 0.95rem; line-height: 1.5;"></textarea>
-                            <p style="font-size: 0.85rem; color: #888; margin-top: 0.5rem;">Tip: You can use basic HTML
-                                tags for formatting.</p>
-                        </div>
-
-                        <div class="form-actions" style="display: flex; gap: 1rem;">
-                            <button type="submit" class="btn-primary">🚀 Publish Post</button>
-                        </div>
-                    </form>
-                    <div id="blog-status" style="margin-top: 1rem; border-radius: 8px; font-weight: 600;"></div>
-                </div>
-            </div>
-
-            <!-- Appointments Tab -->
-            <div id="appointments-tab" class="tab-content active">
-                <div class="table-card">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Client</th>
-                                <th>Date & Time</th>
-                                <th>Service</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="appointments-body"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Intake Tab -->
-            <div id="intake-tab" class="tab-content">
-                <div class="table-card">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Client</th>
-                                <th>Type</th>
-                                <th>Details</th>
-                            </tr>
-                        </thead>
-                        <tbody id="intake-body"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Availability Tab -->
-            <div id="availability-tab" class="tab-content">
-                <div class="table-card" style="max-width: 1000px;">
-                    <div class="availability-header">
-                        <h2>📅 Availability Calendar</h2>
-                        <p style="color: #666; margin-bottom: 1rem;">All dates are <strong>unavailable by
-                                default</strong>. Click on any date to set your available hours. You can set any times
-                            throughout the full 24 hours.</p>
-                    </div>
-
-                    <!-- Calendar Navigation -->
-                    <div class="calendar-nav">
-                        <button class="cal-nav-btn" onclick="changeMonth(-1)">◀ Previous</button>
-                        <h3 id="calendar-month-title"></h3>
-                        <button class="cal-nav-btn" onclick="changeMonth(1)">Next ▶</button>
-                    </div>
-
-                    <!-- Month Calendar Grid -->
-                    <div class="calendar-grid">
-                        <div class="calendar-header">
-                            <div class="cal-day-name">Sun</div>
-                            <div class="cal-day-name">Mon</div>
-                            <div class="cal-day-name">Tue</div>
-                            <div class="cal-day-name">Wed</div>
-                            <div class="cal-day-name">Thu</div>
-                            <div class="cal-day-name">Fri</div>
-                            <div class="cal-day-name">Sat</div>
-                        </div>
-                        <div id="calendar-body" class="calendar-body"></div>
-                    </div>
-
-                    <!-- Legend -->
-                    <div class="calendar-legend">
-                        <div class="legend-item"><span class="legend-dot available"></span> Available (slots set)</div>
-                        <div class="legend-item"><span class="legend-dot unavailable"></span> Unavailable (default)
-                        </div>
-                        <div class="legend-item"><span class="legend-dot booked"></span> Has Bookings</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <!-- Date Override Modal -->
-    <div id="date-modal" class="modal">
-        <div class="modal-content" style="max-width: 550px;">
-            <span class="close-modal" onclick="closeDateModal()">&times;</span>
-            <h2 id="date-modal-title">Set Availability</h2>
-            <p id="date-modal-subtitle" style="color: #666; margin-bottom: 1.5rem;"></p>
-
-            <div class="date-modal-toggle">
-                <label>
-                    <input type="checkbox" id="date-enabled-toggle" onchange="toggleDateEnabled()">
-                    <span id="date-enabled-label">Make this date available for bookings</span>
-                </label>
-            </div>
-
-            <div id="date-slots-container">
-                <p style="font-weight: 600; margin-bottom: 0.5rem;">Time Slots (24-hour flexibility)</p>
-                <div class="slots-list" id="date-slots-list"></div>
-
-                <!-- Quick Add Buttons -->
-                <div style="margin: 1rem 0;">
-                    <p style="font-size: 0.85rem; color: #888; margin-bottom: 0.5rem;">Quick add:</p>
-                    <div class="quick-times">
-                        <button class="quick-time-btn" onclick="quickAddSlot('9:00 AM')">9 AM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('10:00 AM')">10 AM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('11:00 AM')">11 AM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('12:00 PM')">12 PM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('1:00 PM')">1 PM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('2:00 PM')">2 PM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('3:00 PM')">3 PM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('4:00 PM')">4 PM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('5:00 PM')">5 PM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('6:00 PM')">6 PM</button>
-                    </div>
-                </div>
-
-                <div class="add-slot-row" style="margin-top: 1rem;">
-                    <input type="text" placeholder="Custom time (e.g. 7:30 PM)" id="new-date-slot"
-                        style="flex: 1; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
-                    <button class="btn-view" onclick="addDateSlot()">+ Add</button>
-                </div>
-            </div>
-
-            <div class="date-modal-actions">
-                <button class="btn-secondary" onclick="clearAllSlots()">Clear All Slots</button>
-                <button class="btn-primary" onclick="saveDateOverride()">Save Changes</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Details Modal -->
-    <div id="details-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
-            <div id="modal-data"></div>
-        </div>
-    </div>
-
-    <style>
         .day-config-card {
             border: 1px solid #eee;
             border-radius: 12px;
@@ -749,6 +538,217 @@
             border-color: var(--primary);
         }
     </style>
+</head>
+
+<body>
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html" class="has-logo">
+                    <img src="images/logo.webp" alt="Logo" class="logo-image">
+                    <span class="logo-text">Adria Cross</span>
+                </a>
+            </div>
+            <div style="font-weight: 700; color: var(--primary);">OWNER PORTAL</div>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <!-- Login -->
+        <section id="login-section">
+            <h2>Welcome Back</h2>
+            <form id="login-form">
+                <input type="text" id="username" placeholder="Username" required
+                    style="width:100%; padding:1rem; margin-bottom:1rem; border:1px solid #eee; border-radius:8px;">
+                <input type="password" id="password" placeholder="Password" required
+                    style="width:100%; padding:1rem; margin-bottom:1rem; border:1px solid #eee; border-radius:8px;">
+                <button type="submit"
+                    style="width:100%; padding:1rem; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Login</button>
+            </form>
+        </section>
+
+        <!-- Dashboard -->
+        <section id="dashboard-section">
+            <div class="dashboard-header">
+                <h1>Owner Dashboard</h1>
+                <button onclick="logout()"
+                    style="padding:0.5rem 1rem; background:none; border:1px solid #ccc; border-radius:5px; cursor:pointer;">Logout</button>
+            </div>
+
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="switchTab('appointments')">Appointments</button>
+                <button class="tab-btn" onclick="switchTab('intake')">Intake Profiles</button>
+                <button class="tab-btn" onclick="switchTab('availability')">Availability Settings</button>
+                <button class="tab-btn" onclick="switchTab('blog')">Blog Posts</button>
+            </div>
+
+            <!-- Blog Tab -->
+            <div id="blog-tab" class="tab-content">
+                <div class="table-card" style="max-width: 800px;">
+                    <h2>📝 Write New Blog Post</h2>
+                    <form id="blog-form" style="margin-top: 1.5rem;">
+                        <input type="text" id="blog-title"
+                            placeholder="Article Title (e.g. 5 Ways to style a white tee)" required
+                            style="width: 100%; padding: 1rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 8px; font-weight: 700; font-size: 1.1rem;">
+
+                        <input type="text" id="blog-summary"
+                            placeholder="Short Summary (2-3 sentences for the index page)" required
+                            style="width: 100%; padding: 1rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 8px;">
+
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #666;">Article
+                                Content (HTML allowed)</label>
+                            <textarea id="blog-content" rows="15" required
+                                placeholder="Write your article here. Use <h3> for headings, <p> for paragraphs, and <ul>/<li> for lists."
+                                style="width: 100%; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; font-family: monospace; font-size: 0.95rem; line-height: 1.5;"></textarea>
+                            <p style="font-size: 0.85rem; color: #888; margin-top: 0.5rem;">Tip: You can use basic HTML
+                                tags for formatting.</p>
+                        </div>
+
+                        <div class="form-actions" style="display: flex; gap: 1rem;">
+                            <button type="submit" class="btn-primary">🚀 Publish Post</button>
+                        </div>
+                    </form>
+                    <div id="blog-status" style="margin-top: 1rem; border-radius: 8px; font-weight: 600;"></div>
+                </div>
+            </div>
+
+            <!-- Appointments Tab -->
+            <div id="appointments-tab" class="tab-content active">
+                <div class="table-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Client</th>
+                                <th>Date &amp; Time</th>
+                                <th>Service</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointments-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Intake Tab -->
+            <div id="intake-tab" class="tab-content">
+                <div class="table-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Client</th>
+                                <th>Type</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="intake-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Availability Tab -->
+            <div id="availability-tab" class="tab-content">
+                <div class="table-card" style="max-width: 1000px;">
+                    <div class="availability-header">
+                        <h2>📅 Availability Calendar</h2>
+                        <p style="color: #666; margin-bottom: 1rem;">All dates are <strong>unavailable by
+                                default</strong>. Click on any date to set your available hours. You can set any times
+                            throughout the full 24 hours.</p>
+                    </div>
+
+                    <!-- Calendar Navigation -->
+                    <div class="calendar-nav">
+                        <button class="cal-nav-btn" onclick="changeMonth(-1)">◀ Previous</button>
+                        <h3 id="calendar-month-title"></h3>
+                        <button class="cal-nav-btn" onclick="changeMonth(1)">Next ▶</button>
+                    </div>
+
+                    <!-- Month Calendar Grid -->
+                    <div class="calendar-grid">
+                        <div class="calendar-header">
+                            <div class="cal-day-name">Sun</div>
+                            <div class="cal-day-name">Mon</div>
+                            <div class="cal-day-name">Tue</div>
+                            <div class="cal-day-name">Wed</div>
+                            <div class="cal-day-name">Thu</div>
+                            <div class="cal-day-name">Fri</div>
+                            <div class="cal-day-name">Sat</div>
+                        </div>
+                        <div id="calendar-body" class="calendar-body"></div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="calendar-legend">
+                        <div class="legend-item"><span class="legend-dot available"></span> Available (slots set)</div>
+                        <div class="legend-item"><span class="legend-dot unavailable"></span> Unavailable (default)
+                        </div>
+                        <div class="legend-item"><span class="legend-dot booked"></span> Has Bookings</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Date Override Modal -->
+    <div id="date-modal" class="modal">
+        <div class="modal-content" style="max-width: 550px;">
+            <span class="close-modal" onclick="closeDateModal()">&times;</span>
+            <h2 id="date-modal-title">Set Availability</h2>
+            <p id="date-modal-subtitle" style="color: #666; margin-bottom: 1.5rem;"></p>
+
+            <div class="date-modal-toggle">
+                <label>
+                    <input type="checkbox" id="date-enabled-toggle" onchange="toggleDateEnabled()">
+                    <span id="date-enabled-label">Make this date available for bookings</span>
+                </label>
+            </div>
+
+            <div id="date-slots-container">
+                <p style="font-weight: 600; margin-bottom: 0.5rem;">Time Slots (24-hour flexibility)</p>
+                <div class="slots-list" id="date-slots-list"></div>
+
+                <!-- Quick Add Buttons -->
+                <div style="margin: 1rem 0;">
+                    <p style="font-size: 0.85rem; color: #888; margin-bottom: 0.5rem;">Quick add:</p>
+                    <div class="quick-times">
+                        <button class="quick-time-btn" onclick="quickAddSlot('9:00 AM')">9 AM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('10:00 AM')">10 AM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('11:00 AM')">11 AM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('12:00 PM')">12 PM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('1:00 PM')">1 PM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('2:00 PM')">2 PM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('3:00 PM')">3 PM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('4:00 PM')">4 PM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('5:00 PM')">5 PM</button>
+                        <button class="quick-time-btn" onclick="quickAddSlot('6:00 PM')">6 PM</button>
+                    </div>
+                </div>
+
+                <div class="add-slot-row" style="margin-top: 1rem;">
+                    <input type="text" placeholder="Custom time (e.g. 7:30 PM)" id="new-date-slot"
+                        style="flex: 1; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
+                    <button class="btn-view" onclick="addDateSlot()">+ Add</button>
+                </div>
+            </div>
+
+            <div class="date-modal-actions">
+                <button class="btn-secondary" onclick="clearAllSlots()">Clear All Slots</button>
+                <button class="btn-primary" onclick="saveDateOverride()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="details-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div id="modal-data"></div>
+        </div>
+    </div>
+
+
 
     <script>
         // Calendar State
