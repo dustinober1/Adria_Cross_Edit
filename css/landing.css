@@ -2,9 +2,9 @@
 
 /* CSS Custom Properties for Consistent Theming */
 :root {
-    --primary-color: #b8860b;
-    /* Improved contrast - darkened gold */
-    --primary-dark: #966c09;
+    --primary-color: #966c09;
+    /* Improved gold for better accessibility contrast */
+    --primary-dark: #7a5807;
     --primary-light: #d4a574;
     --text-primary: #2c2c2c;
     --text-secondary: #555;
@@ -20,7 +20,7 @@
     --radius-md: 12px;
     --radius-lg: 20px;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --focus-outline: 2px solid #b8860b;
+    --focus-outline: 2px solid var(--primary-color);
 }
 
 /* Skip Link for Accessibility */
@@ -61,254 +61,58 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-.hero {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #fdfcfb 0%, #f5f3f0 100%);
-    padding: 6rem 2rem 2rem 2rem;
+/* Base styles for responsive iframes */
+.iframe-container {
     position: relative;
+    width: 100%;
     overflow: hidden;
+    padding-top: 56.25%;
+    /* 16:9 Aspect Ratio */
 }
 
-.hero::before {
-    content: '';
+.iframe-container iframe {
     position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(210, 180, 140, 0.1) 0%, transparent 70%);
-    border-radius: 50%;
-}
-
-.hero::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    left: -10%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(210, 180, 140, 0.08) 0%, transparent 70%);
-    border-radius: 50%;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    align-items: center;
-    position: relative;
-    z-index: 1;
-}
-
-.content {
-    padding: 2rem;
-}
-
-.subtitle {
-    color: #c19a5d;
-    font-size: 0.9rem;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-}
-
-h1 {
-    font-size: 3.5rem;
-    color: #d4a574;
-    margin-bottom: 1.5rem;
-    font-weight: 700;
-    line-height: 1.2;
-}
-
-.description {
-    font-size: 1.1rem;
-    color: #666;
-    margin-bottom: 2rem;
-    line-height: 1.8;
-}
-
-.features {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
-}
-
-.feature {
-    text-align: center;
-    padding: 1rem;
-}
-
-.feature-icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.feature-title {
-    font-weight: 600;
-    color: #d4a574;
-    margin-bottom: 0.3rem;
-}
-
-.feature-text {
-    font-size: 0.9rem;
-    color: #888;
-}
-
-.form-section {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    padding: 3.5rem 2.5rem 2.5rem 2.5rem;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-    margin-top: 2rem;
-}
-
-.form-title {
-    font-size: 2rem;
-    color: #d4a574;
-    margin-bottom: 0.5rem;
-    text-align: center;
-}
-
-.form-subtitle {
-    color: #888;
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #666;
-    font-weight: 500;
-    font-size: 0.9rem;
-}
-
-.form-group input,
-.form-group textarea {
-    width: 100%;
-    padding: 0.8rem;
-    border: 2px solid #e8e8e8;
-    border-radius: 10px;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.95rem;
-    transition: border-color 0.3s ease;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: #d4a574;
-}
-
-.form-group textarea {
-    resize: vertical;
-    min-height: 100px;
-}
-
-.btn {
-    width: 100%;
-    padding: 1rem;
-    background: linear-gradient(135deg, #d4a574 0%, #c19a5d 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'Montserrat', sans-serif;
-}
-
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(212, 165, 116, 0.4);
-}
-
-.divider {
-    position: relative;
-    text-align: center;
-    margin: 1.5rem 0;
-}
-
-.divider::before {
-    content: '';
-    position: absolute;
-    top: 50%;
+    top: 0;
     left: 0;
+    bottom: 0;
     right: 0;
-    height: 1px;
-    background: #e8e8e8;
+    width: 100%;
+    height: 100%;
+    border: none;
 }
 
-.divider-text {
-    position: relative;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 0 1rem;
-    color: #999;
-    font-size: 0.9rem;
+/* Instagram specific responsive wrapper */
+.instagram-wrapper {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
 }
 
-.calendar-btn {
+.instagram-post {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    background: var(--surface);
+    transition: var(--transition);
+    flex: 0 0 auto;
+    width: 280px;
+}
+
+.instagram-post:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.instagram-feed {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    background: white;
-    color: #d4a574;
-    border: 2px solid #d4a574;
-}
-
-.calendar-btn:hover {
-    background: #d4a574;
-    color: white;
-}
-
-.success-message {
-    background: #d4f4dd;
-    color: #2d5016;
+    overflow-x: auto;
+    gap: 1.5rem;
     padding: 1rem;
-    border-radius: 10px;
-    margin-bottom: 1rem;
-    text-align: center;
-    display: none;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
 }
 
-.success-message.show {
-    display: block;
-}
-
-.demo-link {
-    text-align: center;
-    margin-top: 1.5rem;
-}
-
-.demo-link a {
-    color: #d4a574;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.3s ease;
-}
-
-.demo-link a:hover {
-    color: #c19a5d;
-    text-decoration: underline;
-}
-
-/* Enhanced Professional Styles */
-
-/* Remove duplicate styles and enhance existing ones */
 .hero {
     min-height: 100vh;
     display: flex;
@@ -327,7 +131,7 @@ h1 {
     right: -20%;
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, rgba(193, 154, 93, 0.08) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(150, 108, 9, 0.08) 0%, transparent 70%);
     border-radius: 50%;
     animation: float 6s ease-in-out infinite;
 }
@@ -339,7 +143,7 @@ h1 {
     left: -10%;
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(193, 154, 93, 0.05) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(150, 108, 9, 0.05) 0%, transparent 70%);
     border-radius: 50%;
     animation: float 8s ease-in-out infinite reverse;
 }

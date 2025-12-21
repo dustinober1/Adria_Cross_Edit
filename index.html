@@ -34,15 +34,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/landing.css">
+    <link rel="stylesheet" href="css/landing.min.css">
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KY9029WBWZ"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
-        gtag('config', 'GA_MEASUREMENT_ID'); // Replace GA_MEASUREMENT_ID with your actual Google Analytics ID
+
+        gtag('config', 'G-KY9029WBWZ');
     </script>
 
     <style>
@@ -274,9 +275,11 @@
                     wardrobe.</p>
 
                 <div class="cta-buttons">
-                    <a href="contact.html#calendar-section" class="btn-cta btn-primary-cta">📅 Book Your Free 15-Min
+                    <a href="contact.html#calendar-section" class="btn-cta btn-primary-cta"
+                        aria-label="Book a free 15-minute style consultation">📅 Book Your Free 15-Min
                         Style Consult</a>
-                    <a href="services.html" class="btn-cta btn-secondary-cta">View Services & Pricing</a>
+                    <a href="services.html" class="btn-cta btn-secondary-cta"
+                        aria-label="View services and pricing">View Services & Pricing</a>
                 </div>
                 <p style="font-size: 0.9rem; color: #888; margin-top: 1rem;">✓ No obligation • ✓ Virtual or in-person •
                     ✓ Response within 24 hours</p>
@@ -292,36 +295,29 @@
                 behind-the-scenes
                 content</p>
 
-            <div class="instagram-feed"
-                style="display: flex; overflow-x: auto; gap: 1rem; padding: 1rem; scrollbar-width: thin;" role="region"
-                aria-label="Instagram feed">
-                <!-- Embedded Instagram Posts with fixed dimensions for proper loading -->
-                <div class="instagram-post"
-                    style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
+            <div class="instagram-feed" role="region" aria-label="Instagram feed">
+                <!-- Embedded Instagram Posts -->
+                <div class="instagram-post">
                     <iframe src="https://www.instagram.com/p/DPpP_JFjQqq/embed/captioned/" width="280" height="350"
                         frameborder="0" scrolling="no" loading="lazy" title="Instagram post 1 from @adriacrossedit"
                         style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
                 </div>
-                <div class="instagram-post"
-                    style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
+                <div class="instagram-post">
                     <iframe src="https://www.instagram.com/reel/DIACG7WJBL3/embed/captioned/" width="280" height="350"
                         frameborder="0" scrolling="no" loading="lazy" title="Instagram reel 2 from @adriacrossedit"
                         style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
                 </div>
-                <div class="instagram-post"
-                    style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
+                <div class="instagram-post">
                     <iframe src="https://www.instagram.com/reel/DH4g_4zJTvH/embed/captioned/" width="280" height="350"
                         frameborder="0" scrolling="no" loading="lazy" title="Instagram reel 3 from @adriacrossedit"
                         style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
                 </div>
-                <div class="instagram-post"
-                    style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
+                <div class="instagram-post">
                     <iframe src="https://www.instagram.com/reel/DHW7c2tJnD2/embed/captioned/" width="280" height="350"
                         frameborder="0" scrolling="no" loading="lazy" title="Instagram reel 4 from @adriacrossedit"
                         style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
                 </div>
-                <div class="instagram-post"
-                    style="flex: 0 0 auto; width: 280px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s;">
+                <div class="instagram-post">
                     <iframe src="https://www.instagram.com/reel/C6mZ6FMJc7w/embed/captioned/" width="280" height="350"
                         frameborder="0" scrolling="no" loading="lazy" title="Instagram reel 5 from @adriacrossedit"
                         style="border: none; display: block; width: 100%; height: 100%; min-height: 350px;"></iframe>
@@ -433,8 +429,8 @@
         <div class="footer-bottom">
             <p class="footer-copyright">© 2025 Adria Cross. All rights reserved.</p>
             <div class="footer-legal">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms-of-service.html">Terms of Service</a>
             </div>
         </div>
     </footer>
@@ -444,8 +440,7 @@
         🌙
     </button>
 
-    <script src="js/logger.min.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/main.min.js"></script>
 </body>
 
 </html>

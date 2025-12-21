@@ -34,7 +34,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/landing.css">
+    <link rel="stylesheet" href="css/landing.min.css">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KY9029WBWZ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-KY9029WBWZ');
+    </script>
     <style>
         .form-group input,
         .form-group textarea {
@@ -240,6 +248,7 @@
                         </div>
 
                         <button type="submit" id="submit-booking" class="btn"
+                            aria-label="Submit your appointment request"
                             style="background: linear-gradient(135deg, #d4a574 0%, #c19a5d 100%); color: white; padding: 1.2rem; font-size: 1.1rem; border-radius: 12px; border: none; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.3s;">
                             Request Appointment
                         </button>
@@ -392,8 +401,48 @@
         </div>
     </main>
 
-    <script src="js/logger.min.js"></script>
-    <script src="js/main.js"></script>
+    <!-- Site Footer -->
+    <footer class="site-footer" role="contentinfo">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h3>Adria Cross</h3>
+                <p>Personal Stylist helping you discover your style, save time, and feel unstoppable with a curated,
+                    wearable wardrobe.</p>
+            </div>
+            <nav class="footer-nav" aria-label="Footer navigation">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Me</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="blog.html">Style Blog</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="footer-contact">
+                <h4>Get In Touch</h4>
+                <p>📧 <a href="mailto:hello@adriacrossedit.com">hello@adriacrossedit.com</a></p>
+                <p>📍 Available for in-person & virtual styling</p>
+                <p>📅 <a href="contact.html#calendar-section">Book a Free Consultation</a></p>
+            </div>
+            <div class="footer-social">
+                <h4>Follow Along</h4>
+                <div class="footer-social-links">
+                    <a href="https://www.instagram.com/adriacrossedit/" target="_blank" aria-label="Instagram"
+                        title="Follow on Instagram">📸</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-copyright">© 2025 Adria Cross. All rights reserved.</p>
+            <div class="footer-legal">
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms-of-service.html">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.min.js"></script>
 </body>
 
 </html>

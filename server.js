@@ -5,17 +5,22 @@ const session = require('express-session');
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
-app.set('trust proxy', 1); // Required for sessions on Render
+app.set('trust proxy', 1);
 
-// Database connection
-// For Render/Supabase, use DATABASE_URL. For local, you'll need a local Postgres or we can keep it flexible.
+// Security: Enforce Environment Variables
 if (!process.env.DATABASE_URL) {
-    console.error('CRITICAL: DATABASE_URL environment variable is missing.');
-    console.error('Please add your Supabase/Neon connection string to Render Environment Variables.');
+    console.warn('CRITICAL: DATABASE_URL is missing. DB features will fail.');
+}
+if (!process.env.SESSION_SECRET) {
+    console.warn('WARNING: SESSION_SECRET is missing. Using insecure default.');
+}
+if (!process.env.ADMIN_PASSWORD) {
+    console.warn('CRITICAL: ADMIN_PASSWORD not set. Admin login will use insecure default until set.');
 }
 
 const pool = new Pool({
@@ -23,7 +28,28 @@ const pool = new Pool({
     ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
-// Multer setup for file uploads (Note: In Render free tier, these will reset on every deploy)
+// Rate Limiting
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // 5 attempts per window
+    message: { error: 'Too many login attempts. Please try again in 15 minutes.' }
+});
+
+const appointmentLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 10, // 10 appointments per hour
+    message: { error: 'Too many requests. Please try again later.' }
+});
+
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 1000, // Basic DDOS protection
+    message: { error: 'Too many requests from this IP.' }
+});
+
+app.use(globalLimiter);
+
+// Multer setup with File Security
 const UPLOAD_ROOT = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOAD_ROOT)) {
     fs.mkdirSync(UPLOAD_ROOT, { recursive: true });
@@ -35,12 +61,22 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+        cb(null, 'styledata-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
+
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 }
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|webp/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+        if (extname && mimetype) {
+            return cb(null, true);
+        }
+        cb(new Error('Only images (JPEG, PNG, WebP) are allowed!'));
+    }
 });
 
 // Initialize Tables
@@ -86,7 +122,9 @@ const initDb = async () => {
         // Defaults
         const userCheck = await pool.query('SELECT * FROM users WHERE username = $1', ['admin']);
         if (userCheck.rows.length === 0) {
-            const hash = bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'adria2025', 10);
+            // Priority: Env Var > Insecure default (only for dev, warn above)
+            const password = process.env.ADMIN_PASSWORD || 'adria-dev-2025';
+            const hash = bcrypt.hashSync(password, 10);
             await pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', ['admin', hash]);
         }
 
@@ -106,13 +144,18 @@ const initDb = async () => {
 initDb();
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10kb' })); // Limit JSON size
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'adria-secret-key-2025',
+    secret: process.env.SESSION_SECRET || 'insecure-default-key-adria-2025',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
 }));
 
 const isAuthenticated = (req, res, next) => {
@@ -121,8 +164,14 @@ const isAuthenticated = (req, res, next) => {
 };
 
 // API Endpoints
-app.post('/api/appointments', async (req, res) => {
+app.post('/api/appointments', appointmentLimiter, async (req, res) => {
     const { name, email, date, time, service, message } = req.body;
+
+    // Basic validation
+    if (!name || !email || !date || !time) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
     try {
         const existing = await pool.query('SELECT id FROM appointments WHERE date = $1 AND time = $2 AND status != $3', [date, time, 'cancelled']);
         if (existing.rows.length > 0) return res.status(400).json({ error: 'Already booked.' });
@@ -135,13 +184,16 @@ app.post('/api/appointments', async (req, res) => {
 app.post('/api/intake', upload.array('photos', 5), async (req, res) => {
     try {
         const { form_type, name, email, ...formData } = req.body;
+        if (!name || !email || !form_type) {
+            return res.status(400).json({ error: 'Name, email, and form type are required.' });
+        }
         const filenames = req.files ? req.files.map(f => f.filename) : [];
         await pool.query('INSERT INTO intake_submissions (form_type, name, email, data, files) VALUES ($1, $2, $3, $4, $5)', [form_type, name, email, JSON.stringify(formData), JSON.stringify(filenames)]);
         res.status(201).json({ message: 'Success!' });
     } catch (err) { res.status(500).json({ error: 'DB Error' }); }
 });
 
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', loginLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
         const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
@@ -153,7 +205,7 @@ app.post('/api/login', async (req, res) => {
         }
     } catch (err) {
         console.error('Login error:', err);
-        res.status(500).json({ error: 'Server error. Please check DATABASE_URL.' });
+        res.status(500).json({ error: 'Server error.' });
     }
 });
 
@@ -166,6 +218,7 @@ app.get('/api/appointments', isAuthenticated, async (req, res) => {
 
 app.get('/api/available-slots', async (req, res) => {
     const { date } = req.query;
+    if (!date) return res.json([]);
     const dayOfWeek = new Date(date).getUTCDay();
     const config = await pool.query('SELECT * FROM availability_config WHERE day_of_week = $1', [dayOfWeek]);
     if (!config.rows[0] || !config.rows[0].is_enabled) return res.json([]);
@@ -197,22 +250,14 @@ app.patch('/api/appointments/:id', isAuthenticated, async (req, res) => {
     res.json({ success: true });
 });
 
-app.get('/api/db-test', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT NOW()');
-        res.json({ success: true, message: 'Database connected!', time: result.rows[0].now });
-    } catch (err) {
-        res.status(500).json({
-            success: false,
-            error: err.message,
-            detail: err.detail || 'No details',
-            code: err.code,
-            hint: 'Ensure DATABASE_URL is correct in Render Environment Variables.'
-        });
-    }
-});
-
 app.use(express.static(path.join(__dirname)));
 app.use('/uploads', express.static(UPLOAD_ROOT));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: err.message || 'Something broke!' });
+});
+
 app.listen(port, () => console.log(`Run: http://localhost:${port}`));

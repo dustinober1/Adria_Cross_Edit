@@ -35,7 +35,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/landing.css">
+    <link rel="stylesheet" href="css/landing.min.css">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KY9029WBWZ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-KY9029WBWZ');
+    </script>
 
     <!-- Structured Data / JSON-LD -->
     <script type="application/ld+json">
@@ -316,10 +324,12 @@
                 <h2>Ready to Transform Your Wardrobe?</h2>
                 <p>Let's create a wardrobe that works as hard as you do — in just one session.</p>
                 <div class="cta-buttons">
-                    <a href="contact.html#calendar-section" class="btn-cta btn-primary-cta book-consultation-btn">
+                    <a href="contact.html#calendar-section" class="btn-cta btn-primary-cta book-consultation-btn"
+                        aria-label="Book a free 15-minute style consultation">
                         📅 Book Your Free 15-Min Consult
                     </a>
-                    <a href="intake-form.html" class="btn-cta btn-secondary-cta">
+                    <a href="intake-form.html" class="btn-cta btn-secondary-cta"
+                        aria-label="Complete your intake form if you have already booked">
                         📝 Already Booked? Complete Intake Form
                     </a>
                 </div>
@@ -365,8 +375,8 @@
         <div class="footer-bottom">
             <p class="footer-copyright">© 2025 Adria Cross. All rights reserved.</p>
             <div class="footer-legal">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms-of-service.html">Terms of Service</a>
             </div>
         </div>
     </footer>
@@ -376,8 +386,7 @@
         🌙
     </button>
 
-    <script src="js/logger.min.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/main.min.js"></script>
 </body>
 
 </html>
