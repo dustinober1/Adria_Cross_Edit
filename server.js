@@ -683,42 +683,80 @@ const generateSessionId = () => {
     return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 };
 
+const COLOR_WHEEL = {
+    'red': { complementary: ['green'], analogous: ['orange', 'purple'] },
+    'orange': { complementary: ['blue'], analogous: ['red', 'yellow'] },
+    'yellow': { complementary: ['purple'], analogous: ['orange', 'green'] },
+    'green': { complementary: ['red'], analogous: ['yellow', 'blue'] },
+    'blue': { complementary: ['orange'], analogous: ['green', 'purple'] },
+    'purple': { complementary: ['yellow'], analogous: ['blue', 'red'] },
+    'teal': { complementary: ['coral', 'orange'], analogous: ['blue', 'green'] },
+    'pink': { complementary: ['green'], analogous: ['red', 'purple'] }
+};
+
+const NEUTRALS = ['black', 'white', 'gray', 'grey', 'beige', 'navy', 'denim', 'brown', 'cream'];
+
 const calculateMatchScore = (item1, item2) => {
     let score = 0;
 
-    // Color compatibility (40% weight)
+    // 1. Color Harmony (45% weight)
     if (item1.color_tags && item2.color_tags) {
-        const commonColors = item1.color_tags.filter(color =>
-            item2.color_tags.includes(color)
-        );
-        score += (commonColors.length / Math.max(item1.color_tags.length, item2.color_tags.length)) * 40;
+        const colors1 = Array.isArray(item1.color_tags) ? item1.color_tags : item1.color_tags.split(',').map(c => c.trim().toLowerCase());
+        const colors2 = Array.isArray(item2.color_tags) ? item2.color_tags : item2.color_tags.split(',').map(c => c.trim().toLowerCase());
+
+        let colorScore = 0;
+        let combinations = 0;
+
+        for (const c1 of colors1) {
+            for (const c2 of colors2) {
+                combinations++;
+                if (c1 === c2) colorScore += 45; // Exact match
+                else if (NEUTRALS.includes(c1) || NEUTRALS.includes(c2)) colorScore += 40; // Neutrals match everything
+                else if (COLOR_WHEEL[c1]?.complementary?.includes(c2)) colorScore += 45; // High score for complementary
+                else if (COLOR_WHEEL[c1]?.analogous?.includes(c2)) colorScore += 35; // Good score for analogous
+                else colorScore += 10; // Low base compatibility
+            }
+        }
+        score += colorScore / combinations;
     }
 
-    // Style compatibility (30% weight)
+    // 2. Style & Occasion Compatibility (35% weight)
     if (item1.style_tags && item2.style_tags) {
-        const commonStyles = item1.style_tags.filter(style =>
-            item2.style_tags.includes(style)
-        );
-        score += (commonStyles.length / Math.max(item1.style_tags.length, item2.style_tags.length)) * 30;
+        const styles1 = Array.isArray(item1.style_tags) ? item1.style_tags : item1.style_tags.split(',').map(s => s.trim().toLowerCase());
+        const styles2 = Array.isArray(item2.style_tags) ? item2.style_tags : item2.style_tags.split(',').map(s => s.trim().toLowerCase());
+
+        const commonStyles = styles1.filter(style => styles2.includes(style));
+
+        // Bonus for sharing specific style vibes
+        if (commonStyles.includes('formal')) score += 35;
+        else if (commonStyles.includes('business') || commonStyles.includes('professional')) score += 30;
+        else if (commonStyles.includes('casual')) score += 25;
+        else if (commonStyles.length > 0) score += (commonStyles.length / Math.max(styles1.length, styles2.length)) * 35;
+        else score += 10; // Default style match
     }
 
-    // Pattern mixing rules (20% weight)
-    if (item1.pattern && item2.pattern) {
-        if (item1.pattern === 'solid' && item2.pattern !== 'solid') score += 20;
-        else if (item2.pattern === 'solid' && item1.pattern !== 'solid') score += 20;
-        else if (item1.pattern === item2.pattern && item1.pattern !== 'solid') score -= 10;
-        else score += 10;
+    // 3. Pattern Mixing Rules (15% weight)
+    const p1 = (item1.pattern || 'solid').toLowerCase();
+    const p2 = (item2.pattern || 'solid').toLowerCase();
+
+    if (p1 === 'solid' || p2 === 'solid') {
+        score += 15; // Solid with anything is safe
+    } else if (p1 === p2) {
+        score += 5; // Same pattern (e.g. stripe on stripe) is risky
+    } else {
+        score += 8; // Mixed patterns (could be bold)
     }
 
-    // Season compatibility (10% weight)
+    // 4. Season Compatibility (5% weight)
     if (item1.season_tags && item2.season_tags) {
-        const commonSeasons = item1.season_tags.filter(season =>
-            item2.season_tags.includes(season)
-        );
-        score += (commonSeasons.length / Math.max(item1.season_tags.length, item2.season_tags.length)) * 10;
+        const seasons1 = Array.isArray(item1.season_tags) ? item1.season_tags : item1.season_tags.split(',').map(s => s.trim().toLowerCase());
+        const seasons2 = Array.isArray(item2.season_tags) ? item2.season_tags : item2.season_tags.split(',').map(s => s.trim().toLowerCase());
+
+        const commonSeasons = seasons1.filter(s => seasons2.includes(s));
+        if (commonSeasons.length > 0) score += 5;
     }
 
-    return Math.min(100, Math.max(0, score));
+    return Math.min(100, Math.max(0, Math.round(score)));
 };
 
 // ============================================
@@ -969,10 +1007,32 @@ app.get('/api/matches', async (req, res) => {
             scoredMatches.sort((a, b) => b.score - a.score);
             const bestMatch = scoredMatches[0];
 
+            // Generate style-based occasion
+            const styles = [
+                ...(Array.isArray(currentItem.style_tags) ? currentItem.style_tags : (currentItem.style_tags || '').split(',')),
+                ...(Array.isArray(bestMatch.item.style_tags) ? bestMatch.item.style_tags : (bestMatch.item.style_tags || '').split(','))
+            ].map(s => s.trim().toLowerCase());
+
+            let occasion = 'Everyday Wear';
+            if (styles.includes('formal')) {
+                const choices = ['Gala Event', 'Wedding Guest', 'Black Tie Dinner', 'Award Ceremony'];
+                occasion = choices[Math.floor(Math.random() * choices.length)];
+            } else if (styles.includes('business') || styles.includes('professional')) {
+                const choices = ['Board Meeting', 'Job Interview', 'Client Presentation', 'Corporate Event'];
+                occasion = choices[Math.floor(Math.random() * choices.length)];
+            } else if (styles.includes('stylish') || styles.includes('chic') || styles.includes('elegant')) {
+                const choices = ['Dinner Date', 'Cocktail Hour', 'Art Gallery Opening', 'Fashion Event'];
+                occasion = choices[Math.floor(Math.random() * choices.length)];
+            } else if (styles.includes('casual')) {
+                const choices = ['Weekend Brunch', 'Coffee Date', 'Casual Friday', 'Movie Night'];
+                occasion = choices[Math.floor(Math.random() * choices.length)];
+            }
+
             res.json({
                 current_item: currentItem,
                 match: bestMatch.item,
-                score: bestMatch.score
+                score: bestMatch.score,
+                occasion: occasion
             });
         } else {
             res.json({ match: null, message: 'No matches available' });
