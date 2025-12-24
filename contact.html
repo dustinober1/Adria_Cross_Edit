@@ -39,7 +39,7 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-KY9029WBWZ"></script>
     <script>
-        window.dataLayer = window.dataLayer || [];
+        window.dataLayer = window.dataLayer
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
         gtag('config', 'G-KY9029WBWZ');
@@ -170,7 +170,6 @@
                 <li><a href="blog.html">Blog</a></li>
                 <li><a href="clothing-matcher/">Clothing Matcher</a></li>
                 <li><a href="contact.html" class="active">Contact</a></li>
-                <li><button class="search-btn search-trigger" aria-label="Open search">🔍</button></li>
             </ul>
         </div>
     </nav>
@@ -386,78 +385,81 @@
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('booking-date').setAttribute('min', today);
             </script>
-        </div>
 
-        <div class="article-section highlight-section">
-            <h2>Email</h2>
-            <div class="content-card">
-                <p>Feel free to reach out via email:</p>
-                <p style="font-weight: 600; color: #c19a5d; font-size: 1.1rem; text-align: center; margin-top: 1rem;"><a
-                        href="mailto:hello@adriacrossedit.com"
-                        style="color: #c19a5d; text-decoration: none;">hello@adriacrossedit.com</a></p>
-            </div>
-        </div>
-
-        <div class="article-section highlight-section">
-            <h2>Styling Intake Forms</h2>
-            <div class="content-card">
-                <p>Complete the appropriate intake form based on your selected service to help me understand your style
-                    preferences and goals:</p>
-                <div style="text-align: center; margin: 1.5rem 0 0.5rem 0;">
-                    <a href="intake-form.html" class="btn-cta btn-primary-cta"
-                        style="padding: 1rem 2.5rem; border-radius: 25px; font-family: 'Montserrat', sans-serif; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; background: linear-gradient(135deg, #d4a574 0%, #c19a5d 100%); color: white; border: none; transition: all 0.3s; margin: 0 auto;">
-                        📝 Complete Intake Form
-                    </a>
+            <div class="article-section highlight-section">
+                <h2>Email</h2>
+                <div class="content-card">
+                    <p>Feel free to reach out via email:</p>
+                    <p
+                        style="font-weight: 600; color: #c19a5d; font-size: 1.1rem; text-align: center; margin-top: 1rem;">
+                        <a href="mailto:hello@adriacrossedit.com"
+                            style="color: #c19a5d; text-decoration: none;">hello@adriacrossedit.com</a>
+                    </p>
                 </div>
             </div>
-        </div>
 
-
-
-        <div class="article-section highlight-section">
-            <h2>Frequently Asked Questions</h2>
-            <div class="content-card">
-                <div class="faq-item" style="margin-bottom: 0.5rem;">
-                    <div class="faq-question">
-                        Do you offer virtual services?
-                        <span class="faq-toggle">+</span>
-                    </div>
-                    <div class="faq-answer">
-                        Yes — every service can be completed virtually for your convenience.
-                    </div>
-                </div>
-
-                <div class="faq-item" style="margin-bottom: 0.5rem;">
-                    <div class="faq-question">
-                        How do I prepare for a Closet Edit?
-                        <span class="faq-toggle">+</span>
-                    </div>
-                    <div class="faq-answer">
-                        Create two piles: "Love/Wear Often" and "Don't Wear/Unsure." Have your favorite pieces visible.
-                    </div>
-                </div>
-
-                <div class="faq-item" style="margin-bottom: 0.5rem;">
-                    <div class="faq-question">
-                        What if I need to cancel or reschedule?
-                        <span class="faq-toggle">+</span>
-                    </div>
-                    <div class="faq-answer">
-                        Please provide 24 hours notice for any cancellations or rescheduling requests.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question">
-                        Is the consultation really free?
-                        <span class="faq-toggle">+</span>
-                    </div>
-                    <div class="faq-answer">
-                        Yes! The 15-minute intro call is completely complimentary to see if we're a good fit.
+            <div class="article-section highlight-section">
+                <h2>Styling Intake Forms</h2>
+                <div class="content-card">
+                    <p>Complete the appropriate intake form based on your selected service to help me understand your
+                        style
+                        preferences and goals:</p>
+                    <div style="text-align: center; margin: 1.5rem 0 0.5rem 0;">
+                        <a href="intake-form.html" class="btn-cta btn-primary-cta"
+                            style="padding: 1rem 2.5rem; border-radius: 25px; font-family: 'Montserrat', sans-serif; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; background: linear-gradient(135deg, #d4a574 0%, #c19a5d 100%); color: white; border: none; transition: all 0.3s; margin: 0 auto;">
+                            📝 Complete Intake Form
+                        </a>
                     </div>
                 </div>
             </div>
-        </div>
+
+
+
+            <div class="article-section highlight-section">
+                <h2>Frequently Asked Questions</h2>
+                <div class="content-card">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            Do you offer virtual services?
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Yes — every service can be completed virtually for your convenience.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            How do I prepare for a Closet Edit?
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Create two piles: "Love/Wear Often" and "Don't Wear/Unsure." Have your favorite pieces
+                            visible.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            What if I need to cancel or reschedule?
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Please provide 24 hours notice for any cancellations or rescheduling requests.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            Is the consultation really free?
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Yes! The 15-minute intro call is completely complimentary to see if we're a good fit.
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -478,7 +480,7 @@
                     <li><a href="blog.html">Style Blog</a></li>
                     <li><a href="clothing-matcher/">Clothing Matcher</a></li>
                     <li><a href="contact.html">Contact</a></li>
-                    <li><button class="search-btn search-trigger" aria-label="Open search">🔍</button></li>
+                    <li><a href="admin.html">Admin</a></li>
                 </ul>
             </nav>
             <div class="footer-contact">
