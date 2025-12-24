@@ -14,109 +14,232 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" defer></script>
     <link rel="stylesheet" href="css/landing.min.css">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KY9029WBWZ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-KY9029WBWZ');
+    </script>
+
     <style>
-        .error-container {
-            min-height: 100vh;
+        /* Modern 404 Page Styling */
+        .error-hero {
+            min-height: 80vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 2rem;
-            background: linear-gradient(135deg, #fdfcfb 0%, #f5f3f0 100%);
+            padding: 8rem 2rem 4rem;
+            background: linear-gradient(135deg, var(--background) 0%, var(--surface-alt) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Ambient floating elements for dynamic feel */
+        .error-hero::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(150, 108, 9, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .error-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -5%;
+            left: -5%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(212, 165, 116, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 10s ease-in-out infinite reverse;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-30px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .error-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            width: 100%;
         }
 
         .error-code {
-            font-size: 8rem;
+            font-size: clamp(6rem, 15vw, 12rem);
             font-weight: 700;
-            color: #c19a5d;
-            line-height: 1;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #c19a5d, #d4a574);
+            line-height: 0.9;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            font-family: 'Montserrat', sans-serif;
+            opacity: 0.15;
+            letter-spacing: -5px;
+            user-select: none;
         }
 
-        .error-message {
-            font-size: 1.5rem;
-            color: #666;
-            margin-bottom: 0.5rem;
+        .error-main-text {
+            margin-top: -3rem;
+            /* Overlap slightly with the big number */
         }
 
-        .error-description {
-            font-size: 1.1rem;
-            color: #888;
-            margin-bottom: 2rem;
-            max-width: 400px;
+        .error-title {
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.8);
         }
 
-        .error-actions {
+        .decorative-line {
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            margin: 0 auto 2rem;
+            border-radius: 2px;
+        }
+
+        .error-desc {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 3.5rem;
+            max-width: 550px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        /* Suggestions Grid Cards */
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin: 0 auto 3.5rem;
+            text-align: left;
+            max-width: 900px;
+        }
+
+        .suggestion-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 16px;
             display: flex;
+            align-items: center;
             gap: 1rem;
-            flex-wrap: wrap;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .suggestion-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(193, 154, 93, 0.15);
+            border-color: var(--primary-light);
+            background: white;
+        }
+
+        .suggestion-icon {
+            font-size: 1.8rem;
+            min-width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            background: linear-gradient(135deg, rgba(193, 154, 93, 0.1), rgba(212, 165, 116, 0.1));
+            border-radius: 12px;
+            color: var(--primary-color);
+        }
+
+        .suggestion-text h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .suggestion-text p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .btn-home {
-            padding: 1rem 2.5rem;
-            border-radius: 25px;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-            background: linear-gradient(135deg, #d4a574 0%, #c19a5d 100%);
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
             color: white;
-            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(193, 154, 93, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .btn-home:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(193, 154, 93, 0.35);
-        }
-
-        .btn-contact {
-            padding: 1rem 2.5rem;
-            border-radius: 25px;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-            background: transparent;
-            border: 2px solid #c19a5d;
-            color: #c19a5d;
-        }
-
-        .btn-contact:hover {
-            background: #c19a5d;
+            box-shadow: 0 8px 25px rgba(193, 154, 93, 0.4);
             color: white;
-            box-shadow: 0 8px 20px rgba(193, 154, 93, 0.35);
-        }
-
-        .decorative-line {
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(135deg, #c19a5d, #d4a574);
-            border-radius: 2px;
-            margin: 1.5rem 0;
         }
 
         @media (max-width: 768px) {
+            .error-hero {
+                padding: 6rem 1.5rem 3rem;
+            }
+
             .error-code {
-                font-size: 5rem;
+                font-size: 8rem;
             }
 
-            .error-message {
-                font-size: 1.2rem;
+            .error-title {
+                font-size: 2rem;
             }
 
-            .error-actions {
-                flex-direction: column;
+            .suggestions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .suggestion-card {
+                padding: 1.2rem;
             }
         }
     </style>
@@ -124,9 +247,7 @@
 
 <body>
     <!-- Skip to main content link for accessibility -->
-    <a href="#main-content" class="skip-link"
-        style="position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden;">Skip to main
-        content</a>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
 
     <!-- Navigation Bar -->
     <nav class="top-nav" role="navigation" aria-label="Main navigation">
@@ -150,48 +271,113 @@
                 <li><a href="blog.html">Blog</a></li>
                 <li><a href="clothing-matcher/">Clothing Matcher</a></li>
                 <li><a href="contact.html">Contact</a></li>
+                <li><button class="search-btn search-trigger" aria-label="Open search">🔍</button></li>
             </ul>
         </div>
     </nav>
 
-    <main id="main-content" role="main" class="error-container">
-        <div class="error-code">404</div>
-        <h1 class="error-message">Page Not Found</h1>
-        <div class="decorative-line"></div>
-        <p class="error-description">
-            Oops! The page you're looking for seems to have wandered off — perhaps it's out shopping for the perfect
-            outfit.
-        </p>
+    <!-- Main Content -->
+    <main id="main-content" class="error-hero">
+        <div class="error-content">
+            <div class="error-code">404</div>
+            <div class="error-main-text">
+                <h1 class="error-title">Page Not Found</h1>
+                <div class="decorative-line"></div>
+                <p class="error-description error-desc">
+                    Oops! The page you're looking for seems to have wandered off — perhaps it's out shopping for the
+                    perfect
+                    outfit.
+                </p>
+            </div>
 
-        <!-- Helpful suggestions -->
-        <div
-            style="margin: 2rem auto; max-width: 500px; text-align: left; background: #faf8f5; padding: 1.5rem; border-radius: 12px;">
-            <p style="font-weight: 600; color: #c19a5d; margin-bottom: 1rem;">Looking for something specific?</p>
-            <ul style="list-style: none; padding: 0; margin: 0;">
-                <li style="margin-bottom: 0.75rem;">
-                    📅 <a href="contact.html#calendar-section" style="color: #444;">Book a free consultation</a>
-                </li>
-                <li style="margin-bottom: 0.75rem;">
-                    👗 <a href="services.html" style="color: #444;">View styling services & pricing</a>
-                </li>
-                <li style="margin-bottom: 0.75rem;">
-                    📝 <a href="blog.html" style="color: #444;">Read style tips on the blog</a>
-                </li>
-                <li style="margin-bottom: 0.75rem;">
-                    👋 <a href="about.html" style="color: #444;">Learn about Adria</a>
-                </li>
-                <li>
-                    📧 <a href="mailto:hello@adriacrossedit.com" style="color: #444;">Email:
-                        hello@adriacrossedit.com</a>
-                </li>
-            </ul>
-        </div>
+            <div class="suggestions-grid">
+                <a href="contact.html#calendar-section" class="suggestion-card">
+                    <div class="suggestion-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                    <div class="suggestion-text">
+                        <h3>Book a Consult</h3>
+                        <p>Free 15-minute style chat</p>
+                    </div>
+                </a>
+                <a href="services.html" class="suggestion-card">
+                    <div class="suggestion-icon"><i class="fa-solid fa-shirt"></i></div>
+                    <div class="suggestion-text">
+                        <h3>Style Services</h3>
+                        <p>Explore packages & pricing</p>
+                    </div>
+                </a>
+                <a href="blog.html" class="suggestion-card">
+                    <div class="suggestion-icon"><i class="fa-solid fa-pen-nib"></i></div>
+                    <div class="suggestion-text">
+                        <h3>Style Blog</h3>
+                        <p>Read the latest tips</p>
+                    </div>
+                </a>
+                <a href="contact.html" class="suggestion-card">
+                    <div class="suggestion-icon"><i class="fa-regular fa-envelope"></i></div>
+                    <div class="suggestion-text">
+                        <h3>Contact Me</h3>
+                        <p>Get in touch directly</p>
+                    </div>
+                </a>
+            </div>
 
-        <div class="error-actions">
-            <a href="index.html" class="btn-home">Return Home</a>
-            <a href="contact.html#calendar-section" class="btn-contact">Book Free Consult</a>
+            <div class="action-buttons">
+                <a href="index.html" class="btn-home"><i class="fa-solid fa-house"></i> Return Home</a>
+            </div>
         </div>
     </main>
+
+    <!-- Site Footer -->
+    <footer class="site-footer" role="contentinfo">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h3>Adria Cross</h3>
+                <p>Personal Stylist helping you discover your style, save time, and feel unstoppable with a curated,
+                    wearable wardrobe.</p>
+            </div>
+            <nav class="footer-nav" aria-label="Footer navigation">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Me</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="blog.html">Style Blog</a></li>
+                    <li><a href="clothing-matcher/">Clothing Matcher</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="admin.html">Admin</a></li>
+                </ul>
+            </nav>
+            <div class="footer-contact">
+                <h4>Get In Touch</h4>
+                <p>📧 <a href="mailto:hello@adriacrossedit.com">hello@adriacrossedit.com</a></p>
+                <p>📍 Available for in-person & virtual styling</p>
+                <p>📅 <a href="contact.html#calendar-section">Book a Free Consultation</a></p>
+            </div>
+            <div class="footer-social">
+                <h4>Follow Along</h4>
+                <div class="footer-social-links">
+                    <a href="https://www.instagram.com/adriacrossedit/" target="_blank" aria-label="Instagram"
+                        title="Follow on Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://www.facebook.com/adria.chittenden" target="_blank" aria-label="Facebook"
+                        title="Follow on Facebook"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="https://x.com/AdriaCross1618" target="_blank" aria-label="X" title="Follow on X"><i
+                            class="fa-brands fa-x-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-copyright">© 2025 Adria Cross. All rights reserved.</p>
+            <div class="footer-legal">
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms-of-service.html">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark/light mode">
+        🌙
+    </button>
 
     <script src="js/main.min.js"></script>
 </body>
