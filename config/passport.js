@@ -125,22 +125,33 @@ module.exports = function configurePassport(app, pool) {
                     let user;
                     if (result.rows.length > 0) {
                         user = result.rows[0];
-                         if (!user.provider || user.provider !== 'apple') {
-                             await pool.query('UPDATE users SET provider = $1, provider_id = $2 WHERE id = $3', ['apple', appleId, user.id]);
-                         }
+                        logger.info(`Apple Auth: Found existing user ${user.email || user.username}`);
+                        if (!user.provider || user.provider !== 'apple') {
+                            await pool.query('UPDATE users SET provider = $1, provider_id = $2 WHERE id = $3', ['apple', appleId, user.id]);
+                        }
                     } else {
                         // Create new user
                         const username = email ? email.split('@')[0] : `apple_user_${Math.random().toString(36).substr(2, 5)}`;
+                        logger.info(`Apple Auth: Creating new user with username ${username}`);
                         
-                        const insertResult = await pool.query(
-                            'INSERT INTO users (username, email, provider, provider_id, display_name, email_verified, role) VALUES ($1, $2, $3, $4, $5, TRUE, $6) RETURNING *',
-                            [username, email, 'apple', appleId, displayName, 'client']
-                        );
-                        user = insertResult.rows[0];
-                         if (!user) {
+                        try {
+                            const insertResult = await pool.query(
+                                'INSERT INTO users (username, email, provider, provider_id, display_name, email_verified, role) VALUES ($1, $2, $3, $4, $5, TRUE, $6) RETURNING *',
+                                [username, email, 'apple', appleId, displayName, 'client']
+                            );
+                            user = insertResult.rows[0];
+                        } catch (insertErr) {
+                            logger.warn('Apple Auth: Insert with RETURNING failed, falling back to lookup');
+                        }
+
+                        if (!user) {
                              const newUser = await pool.query('SELECT * FROM users WHERE provider_id = $1', [appleId]);
                              user = newUser.rows[0];
                         }
+                    }
+
+                    if (!user) {
+                        throw new Error('Failed to create or retrieve user after Apple authentication');
                     }
 
                     return done(null, user);
