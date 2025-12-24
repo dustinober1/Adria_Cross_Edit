@@ -647,67 +647,7 @@ app.patch('/api/appointments/:id', isAuthenticated, async (req, res) => {
     res.json({ success: true });
 });
 
-// ============================================
-// Clothing Matcher - Database Initialization
-// ============================================
-const initClothingMatcherDb = async () => {
-    try {
-        // Extend users table for client status
-        await pool.query(`
-                    ALTER TABLE users ADD COLUMN IF NOT EXISTS is_client BOOLEAN DEFAULT FALSE;
-                `);
-
-        await pool.query(`
-                    ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_code TEXT;
-                `);
-
-        // Create clothing categories
-        await pool.query(`
-                    CREATE TABLE IF NOT EXISTS clothing_categories (
-                        id SERIAL PRIMARY KEY,
-                        name TEXT UNIQUE NOT NULL
-                    );
-                `);
-
-        // Create clothing items table
-        await pool.query(`
-                    CREATE TABLE IF NOT EXISTS clothing_items (
-                        id SERIAL PRIMARY KEY,
-                        session_id TEXT,
-                        user_id INTEGER REFERENCES users(id),
-                        category_id INTEGER REFERENCES clothing_categories(id),
-                        image_path TEXT NOT NULL,
-                        color_tags TEXT[],
-                        style_tags TEXT[],
-                        season_tags TEXT[],
-                        brand TEXT,
-                        pattern TEXT,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        expires_at TIMESTAMP
-                    );
-                `);
-
-        // Insert default categories
-        const categoryCheck = await pool.query('SELECT COUNT(*) FROM clothing_categories');
-        if (parseInt(categoryCheck.rows[0].count) === 0) {
-            await pool.query(`
-                        INSERT INTO clothing_categories (name) VALUES 
-                        ('tops'), ('bottoms'), ('shoes'), ('accessories');
-                    `);
-        }
-
-        console.log('Clothing matcher database initialized successfully');
-    } catch (err) {
-        console.error('Error initializing clothing matcher database:', err);
-    }
-};
-
-// Initialize clothing matcher database
-if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) {
-    // SQLite already initialized above
-} else {
-    initClothingMatcherDb();
-}
+// Clothing Matcher database initialization is now handled by global migrations.
 
 // ============================================
 // Clothing Matcher Helper Functions

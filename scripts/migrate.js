@@ -17,10 +17,13 @@ async function runMigrations(dbPoolOrWrapper) {
             const migrationPath = path.join(migrationsDir, file);
             let sql = fs.readFileSync(migrationPath, 'utf8');
 
+            const isSqlite = process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:');
+
             // Simple compatibility check: SQLite doesn't use SERIAL or TIMESTAMP
-            if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) {
+            if (isSqlite) {
                 sql = sql.replace(/SERIAL PRIMARY KEY/g, 'INTEGER PRIMARY KEY AUTOINCREMENT');
                 sql = sql.replace(/TIMESTAMP/g, 'DATETIME');
+                sql = sql.replace(/TEXT\[\]/g, 'TEXT');
                 sql = sql.replace(/ON CONFLICT \(name\) DO NOTHING/g, '');
             }
 
@@ -28,13 +31,12 @@ async function runMigrations(dbPoolOrWrapper) {
 
             for (let query of queries) {
                 try {
+                    let execQuery = query;
                     // For SQLite INSERT OR IGNORE fallback
-                    if (sql.includes('clothing_categories') && query.includes('INSERT INTO')) {
-                        const sqliteQuery = query.replace('INSERT INTO', 'INSERT OR IGNORE INTO');
-                        await dbPoolOrWrapper.query(sqliteQuery);
-                    } else {
-                        await dbPoolOrWrapper.query(query);
+                    if (isSqlite && sql.includes('clothing_categories') && query.includes('INSERT INTO')) {
+                        execQuery = query.replace('INSERT INTO', 'INSERT OR IGNORE INTO');
                     }
+                    await dbPoolOrWrapper.query(execQuery);
                 } catch (err) {
                     if (err.message.includes('already exists') || err.message.includes('duplicate')) {
                         continue;

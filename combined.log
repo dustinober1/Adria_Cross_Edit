@@ -11,3 +11,9 @@
 {"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-24T20:01:01.712Z"}
 {"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-24T20:01:01.716Z"}
 {"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-24T20:01:01.717Z"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-24T20:28:17.948Z"}
+{"level":"info","message":"Server starting in test mode on port 3000","timestamp":"2025-12-24T20:28:17.950Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2025-12-24T20:28:17.986Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-24T20:28:18.097Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-24T20:28:18.098Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-24T20:28:18.099Z"}
