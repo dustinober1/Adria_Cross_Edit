@@ -13,6 +13,9 @@ const sqlite3 = require('sqlite3');
 const helmet = require('helmet');
 const logger = require('./logger');
 const Joi = require('joi');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+const { runMigrations } = require('./scripts/migrate');
 
 // ============================================
 // Square SDK Configuration
@@ -42,6 +45,30 @@ if (process.env.SQUARE_ACCESS_TOKEN) {
 const app = express();
 const port = process.env.PORT || 3000;
 app.set('trust proxy', 1);
+
+// ============================================
+// API Documentation (Swagger)
+// ============================================
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Adria Cross Edit API',
+            version: '1.0.0',
+            description: 'API documentation for the Adria Cross Edit full-stack application',
+        },
+        servers: [
+            {
+                url: process.env.BASE_URL || `http://localhost:${port}`,
+                description: 'Current Server',
+            },
+        ],
+    },
+    apis: ['./server.js'], // Files containing annotations
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Security: Enforce Environment Variables
 if (!process.env.DATABASE_URL) {
@@ -102,77 +129,8 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) 
                 driver: sqlite3.Database
             });
 
-            await db.exec(`
-                CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT UNIQUE NOT NULL,
-                    password TEXT NOT NULL,
-                    is_client BOOLEAN DEFAULT FALSE,
-                    verification_code TEXT
-                );
-
-                CREATE TABLE IF NOT EXISTS clothing_categories (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT UNIQUE NOT NULL
-                );
-
-                CREATE TABLE IF NOT EXISTS clothing_items (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    session_id TEXT,
-                    user_id INTEGER,
-                    category_id INTEGER,
-                    image_path TEXT NOT NULL,
-                    color_tags TEXT,
-                    style_tags TEXT,
-                    season_tags TEXT,
-                    brand TEXT,
-                    pattern TEXT,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    expires_at DATETIME
-                );
-
-                CREATE TABLE IF NOT EXISTS appointments (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    email TEXT NOT NULL,
-                    date TEXT NOT NULL,
-                    time TEXT NOT NULL,
-                    service TEXT,
-                    message TEXT,
-                    status TEXT DEFAULT 'pending',
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-                );
-
-                CREATE TABLE IF NOT EXISTS intake_submissions (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    form_type TEXT NOT NULL,
-                    name TEXT NOT NULL,
-                    email TEXT NOT NULL,
-                    data TEXT NOT NULL,
-                    files TEXT,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-                );
-
-                CREATE TABLE IF NOT EXISTS availability_config (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    day_of_week INTEGER UNIQUE,
-                    slots TEXT DEFAULT '[]',
-                    is_enabled INTEGER DEFAULT 1
-                );
-
-                CREATE TABLE IF NOT EXISTS availability_overrides (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    date TEXT UNIQUE NOT NULL,
-                    slots TEXT DEFAULT '[]',
-                    is_enabled INTEGER DEFAULT 1
-                );
-            `);
-
-            // Insert default categories
-            await db.run(`INSERT OR IGNORE INTO clothing_categories (name) VALUES ('tops')`);
-            await db.run(`INSERT OR IGNORE INTO clothing_categories (name) VALUES ('bottoms')`);
-            await db.run(`INSERT OR IGNORE INTO clothing_categories (name) VALUES ('shoes')`);
-            await db.run(`INSERT OR IGNORE INTO clothing_categories (name) VALUES ('accessories')`);
+            // Run central migrations
+            await runMigrations(pool);
 
             // Create default admin user if not exists
             const adminCheck = await db.get('SELECT * FROM users WHERE username = ?', ['admin']);
@@ -182,7 +140,7 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) 
                 await db.run('INSERT INTO users (username, password) VALUES (?, ?)', ['admin', hash]);
             }
 
-            console.log('SQLite database initialized successfully');
+            logger.info('SQLite database initialized successfully');
         } catch (err) {
             logger.error('Error initializing SQLite database:', err);
         }
@@ -250,66 +208,14 @@ const upload = multer({
     }
 });
 
-// Initialize Tables
+// Initialize Tables (PostgreSQL)
 const initDb = async () => {
     try {
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS appointments (
-                id SERIAL PRIMARY KEY,
-                name TEXT NOT NULL,
-                email TEXT NOT NULL,
-                date TEXT NOT NULL,
-                time TEXT NOT NULL,
-                service TEXT,
-                message TEXT,
-                status TEXT DEFAULT 'pending',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE TABLE IF NOT EXISTS intake_submissions (
-                id SERIAL PRIMARY KEY,
-                form_type TEXT NOT NULL,
-                name TEXT NOT NULL,
-                email TEXT NOT NULL,
-                data TEXT NOT NULL,
-                files TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE TABLE IF NOT EXISTS newsletter_subscriptions (
-                id SERIAL PRIMARY KEY,
-                email TEXT UNIQUE NOT NULL,
-                is_confirmed BOOLEAN DEFAULT FALSE,
-                confirmation_token TEXT UNIQUE,
-                subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                confirmed_at TIMESTAMP
-            );
-
-            CREATE TABLE IF NOT EXISTS availability_config (
-                id SERIAL PRIMARY KEY,
-                day_of_week INTEGER UNIQUE,
-                slots TEXT DEFAULT '[]',
-                is_enabled INTEGER DEFAULT 1
-            );
-
-            CREATE TABLE IF NOT EXISTS availability_overrides (
-                id SERIAL PRIMARY KEY,
-                date TEXT UNIQUE NOT NULL,
-                slots TEXT DEFAULT '[]',
-                is_enabled INTEGER DEFAULT 1
-            );
-
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                username TEXT UNIQUE NOT NULL,
-                password TEXT NOT NULL
-            );
-        `);
+        await runMigrations(pool);
 
         // Defaults
         const userCheck = await pool.query('SELECT * FROM users WHERE username = $1', ['admin']);
         if (userCheck.rows.length === 0) {
-            // Priority: Env Var > Insecure default (only for dev, warn above)
             const password = process.env.ADMIN_PASSWORD || 'adria-dev-2025';
             const hash = bcrypt.hashSync(password, 10);
             await pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', ['admin', hash]);
@@ -352,21 +258,31 @@ const generateToken = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 };
 
-const sendEmail = async (to, subject, html) => {
+const sendEmail = async (to, subject, html, retries = 3) => {
     if (!process.env.EMAIL_HOST) {
-        console.warn('Email not configured (EMAIL_HOST missing). Skipping email.');
+        logger.warn('Email not configured (EMAIL_HOST missing). Skipping email.');
         return;
     }
-    try {
-        await transporter.sendMail({
-            from: process.env.EMAIL_FROM || '"Adria Cross" <hello@adriacrossedit.com>',
-            to,
-            subject,
-            html
-        });
-        console.log(`Email sent to ${to}`);
-    } catch (error) {
-        console.error('Error sending email:', error);
+
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            await transporter.sendMail({
+                from: process.env.EMAIL_FROM || '"Adria Cross" <hello@adriacrossedit.com>',
+                to,
+                subject,
+                html
+            });
+            logger.info(`Email sent to ${to}`);
+            return; // Success
+        } catch (error) {
+            logger.error(`Attempt ${attempt} failed to send email to ${to}:`, error);
+            if (attempt === retries) {
+                logger.error(`Failed to send email to ${to} after ${retries} attempts.`);
+            } else {
+                // Wait before retrying (exponential backoff: 1s, 2s, 4s...)
+                await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 500));
+            }
+        }
     }
 };
 
@@ -425,6 +341,28 @@ app.get('/health', (req, res) => {
 // API Endpoints
 
 // Newsletter subscription endpoint
+/**
+ * @openapi
+ * /api/newsletter:
+ *   post:
+ *     summary: Subscribe to the newsletter
+ *     tags: [Newsletter]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *     responses:
+ *       201:
+ *         description: Subscription successful, confirmation email sent
+ *       400:
+ *         description: Invalid input
+ */
 app.post('/api/newsletter', rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 3,
@@ -1432,9 +1370,29 @@ app.get('/api/invoices', isAuthenticated, async (req, res) => {
         res.json({ invoices });
 
     } catch (err) {
-        console.error('List Invoices Error:', err);
+        logger.error('List Invoices Error:', err);
         res.status(500).json({ error: 'Failed to list invoices' });
     }
+});
+
+/**
+ * @openapi
+ * /api/square/webhook:
+ *   post:
+ *     summary: Handle Square webhook notifications
+ *     tags: [Payments]
+ *     responses:
+ *       200:
+ *         description: Webhook received
+ */
+app.post('/api/square/webhook', (req, res) => {
+    // Square webhook signatures should be verified in production
+    const event = req.body;
+    logger.info(`Received Square Webhook: ${event.type}`, { eventId: event.id });
+
+    // Process specific events (payment.updated, invoice.payment_made, etc.)
+    // For now, just acknowledge receipt
+    res.sendStatus(200);
 });
 
 // Ensure session for clothing matcher

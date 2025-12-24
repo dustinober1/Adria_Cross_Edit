@@ -2,3 +2,7 @@
 {"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-24T19:55:33.035Z"}
 {"level":"info","message":"Run: http://localhost:3000","timestamp":"2025-12-24T19:55:33.078Z"}
 {"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-24T19:55:40.074Z"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-24T19:57:36.197Z"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-24T19:59:33.048Z"}
+{"level":"info","message":"Migrations completed successfully (initial schema).","timestamp":"2025-12-24T19:59:33.201Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-24T19:59:33.202Z"}

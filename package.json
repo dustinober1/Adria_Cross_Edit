@@ -33,7 +33,9 @@
     "pg": "^8.16.3",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
-    "square": "^39.0.0"
+    "square": "^39.0.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "helmet": "^8.1.0",
