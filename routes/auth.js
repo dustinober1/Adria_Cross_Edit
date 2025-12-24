@@ -29,10 +29,12 @@ router.get('/google/callback',
 router.get('/apple', (req, res, next) => {
     try {
         // Check if strategy is registered
-        if (passport._strategy('apple')) {
+        const isConfigured = passport._strategies && passport._strategies.apple;
+        
+        if (isConfigured) {
             passport.authenticate('apple')(req, res, next);
         } else {
-            logger.error('Apple Auth Error: Strategy "apple" is not configured. Check environment variables and key file.');
+            logger.error('Apple Auth Error: Strategy "apple" is not configured in passport._strategies');
             res.status(501).json({ 
                 error: 'Configuration Error', 
                 message: 'Apple Sign-In is not fully configured on this server. Please contact the administrator.' 
@@ -40,7 +42,7 @@ router.get('/apple', (req, res, next) => {
         }
     } catch (err) {
         logger.error('Apple Auth Route Error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: 'Internal Server Error', details: err.message });
     }
 });
 

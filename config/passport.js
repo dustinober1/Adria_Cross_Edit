@@ -108,8 +108,9 @@ module.exports = function configurePassport(app, pool) {
                     clientID: process.env.APPLE_CLIENT_ID,
                     teamID: process.env.APPLE_TEAM_ID,
                     keyID: process.env.APPLE_KEY_ID,
-                    privateKeyString: privateKey,
+                    privateKey: privateKey,
                     callbackURL: process.env.APPLE_CALLBACK_URL || '/auth/apple/callback',
+                    scope: ['name', 'email'],
                     passReqToCallback: true
                 }, async (req, accessToken, refreshToken, idToken, profile, done) => {
                     try {
