@@ -265,6 +265,15 @@ const initDb = async () => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
 
+            CREATE TABLE IF NOT EXISTS newsletter_subscriptions (
+                id SERIAL PRIMARY KEY,
+                email TEXT UNIQUE NOT NULL,
+                is_confirmed BOOLEAN DEFAULT FALSE,
+                confirmation_token TEXT UNIQUE,
+                subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                confirmed_at TIMESTAMP
+            );
+
             CREATE TABLE IF NOT EXISTS availability_config (
                 id SERIAL PRIMARY KEY,
                 day_of_week INTEGER UNIQUE,
@@ -317,7 +326,7 @@ if (!process.env.DATABASE_URL || !process.env.DATABASE_URL.startsWith('sqlite:')
 // ============================================
 // Email Configuration
 // ============================================
-const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransporter({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
     secure: false, // true for 465, false for other ports
@@ -326,6 +335,11 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS
     }
 });
+
+// Helper function to generate confirmation token
+const generateToken = () => {
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+};
 
 const sendEmail = async (to, subject, html) => {
     if (!process.env.EMAIL_HOST) {
@@ -367,6 +381,100 @@ const isAuthenticated = (req, res, next) => {
 };
 
 // API Endpoints
+
+// Newsletter subscription endpoint
+app.post('/api/newsletter', rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 3,
+    message: { error: 'Too many subscription attempts. Please try again later.' }
+}), async (req, res) => {
+    const { email } = req.body;
+
+    // Basic validation
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ error: 'Invalid email address' });
+    }
+
+    try {
+        const token = generateToken();
+
+        await pool.query(
+            'INSERT INTO newsletter_subscriptions (email, confirmation_token) VALUES ($1, $2) ON CONFLICT (email) DO UPDATE SET confirmation_token = $2, is_confirmed = FALSE',
+            [email, token]
+        );
+
+        // Send confirmation email
+        const confirmUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/confirm-newsletter?token=${token}&email=${encodeURIComponent(email)}`;
+
+        const emailHtml = `
+            <h3>Confirm Your Newsletter Subscription</h3>
+            <p>Hi there!</p>
+            <p>Thank you for subscribing to Adria Cross's style tips newsletter. Please confirm your email address by clicking the button below:</p>
+            <div style="text-align: center; margin: 2rem 0;">
+                <a href="${confirmUrl}" style="background: linear-gradient(135deg, #d4a574 0%, #c19a5d 100%); color: white; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block;">Confirm Subscription</a>
+            </div>
+            <p>If you didn't request this subscription, you can safely ignore this email.</p>
+            <p>Best,<br>Adria Cross</p>
+        `;
+
+        await sendEmail(email, 'Please Confirm Your Newsletter Subscription', emailHtml);
+
+        res.status(201).json({
+            success: true,
+            message: 'Please check your email to confirm your subscription.'
+        });
+
+    } catch (err) {
+        console.error('Newsletter subscription error:', err);
+        res.status(500).json({ error: 'Failed to subscribe. Please try again.' });
+    }
+});
+
+// Newsletter confirmation endpoint
+app.get('/confirm-newsletter', async (req, res) => {
+    const { token, email } = req.query;
+
+    if (!token || !email) {
+        return res.status(400).send('Invalid confirmation link.');
+    }
+
+    try {
+        const result = await pool.query(
+            'UPDATE newsletter_subscriptions SET is_confirmed = TRUE, confirmed_at = CURRENT_TIMESTAMP WHERE email = $1 AND confirmation_token = $2 AND is_confirmed = FALSE RETURNING id',
+            [email, token]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(400).send('Invalid or expired confirmation link.');
+        }
+
+        // Send welcome email
+        const welcomeHtml = `
+            <h3>Welcome to the Adria Cross Newsletter!</h3>
+            <p>Hi there,</p>
+            <p>You're now subscribed! Get ready for exclusive wardrobe tips, seasonal trends, and special offers delivered straight to your inbox.</p>
+            <p>Here's what to expect:</p>
+            <ul>
+                <li>✨ Weekly style tips and inspiration</li>
+                <li>👗 Seasonal wardrobe guides</li>
+                <li>🎨 Color trend alerts</li>
+                <li>🎁 Exclusive offers for subscribers</li>
+            </ul>
+            <p>Can't wait to help you transform your wardrobe!</p>
+            <p>Best,<br>Adria Cross</p>
+        `;
+
+        await sendEmail(email, 'Welcome to Adria Cross Newsletter!', welcomeHtml);
+
+        // Redirect to homepage with success message
+        res.redirect('/index.html?newsletter=confirmed');
+
+    } catch (err) {
+        console.error('Newsletter confirmation error:', err);
+        res.status(500).send('Confirmation failed. Please try again.');
+    }
+});
+
 app.post('/api/appointments', appointmentLimiter, async (req, res) => {
     const { name, email, date, time, service, message } = req.body;
 
@@ -1262,12 +1370,17 @@ app.get('/api/invoices', isAuthenticated, async (req, res) => {
 });
 
 // Ensure session for clothing matcher
-app.use('/clothing-matcher', (req, res, next) => {
+app.use('/clothing-matcher', (req, res) => {
     if (!req.session.userId) {
         req.session.userId = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         console.log('Created anonymous session for clothing matcher:', req.session.userId);
     }
     next();
+});
+
+// Blog redirect route
+app.get('/blog', (req, res) => {
+    res.redirect('/blog/index.html');
 });
 
 // Clothing Matcher routes (must come before static files)
