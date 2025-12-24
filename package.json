@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server.js",
     "check-links": "node scripts/link-checker.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -31,8 +31,15 @@
     "multer": "^2.0.2",
     "nodemailer": "^7.0.11",
     "pg": "^8.16.3",
-    "square": "^39.0.0",
     "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "square": "^39.0.0"
+  },
+  "devDependencies": {
+    "helmet": "^8.1.0",
+    "jest": "^30.2.0",
+    "joi": "^18.0.2",
+    "supertest": "^7.1.4",
+    "winston": "^3.19.0"
   }
 }

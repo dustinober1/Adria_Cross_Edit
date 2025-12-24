@@ -10,6 +10,9 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 const sqlite3 = require('sqlite3');
+const helmet = require('helmet');
+const logger = require('./logger');
+const Joi = require('joi');
 
 // ============================================
 // Square SDK Configuration
@@ -31,9 +34,9 @@ if (process.env.SQUARE_ACCESS_TOKEN) {
     paymentsApi = squareClient.paymentsApi;
     invoicesApi = squareClient.invoicesApi;
     customersApi = squareClient.customersApi;
-    console.log(`Square SDK initialized in ${process.env.SQUARE_ENVIRONMENT || 'sandbox'} mode`);
+    logger.info(`Square SDK initialized in ${process.env.SQUARE_ENVIRONMENT || 'sandbox'} mode`);
 } else {
-    console.warn('SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.');
+    logger.warn('SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.');
 }
 
 const app = express();
@@ -42,13 +45,21 @@ app.set('trust proxy', 1);
 
 // Security: Enforce Environment Variables
 if (!process.env.DATABASE_URL) {
-    console.warn('CRITICAL: DATABASE_URL is missing. DB features will fail.');
+    logger.error('CRITICAL: DATABASE_URL is missing. DB features will fail.');
 }
 if (!process.env.SESSION_SECRET) {
-    console.warn('WARNING: SESSION_SECRET is missing. Using insecure default.');
+    if (process.env.NODE_ENV === 'production') {
+        logger.error('CRITICAL: SESSION_SECRET is missing in production. Exiting.');
+        process.exit(1);
+    }
+    logger.warn('WARNING: SESSION_SECRET is missing. Using insecure default for development.');
 }
 if (!process.env.ADMIN_PASSWORD) {
-    console.warn('CRITICAL: ADMIN_PASSWORD not set. Admin login will use insecure default until set.');
+    if (process.env.NODE_ENV === 'production') {
+        logger.error('CRITICAL: ADMIN_PASSWORD is missing in production. Exiting.');
+        process.exit(1);
+    }
+    logger.warn('CRITICAL: ADMIN_PASSWORD not set. Admin login will use insecure default until set.');
 }
 
 let pool;
@@ -173,7 +184,7 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) 
 
             console.log('SQLite database initialized successfully');
         } catch (err) {
-            console.error('Error initializing SQLite database:', err);
+            logger.error('Error initializing SQLite database:', err);
         }
     }
 
@@ -314,7 +325,7 @@ const initDb = async () => {
             }
         }
     } catch (err) {
-        console.error('Error initializing database:', err);
+        logger.error('Error initializing database:', err);
     }
 };
 
@@ -326,7 +337,7 @@ if (!process.env.DATABASE_URL || !process.env.DATABASE_URL.startsWith('sqlite:')
 // ============================================
 // Email Configuration
 // ============================================
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
     secure: false, // true for 465, false for other ports
@@ -360,11 +371,37 @@ const sendEmail = async (to, subject, html) => {
 };
 
 // Middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://js.squareupsandbox.com", "https://js.squareup.com", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://use.fontawesome.com"],
+            imgSrc: ["'self'", "data:", "https://www.google-analytics.com", "https://*.cdninstagram.com", "https://*.fbcdn.net"],
+            connectSrc: ["'self'", "https://www.google-analytics.com", "https://stats.g.doubleclick.net"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://use.fontawesome.com"],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'"],
+            frameSrc: ["'self'", "https://www.instagram.com"],
+        },
+    },
+}));
+
+// HTTPS Redirect in production
+if (process.env.NODE_ENV === 'production') {
+    app.use((req, res, next) => {
+        if (req.headers['x-forwarded-proto'] !== 'https') {
+            return res.redirect(`https://${req.headers.host}${req.url}`);
+        }
+        next();
+    });
+}
+
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json({ limit: '10kb' })); // Limit JSON size
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'insecure-default-key-adria-2025',
+    secret: process.env.SESSION_SECRET || 'dev-only-insecure-secret',
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -380,6 +417,11 @@ const isAuthenticated = (req, res, next) => {
     else res.status(401).json({ error: 'Unauthorized' });
 };
 
+// Health Check
+app.get('/health', (req, res) => {
+    res.json({ status: 'OK', timestamp: new Date(), env: process.env.NODE_ENV || 'development' });
+});
+
 // API Endpoints
 
 // Newsletter subscription endpoint
@@ -388,12 +430,16 @@ app.post('/api/newsletter', rateLimit({
     max: 3,
     message: { error: 'Too many subscription attempts. Please try again later.' }
 }), async (req, res) => {
-    const { email } = req.body;
+    const schema = Joi.object({
+        email: Joi.string().email().required()
+    });
 
-    // Basic validation
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return res.status(400).json({ error: 'Invalid email address' });
+    const { error } = schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
     }
+
+    const { email } = req.body;
 
     try {
         const token = generateToken();
@@ -425,7 +471,7 @@ app.post('/api/newsletter', rateLimit({
         });
 
     } catch (err) {
-        console.error('Newsletter subscription error:', err);
+        logger.error('Newsletter subscription error:', err);
         res.status(500).json({ error: 'Failed to subscribe. Please try again.' });
     }
 });
@@ -476,12 +522,21 @@ app.get('/confirm-newsletter', async (req, res) => {
 });
 
 app.post('/api/appointments', appointmentLimiter, async (req, res) => {
-    const { name, email, date, time, service, message } = req.body;
+    const schema = Joi.object({
+        name: Joi.string().min(2).max(100).required(),
+        email: Joi.string().email().required(),
+        date: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).required(),
+        time: Joi.string().required(),
+        service: Joi.string().allow(''),
+        message: Joi.string().allow('')
+    });
 
-    // Basic validation
-    if (!name || !email || !date || !time) {
-        return res.status(400).json({ error: 'Missing required fields' });
+    const { error } = schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
     }
+
+    const { name, email, date, time, service, message } = req.body;
 
     try {
         const existing = await pool.query('SELECT id FROM appointments WHERE date = $1 AND time = $2 AND status != $3', [date, time, 'cancelled']);
@@ -497,10 +552,13 @@ app.post('/api/appointments', appointmentLimiter, async (req, res) => {
         Promise.all([
             sendEmail(process.env.ADMIN_EMAIL || 'hello@adriacrossedit.com', `New Booking: ${name} - ${date}`, adminHtml),
             sendEmail(email, 'Appointment Request Received - Adria Cross', userHtml)
-        ]).catch(err => console.error('Email sending failed', err));
+        ]).catch(err => logger.error('Email sending failed', err));
 
         res.status(201).json({ message: 'Success! Confirmation email sent.' });
-    } catch (err) { res.status(500).json({ error: 'DB Error' }); }
+    } catch (err) {
+        logger.error('Appointment Error:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
 app.post('/api/intake', upload.array('photos', 5), async (req, res) => {
@@ -526,6 +584,16 @@ app.post('/api/intake', upload.array('photos', 5), async (req, res) => {
 });
 
 app.post('/api/login', loginLimiter, async (req, res) => {
+    const schema = Joi.object({
+        username: Joi.string().required(),
+        password: Joi.string().required()
+    });
+
+    const { error } = schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
+
     try {
         const { username, password } = req.body;
         const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
@@ -536,7 +604,7 @@ app.post('/api/login', loginLimiter, async (req, res) => {
             res.status(401).json({ error: 'Invalid username or password' });
         }
     } catch (err) {
-        console.error('Login error:', err);
+        logger.error('Login error:', err);
         res.status(500).json({ error: 'Server error.' });
     }
 });
@@ -1396,8 +1464,12 @@ app.use('/uploads', express.static(UPLOAD_ROOT));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: err.message || 'Something broke!' });
+    logger.error(`${err.message}\n${err.stack}`);
+    res.status(500).json({ error: 'Internal Server Error' }); // Don't expose stacks in response
 });
 
-app.listen(port, () => console.log(`Run: http://localhost:${port}`));
+if (require.main === module) {
+    app.listen(port, () => logger.info(`Run: http://localhost:${port}`));
+}
+
+module.exports = app;
