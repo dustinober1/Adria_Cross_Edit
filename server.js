@@ -74,6 +74,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Security: Enforce Environment Variables
 if (!process.env.DATABASE_URL) {
+    if (process.env.NODE_ENV === 'production') {
+        logger.error('CRITICAL: DATABASE_URL is missing in production. Exiting.');
+        process.exit(1);
+    }
     logger.error('CRITICAL: DATABASE_URL is missing. DB features will fail.');
 }
 if (!process.env.SESSION_SECRET) {
