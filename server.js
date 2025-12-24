@@ -16,6 +16,11 @@ const Joi = require('joi');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const { runMigrations } = require('./scripts/migrate');
+const passport = require('passport');
+const cookieParser = require('cookie-parser');
+const configurePassport = require('./config/passport');
+const authRoutes = require('./routes/auth');
+const { isAuthenticated, isAdmin } = require('./middleware/auth');
 
 // ============================================
 // Square SDK Configuration
@@ -322,6 +327,7 @@ if (process.env.NODE_ENV === 'production') {
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json({ limit: '10kb' })); // Limit JSON size
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(cookieParser());
 app.use(session({
     secret: process.env.SESSION_SECRET || 'dev-only-insecure-secret',
     resave: false,
@@ -329,15 +335,25 @@ app.use(session({
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
-        sameSite: 'strict',
+        sameSite: 'lax', // Relaxed slightly for OAuth redirects
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
 }));
 
+// Initialize Passport
+configurePassport(app, pool);
+
+// Auth Routes
+app.use('/auth', authRoutes);
+app.use(authRoutes); // For API routes mounted at root/api level inside authRoutes
+
+/* 
+// Deprecated inline isAuthenticated middleware - imported from middleware/auth.js
 const isAuthenticated = (req, res, next) => {
     if (req.session.userId) next();
     else res.status(401).json({ error: 'Unauthorized' });
-};
+}; 
+*/
 
 // Health Check
 app.get('/health', (req, res) => {
