@@ -89,7 +89,9 @@ router.get('/api/auth/status', (req, res) => {
         res.json({ 
             authenticated: false,
             // Diagnostic info
-            strategies: Object.keys(passport._strategies || {})
+            hasPassport: !!passport,
+            hasStrategies: !!passport._strategies,
+            strategies: passport._strategies ? Object.keys(passport._strategies) : []
         });
     }
 });
