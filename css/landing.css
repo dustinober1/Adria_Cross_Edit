@@ -1799,9 +1799,22 @@ body.dark-mode .service-card {
 }
 
 .footer-social-links a:hover {
-    background: var(--primary-color);
     transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
 }
+
+.footer-social-links a[aria-label="Instagram"]:hover {
+    background: #E1306C;
+}
+
+.footer-social-links a[aria-label="Facebook"]:hover {
+    background: #1877F2;
+}
+
+.footer-social-links a[aria-label="X"]:hover {
+    background: #000;
+}
+
 
 .footer-bottom {
     max-width: 1200px;

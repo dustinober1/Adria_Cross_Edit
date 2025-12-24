@@ -456,6 +456,9 @@ app.get('/confirm-newsletter', async (req, res) => {
 
         await sendEmail(email, 'Welcome to Adria Cross Newsletter!', welcomeHtml);
 
+        // Notify Adria
+        sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com,info@adriacrossedit.com', 'New Newsletter Subscriber!', `<h3>New Subscriber</h3><p><strong>Email:</strong> ${email}</p>`).catch(err => logger.error('Admin notification failed', err));
+
         // Redirect to homepage with success message
         res.redirect('/index.html?newsletter=confirmed');
 
@@ -520,7 +523,7 @@ app.post('/api/appointments', appointmentLimiter, async (req, res) => {
 
         // Fire and forget email sending
         Promise.all([
-            sendEmail(process.env.ADMIN_EMAIL || 'hello@adriacrossedit.com', `New Booking: ${name} - ${date}`, adminHtml),
+            sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com,info@adriacrossedit.com', `New Booking: ${name} - ${date}`, adminHtml),
             sendEmail(email, 'Appointment Request Received - Adria Cross', userHtml)
         ]).catch(err => logger.error('Email sending failed', err));
 
@@ -545,7 +548,7 @@ app.post('/api/intake', upload.array('photos', 5), async (req, res) => {
         const userHtml = `<h3>Profile Received</h3><p>Hi ${name},</p><p>Thank you for submitting your style profile. I have received your information and photos.</p><p>I'll be in touch soon!</p><p>Best,<br>Adria Cross</p>`;
 
         Promise.all([
-            sendEmail(process.env.ADMIN_EMAIL || 'hello@adriacrossedit.com', `New Intake: ${name} (${form_type})`, adminHtml),
+            sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com,info@adriacrossedit.com', `New Intake: ${name} (${form_type})`, adminHtml),
             sendEmail(email, 'Style Profile Received - Adria Cross', userHtml)
         ]).catch(err => console.error('Email sending failed', err));
 
@@ -810,6 +813,9 @@ app.post('/api/clothing/request-verification', async (req, res) => {
         // Send verification email
         const emailHtml = `<h3>Clothing Matcher Access</h3><p>Your verification code is: <strong>${code}</strong></p><p>Enter this code to unlock unlimited uploads and premium features.</p>`;
         await sendEmail(email, 'Your Clothing Matcher Verification Code', emailHtml);
+
+        // Notify Adria
+        sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com,info@adriacrossedit.com', 'Clothing Matcher: Verification Requested', `<h3>Verification Requested</h3><p><strong>Email:</strong> ${email}</p><p>Code: ${code}</p>`).catch(err => logger.error('Admin notification failed', err));
 
         res.json({ success: true, message: 'Verification code sent to your email' });
     } catch (err) {
@@ -1424,6 +1430,11 @@ app.post('/api/square/webhook', (req, res) => {
 
     // Process specific events (payment.updated, invoice.payment_made, etc.)
     // For now, just acknowledge receipt
+    if (event.type === 'payment.updated' || event.type === 'invoice.payment_made') {
+        const amount = event.data?.object?.payment?.amount_money?.amount || 'N/A';
+        const currency = event.data?.object?.payment?.amount_money?.currency || '';
+        sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com,info@adriacrossedit.com', 'Square Payment Notification', `<h3>Payment Event</h3><p>Type: ${event.type}</p><p>Amount: ${amount} ${currency}</p>`).catch(err => logger.error('Admin notification failed', err));
+    }
     res.sendStatus(200);
 });
 
