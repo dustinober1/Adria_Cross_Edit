@@ -17,8 +17,8 @@ router.get('/google/callback',
         // Successful authentication
         logger.info(`User ${req.user.email} logged in via Google`);
         
-        // Redirect to intended page or home
-        const returnTo = req.session.returnTo || '/';
+        // Redirect to member portal or intended page
+        const returnTo = req.session.returnTo || '/member-portal.html';
         delete req.session.returnTo;
         res.redirect(returnTo);
     }
@@ -36,7 +36,7 @@ router.post('/apple/callback',
         // Successful authentication
         logger.info(`User ${req.user.email || req.user.username} logged in via Apple`);
         
-        const returnTo = req.session.returnTo || '/';
+        const returnTo = req.session.returnTo || '/member-portal.html';
         delete req.session.returnTo;
         res.redirect(returnTo);
     }

@@ -1176,8 +1176,15 @@
         let selectedDateData = null;
 
         async function checkAuth() {
-            const res = await fetch('/api/appointments');
-            if (res.ok) showDashboard();
+            const res = await fetch('/api/auth/status');
+            const data = await res.json();
+            if (data.authenticated) {
+                if (data.user.role === 'admin') {
+                    showDashboard();
+                } else {
+                    window.location.href = '/member-portal.html';
+                }
+            }
         }
 
         function showDashboard() {
@@ -1529,7 +1536,7 @@
                 body: JSON.stringify({ username: e.target[0].value, password: e.target[1].value })
             });
             if (res.ok) {
-                showDashboard();
+                window.location.href = '/member-portal.html';
             } else {
                 const err = await res.json();
                 alert(err.error || 'Login failed');
