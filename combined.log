@@ -59,3 +59,37 @@
 {"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-24T22:01:57.327Z"}
 {"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-24T22:01:57.328Z"}
 {"level":"info","message":"Created anonymous session for clothing matcher:","timestamp":"2025-12-24T22:04:09.972Z","userId":"anon_1766613849972_4paxaf8oo"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-24T22:42:38.146Z"}
+{"level":"info","message":"Server starting in development mode on port 3000","timestamp":"2025-12-24T22:42:38.148Z"}
+{"level":"info","message":"Run: http://localhost:3000","timestamp":"2025-12-24T22:42:38.167Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2025-12-24T22:42:38.168Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-24T22:42:38.172Z"}
+{"level":"info","message":"Running migration: 003_oauth_schema.sql","timestamp":"2025-12-24T22:42:38.173Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 003_oauth_schema.sql: -- Migration: 003_oauth_schema.sql\n-- Description: Add columns for OAuth support to users table and ... SQLITE_ERROR: Cannot add a UNIQUE column","stack":"Error: SQLITE_ERROR: Cannot add a UNIQUE column","timestamp":"2025-12-24T22:42:38.174Z"}
+{"code":"SQLITE_MISUSE","errno":21,"level":"error","message":"Migration query failed in 003_oauth_schema.sql: \n\n-- Down Migration (commented out for safety, standard practice is to separate down migrations if n... SQLITE_MISUSE: not an error","stack":"Error: SQLITE_MISUSE: not an error","timestamp":"2025-12-24T22:42:38.178Z"}
+{"code":"SQLITE_MISUSE","errno":21,"level":"error","message":"Migration query failed in 003_oauth_schema.sql: \n-- ALTER TABLE users DROP COLUMN email... SQLITE_MISUSE: not an error","stack":"Error: SQLITE_MISUSE: not an error","timestamp":"2025-12-24T22:42:38.178Z"}
+{"code":"SQLITE_MISUSE","errno":21,"level":"error","message":"Migration query failed in 003_oauth_schema.sql: \n-- ALTER TABLE users DROP COLUMN provider... SQLITE_MISUSE: not an error","stack":"Error: SQLITE_MISUSE: not an error","timestamp":"2025-12-24T22:42:38.178Z"}
+{"code":"SQLITE_MISUSE","errno":21,"level":"error","message":"Migration query failed in 003_oauth_schema.sql: \n-- ALTER TABLE users DROP COLUMN provider_id... SQLITE_MISUSE: not an error","stack":"Error: SQLITE_MISUSE: not an error","timestamp":"2025-12-24T22:42:38.178Z"}
+{"code":"SQLITE_MISUSE","errno":21,"level":"error","message":"Migration query failed in 003_oauth_schema.sql: \n-- ALTER TABLE users DROP COLUMN display_name... SQLITE_MISUSE: not an error","stack":"Error: SQLITE_MISUSE: not an error","timestamp":"2025-12-24T22:42:38.179Z"}
+{"code":"SQLITE_MISUSE","errno":21,"level":"error","message":"Migration query failed in 003_oauth_schema.sql: \n-- ALTER TABLE users DROP COLUMN profile_picture... SQLITE_MISUSE: not an error","stack":"Error: SQLITE_MISUSE: not an error","timestamp":"2025-12-24T22:42:38.179Z"}
+{"code":"SQLITE_MISUSE","errno":21,"level":"error","message":"Migration query failed in 003_oauth_schema.sql: \n-- ALTER TABLE users DROP COLUMN email_verified... SQLITE_MISUSE: not an error","stack":"Error: SQLITE_MISUSE: not an error","timestamp":"2025-12-24T22:42:38.179Z"}
+{"code":"SQLITE_MISUSE","errno":21,"level":"error","message":"Migration query failed in 003_oauth_schema.sql: \n-- ALTER TABLE users DROP COLUMN role... SQLITE_MISUSE: not an error","stack":"Error: SQLITE_MISUSE: not an error","timestamp":"2025-12-24T22:42:38.179Z"}
+{"code":"SQLITE_MISUSE","errno":21,"level":"error","message":"Migration query failed in 003_oauth_schema.sql: \n-- ALTER TABLE users DROP COLUMN created_at... SQLITE_MISUSE: not an error","stack":"Error: SQLITE_MISUSE: not an error","timestamp":"2025-12-24T22:42:38.179Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-24T22:42:38.180Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-24T22:42:38.180Z"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-24T22:43:04.292Z"}
+{"level":"info","message":"Server starting in development mode on port 3000","timestamp":"2025-12-24T22:43:04.295Z"}
+{"level":"info","message":"Run: http://localhost:3000","timestamp":"2025-12-24T22:43:04.312Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2025-12-24T22:43:04.313Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-24T22:43:04.317Z"}
+{"level":"info","message":"Running migration: 003_oauth_schema.sql","timestamp":"2025-12-24T22:43:04.317Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-24T22:43:04.319Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-24T22:43:04.319Z"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-24T22:46:28.970Z"}
+{"level":"info","message":"Server starting in development mode on port 3000","timestamp":"2025-12-24T22:46:28.973Z"}
+{"level":"info","message":"Run: http://localhost:3000","timestamp":"2025-12-24T22:46:28.989Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2025-12-24T22:46:28.990Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-24T22:46:28.993Z"}
+{"level":"info","message":"Running migration: 003_oauth_schema.sql","timestamp":"2025-12-24T22:46:28.994Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-24T22:46:28.994Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-24T22:46:28.995Z"}
