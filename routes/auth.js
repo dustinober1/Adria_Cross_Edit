@@ -85,18 +85,12 @@ router.get('/api/auth/status', (req, res) => {
                 provider: req.user.provider
             }
         });
-    } else if (req.session && req.session.userId) {
-        // Legacy session support
-        res.json({
-            authenticated: true,
-            user: {
-                id: req.session.userId,
-                role: 'client' // Default assumption for now
-            },
-            isLegacy: true
-        });
     } else {
-        res.json({ authenticated: false });
+        res.json({ 
+            authenticated: false,
+            // Diagnostic info
+            strategies: Object.keys(passport._strategies || {})
+        });
     }
 });
 
