@@ -632,7 +632,7 @@ app.post('/api/login', loginLimiter, async (req, res) => {
 
     try {
         const { username, password } = req.body;
-        const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        const user = await pool.query('SELECT * FROM users WHERE username = $1 OR email = $1', [username]);
         if (user.rows[0] && bcrypt.compareSync(password, user.rows[0].password)) {
             req.session.userId = user.rows[0].id;
             res.json({ success: true });
@@ -642,6 +642,48 @@ app.post('/api/login', loginLimiter, async (req, res) => {
     } catch (err) {
         logger.error('Login error:', err);
         res.status(500).json({ error: 'Server error.' });
+    }
+});
+
+app.post('/api/register', rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 5, // 5 signups per hour per IP
+    message: { error: 'Too many accounts created from this IP. Please try again later.' }
+}), async (req, res) => {
+    const schema = Joi.object({
+        username: Joi.string().min(3).max(30).required(),
+        email: Joi.string().email().required(),
+        password: Joi.string().min(6).required(),
+        displayName: Joi.string().allow('')
+    });
+
+    const { error } = schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
+
+    try {
+        const { username, email, password, displayName } = req.body;
+
+        // Check if user exists
+        const existing = await pool.query('SELECT id FROM users WHERE username = $1 OR email = $2', [username, email]);
+        if (existing.rows.length > 0) {
+            return res.status(400).json({ error: 'Username or email already exists.' });
+        }
+
+        const hash = bcrypt.hashSync(password, 10);
+        const result = await pool.query(
+            'INSERT INTO users (username, email, password, display_name, role, provider) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+            [username, email, hash, displayName || username, 'client', 'local']
+        );
+
+        const userId = result.rows[0].id;
+        req.session.userId = userId; // Auto-login after registration
+
+        res.status(201).json({ success: true, message: 'Account created successfully.' });
+    } catch (err) {
+        logger.error('Registration error:', err);
+        res.status(500).json({ error: 'Failed to create account.' });
     }
 });
 
