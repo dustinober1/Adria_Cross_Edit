@@ -635,7 +635,7 @@ body {
    ============================================ */
 @media (max-width: 768px) {
     .matcher-container {
-        padding: 6rem 0.5rem 2rem 0.5rem;
+        padding: 10rem 0.5rem 2rem 0.5rem;
     }
 
     .matcher-title {
@@ -678,7 +678,7 @@ body {
 
 @media (max-width: 480px) {
     .matcher-container {
-        padding: 0.5rem;
+        padding: 8rem 0.5rem 2rem 0.5rem;
     }
 
     .matcher-title {

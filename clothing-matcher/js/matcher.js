@@ -202,6 +202,15 @@
 
                 const categories = await api.getCategories();
                 appState.categories = categories.categories;
+
+                // Auto-navigate to upload if wardrobe is empty
+                if (appState.userItems.length === 0) {
+                    utils.showNotification('Welcome! Let\'s start by uploading some items to your wardrobe.', 'info');
+                    views.show('upload');
+                } else {
+                    // Show wardrobe by default if items exist
+                    views.show('wardrobe');
+                }
             } catch (error) {
                 console.error('Initial load failed:', error);
                 utils.showNotification('Welcome! Head to the Upload tab to add items to your wardrobe.', 'info');
@@ -220,6 +229,11 @@
                 const items = await api.getItems();
                 appState.userItems = items.items;
                 views.updateWardrobe();
+
+                // If items were deleted and now empty, redirect to upload
+                if (appState.userItems.length === 0 && appState.currentView !== 'upload') {
+                    views.show('upload');
+                }
             } catch (error) {
                 utils.showNotification('Failed to refresh items', 'error');
             }
