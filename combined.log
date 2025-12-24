@@ -23,3 +23,17 @@
 {"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-24T20:37:29.288Z"}
 {"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-24T20:37:29.290Z"}
 {"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-24T20:37:29.290Z"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-24T21:26:28.371Z"}
+{"level":"info","message":"Server starting in development mode on port 3000","timestamp":"2025-12-24T21:26:28.374Z"}
+{"level":"info","message":"Run: http://localhost:3000","timestamp":"2025-12-24T21:26:28.398Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2025-12-24T21:26:28.399Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-24T21:26:28.403Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-24T21:26:28.404Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-24T21:26:28.406Z"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-24T21:30:26.707Z"}
+{"level":"info","message":"Server starting in development mode on port 3000","timestamp":"2025-12-24T21:30:26.709Z"}
+{"level":"info","message":"Run: http://localhost:3000","timestamp":"2025-12-24T21:30:26.737Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2025-12-24T21:30:26.741Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-24T21:30:26.775Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-24T21:30:26.776Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-24T21:30:26.776Z"}
