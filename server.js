@@ -666,7 +666,7 @@ const checkUploadLimit = async (categoryId, userId = null, sessionId = null) => 
                 SELECT COUNT(*) as count FROM clothing_items 
                 WHERE category_id = $1 
                 AND (user_id = $2 OR session_id = $3)
-                AND (expires_at IS NULL OR expires_at > datetime('now'))
+                AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
             `, [categoryId, userId, sessionId]);
 
     // Handle both PostgreSQL (countResult.rows[0].count) and SQLite wrappers
@@ -841,7 +841,7 @@ app.get('/api/clothing/', async (req, res) => {
                     FROM clothing_items ci 
                     JOIN clothing_categories cc ON ci.category_id = cc.id 
                     WHERE (ci.user_id = $1 OR ci.session_id = $2)
-                    AND (ci.expires_at IS NULL OR ci.expires_at > datetime('now'))
+                    AND (ci.expires_at IS NULL OR ci.expires_at > CURRENT_TIMESTAMP)
                 `;
         let params = [userId, sessionId];
 
@@ -926,7 +926,7 @@ app.get('/api/matches', async (req, res) => {
         const itemsQuery = `
                     SELECT * FROM clothing_items 
                     WHERE (user_id = $1 OR session_id = $2)
-                    AND (expires_at IS NULL OR expires_at > datetime('now'))
+                    AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
                 `;
         const itemsResult = await pool.query(itemsQuery, [userId, sessionId]);
         const userItems = itemsResult.rows;

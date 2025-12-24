@@ -203,7 +203,15 @@
                 const categories = await api.getCategories();
                 appState.categories = categories.categories;
             } catch (error) {
-                utils.showNotification('Failed to load your data. Please refresh.', 'error');
+                console.error('Initial load failed:', error);
+                utils.showNotification('Welcome! Head to the Upload tab to add items to your wardrobe.', 'info');
+
+                // Hide loading so they can see the UI
+                const initialLoading = document.getElementById('initialLoading');
+                if (initialLoading) initialLoading.style.display = 'none';
+
+                // Switch to upload view by default if data fails (often means it's empty)
+                views.show('upload');
             }
         },
 
