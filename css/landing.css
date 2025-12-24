@@ -67,10 +67,13 @@ body {
     margin: 0 auto;
     position: relative;
     padding: 2rem 0;
+    display: flex;
+    align-items: center;
 }
 
 .reels-wrapper {
     display: flex;
+    flex-wrap: nowrap;
     overflow-x: auto;
     gap: 2rem;
     padding: 1rem 1rem 3rem 1rem;
@@ -79,6 +82,53 @@ body {
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory;
     cursor: grab;
+    scroll-behavior: smooth;
+    width: 100%;
+}
+
+/* Navigation Arrows */
+.reel-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: var(--transition);
+    color: var(--primary-color);
+}
+
+.reel-nav-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 8px 25px rgba(193, 154, 93, 0.3);
+}
+
+.prev-btn {
+    left: -1rem;
+}
+
+.next-btn {
+    right: -1rem;
+}
+
+@media (max-width: 1200px) {
+    .prev-btn {
+        left: 0.5rem;
+    }
+
+    .next-btn {
+        right: 0.5rem;
+    }
 }
 
 .reels-wrapper::-webkit-scrollbar {
@@ -97,8 +147,10 @@ body {
 .reel-card {
     flex: 0 0 calc(300px * (9/16) * 1.5);
     /* Vertical aspect ratio */
-    min-width: 280px;
-    height: 500px;
+    min-width: 320px;
+    /* Increased slightly */
+    height: 650px;
+    /* Increased significantly for "full view" */
     position: relative;
     border-radius: var(--radius-lg);
     overflow: hidden;
@@ -120,8 +172,8 @@ body {
 }
 
 .reel-video iframe {
-    width: 100%;
-    height: 100%;
+    width: 100% !important;
+    height: 100% !important;
     border: none;
     opacity: 0;
     transition: opacity 0.5s ease;

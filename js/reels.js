@@ -55,6 +55,7 @@
         let scrollLeft;
 
         wrapper.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.reel-nav-btn')) return; // Don't drag if clicking buttons
             isDown = true;
             wrapper.classList.add('active');
             startX = e.pageX - wrapper.offsetLeft;
@@ -78,6 +79,38 @@
             const walk = (x - startX) * 2; // scroll-fast
             wrapper.scrollLeft = scrollLeft - walk;
         });
+
+        // 3. Arrow Navigation Logic
+        const prevBtn = document.getElementById('prevReel');
+        const nextBtn = document.getElementById('nextReel');
+
+        if (prevBtn && nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                const cardWidth = reelCards[0].offsetWidth + 32; // width + gap
+                wrapper.scrollBy({ left: cardWidth, behavior: 'smooth' });
+            });
+
+            prevBtn.addEventListener('click', () => {
+                const cardWidth = reelCards[0].offsetWidth + 32; // width + gap
+                wrapper.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+            });
+
+            // Toggle button visibility based on scroll position
+            const toggleButtons = () => {
+                const isAtStart = wrapper.scrollLeft <= 5;
+                const isAtEnd = wrapper.scrollLeft + wrapper.offsetWidth >= wrapper.scrollWidth - 5;
+
+                prevBtn.style.opacity = isAtStart ? '0.3' : '1';
+                prevBtn.style.pointerEvents = isAtStart ? 'none' : 'auto';
+
+                nextBtn.style.opacity = isAtEnd ? '0.3' : '1';
+                nextBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
+            };
+
+            wrapper.addEventListener('scroll', toggleButtons);
+            window.addEventListener('resize', toggleButtons);
+            toggleButtons(); // Initial state
+        }
     };
 
     // Run on init
