@@ -71,6 +71,18 @@ router.post('/apple/callback', (req, res, next) => {
     })(req, res, next);
 });
 
+// GET /api/auth/diagnostic
+// Returns detailed diagnostic info about passport configuration
+router.get('/api/auth/diagnostic', (req, res) => {
+    res.json({
+        hasPassport: !!passport,
+        hasStrategies: !!passport._strategies,
+        strategies: passport._strategies ? Object.keys(passport._strategies) : [],
+        session: !!req.session,
+        authenticated: req.isAuthenticated()
+    });
+});
+
 // GET /api/auth/status
 // Returns current authentication status for the frontend
 router.get('/api/auth/status', (req, res) => {
