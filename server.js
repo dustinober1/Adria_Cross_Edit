@@ -46,6 +46,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 app.set('trust proxy', 1);
 
+logger.info(`Server starting in ${process.env.NODE_ENV || 'development'} mode on port ${port}`);
+
 // ============================================
 // API Documentation (Swagger)
 // ============================================
