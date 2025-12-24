@@ -26,21 +26,48 @@ router.get('/google/callback',
 
 // GET /auth/apple
 // Initiates the Sign In with Apple flow
-router.get('/apple', passport.authenticate('apple'));
+router.get('/apple', (req, res, next) => {
+    try {
+        // Check if strategy is registered
+        if (passport._strategy('apple')) {
+            passport.authenticate('apple')(req, res, next);
+        } else {
+            logger.error('Apple Auth Error: Strategy "apple" is not configured. Check environment variables and key file.');
+            res.status(501).json({ 
+                error: 'Configuration Error', 
+                message: 'Apple Sign-In is not fully configured on this server. Please contact the administrator.' 
+            });
+        }
+    } catch (err) {
+        logger.error('Apple Auth Route Error:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 // POST /auth/apple/callback
 // Handles the callback from Apple
-router.post('/apple/callback', 
-    passport.authenticate('apple', { failureRedirect: '/?login=failed' }),
-    (req, res) => {
-        // Successful authentication
-        logger.info(`User ${req.user.email || req.user.username} logged in via Apple`);
-        
-        const returnTo = req.session.returnTo || '/member-portal.html';
-        delete req.session.returnTo;
-        res.redirect(returnTo);
-    }
-);
+router.post('/apple/callback', (req, res, next) => {
+    passport.authenticate('apple', (err, user, info) => {
+        if (err) {
+            logger.error('Apple Auth Callback Error:', err);
+            return res.redirect('/?login=failed&reason=error');
+        }
+        if (!user) {
+            logger.warn('Apple Auth Callback: No user returned', { info });
+            return res.redirect('/?login=failed&reason=no_user');
+        }
+        req.logIn(user, (loginErr) => {
+            if (loginErr) {
+                logger.error('Apple Auth Login Error:', loginErr);
+                return next(loginErr);
+            }
+            logger.info(`User ${user.email || user.username} logged in via Apple`);
+            const returnTo = req.session.returnTo || '/member-portal.html';
+            delete req.session.returnTo;
+            res.redirect(returnTo);
+        });
+    })(req, res, next);
+});
 
 // GET /api/auth/status
 // Returns current authentication status for the frontend
