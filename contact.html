@@ -265,11 +265,29 @@
             <script>
                 const dateInput = document.getElementById('booking-date');
                 const timeSelect = document.getElementById('booking-time');
+                const serviceSelect = document.getElementById('booking-service');
+                const dateGroup = document.getElementById('booking-date').closest('.form-group');
+                const timeGroup = document.getElementById('booking-time').closest('.form-group');
+
+                // Toggle Date/Time based on Service Selection
+                serviceSelect.addEventListener('change', (e) => {
+                    const isOther = e.target.value === 'other';
+                    if (isOther) {
+                        dateGroup.style.display = 'none';
+                        timeGroup.style.display = 'none';
+                        dateInput.required = false;
+                        timeSelect.required = false;
+                    } else {
+                        dateGroup.style.display = 'block';
+                        timeGroup.style.display = 'block';
+                        dateInput.required = true;
+                        timeSelect.required = true;
+                    }
+                });
 
                 dateInput.addEventListener('change', async () => {
                     const date = dateInput.value;
                     if (!date) return;
-
                     timeSelect.innerHTML = '<option value="">Checking availability...</option>';
 
                     try {
@@ -292,6 +310,7 @@
                     const form = e.target;
                     const statusDiv = document.getElementById('booking-status');
                     const submitBtn = document.getElementById('submit-booking');
+                    const isOther = form.elements['service'].value === 'other';
 
                     submitBtn.disabled = true;
                     submitBtn.textContent = 'Submitting Request...';
@@ -301,8 +320,8 @@
                         name: form.elements['name'].value,
                         email: form.elements['email'].value,
                         service: form.elements['service'].value,
-                        date: form.elements['date'].value,
-                        time: form.elements['time'].value,
+                        date: isOther ? new Date().toISOString().split('T')[0] : form.elements['date'].value,
+                        time: isOther ? 'General Inquiry' : form.elements['time'].value,
                         message: form.elements['message'].value
                     };
 
@@ -311,6 +330,8 @@
                         statusDiv.style.color = '#721c24';
                         statusDiv.textContent = 'Please enter a valid email address.';
                         statusDiv.style.display = 'block';
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Request Appointment';
                         return;
                     }
 
@@ -326,19 +347,26 @@
                         if (response.ok) {
                             statusDiv.style.backgroundColor = '#d4edda';
                             statusDiv.style.color = '#155724';
-                            statusDiv.textContent = 'Appointment requested! A confirmation email has been sent.';
+                            statusDiv.textContent = isOther ?
+                                'Success! Adria will be in contact soon.' :
+                                'Appointment requested! A confirmation email has been sent.';
                             statusDiv.style.display = 'block';
 
                             // Analytics: Track Conversion
                             if (typeof gtag === 'function') {
                                 gtag('event', 'generate_lead', {
                                     'event_category': 'form',
-                                    'event_label': 'consultation_request',
+                                    'event_label': isOther ? 'general_inquiry' : 'consultation_request',
                                     'value': 0
                                 });
                             }
 
                             form.reset();
+                            // Reset visibility
+                            dateGroup.style.display = 'block';
+                            timeGroup.style.display = 'block';
+                            dateInput.required = true;
+                            timeSelect.required = true;
                         } else {
                             statusDiv.style.backgroundColor = '#f8d7da';
                             statusDiv.style.color = '#721c24';

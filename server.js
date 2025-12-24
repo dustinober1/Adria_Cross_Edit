@@ -518,13 +518,22 @@ app.post('/api/appointments', appointmentLimiter, async (req, res) => {
         await pool.query('INSERT INTO appointments (name, email, date, time, service, message) VALUES ($1, $2, $3, $4, $5, $6)', [name, email, date, time, service, message]);
 
         // Send Confirmation Emails
-        const adminHtml = `<h3>New Appointment Request</h3><p><strong>Name:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Date:</strong> ${date} at ${time}</p><p><strong>Service:</strong> ${service}</p><p><strong>Message:</strong> ${message}</p>`;
-        const userHtml = `<h3>Appointment Request Received</h3><p>Hi ${name},</p><p>Thanks for requesting an appointment for <strong>${service}</strong> on ${date} at ${time}.</p><p>I will review your request and get back to you shortly to confirm.</p><p>Best,<br>Adria Cross</p>`;
+        let adminHtml, userHtml, emailSubject;
+
+        if (service === 'other') {
+            adminHtml = `<h3>New General Inquiry</h3><p><strong>Name:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Message:</strong> ${message}</p>`;
+            userHtml = `<h3>Inquiry Received</h3><p>Hi ${name},</p><p>Thanks for reaching out! I've received your inquiry and will be in contact soon.</p><p>Best,<br>Adria Cross</p>`;
+            emailSubject = 'Inquiry Received - Adria Cross';
+        } else {
+            adminHtml = `<h3>New Appointment Request</h3><p><strong>Name:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Date:</strong> ${date} at ${time}</p><p><strong>Service:</strong> ${service}</p><p><strong>Message:</strong> ${message}</p>`;
+            userHtml = `<h3>Appointment Request Received</h3><p>Hi ${name},</p><p>Thanks for requesting an appointment for <strong>${service}</strong> on ${date} at ${time}.</p><p>I will review your request and get back to you shortly to confirm.</p><p>Best,<br>Adria Cross</p>`;
+            emailSubject = 'Appointment Request Received - Adria Cross';
+        }
 
         // Fire and forget email sending
         Promise.all([
-            sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com,info@adriacrossedit.com', `New Booking: ${name} - ${date}`, adminHtml),
-            sendEmail(email, 'Appointment Request Received - Adria Cross', userHtml)
+            sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com,info@adriacrossedit.com', service === 'other' ? `New Inquiry: ${name}` : `New Booking: ${name} - ${date}`, adminHtml),
+            sendEmail(email, emailSubject, userHtml)
         ]).catch(err => logger.error('Email sending failed', err));
 
         res.status(201).json({ message: 'Success! Confirmation email sent.' });
