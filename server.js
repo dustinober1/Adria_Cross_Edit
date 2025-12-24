@@ -459,6 +459,32 @@ app.get('/confirm-newsletter', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /api/appointments:
+ *   post:
+ *     summary: Request a new styling appointment
+ *     tags: [Appointments]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, email, date, time]
+ *             properties:
+ *               name: { type: string }
+ *               email: { type: string, format: email }
+ *               date: { type: string, format: date }
+ *               time: { type: string }
+ *               service: { type: string }
+ *               message: { type: string }
+ *     responses:
+ *       201:
+ *         description: Appointment requested successfully
+ *       400:
+ *         description: Invalid input or slot already booked
+ */
 app.post('/api/appointments', appointmentLimiter, async (req, res) => {
     const schema = Joi.object({
         name: Joi.string().min(2).max(100).required(),
@@ -1395,11 +1421,22 @@ app.post('/api/square/webhook', (req, res) => {
     res.sendStatus(200);
 });
 
-// Ensure session for clothing matcher
-app.use('/clothing-matcher', (req, res) => {
+// Serve static files with caching
+const cacheOptions = {
+    maxAge: '1d',
+    setHeaders: (res, path) => {
+        if (path.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+        } else if (path.match(/\.(js|css|webp|png|jpg|jpeg|gif|ico|woff|woff2)$/)) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+    }
+};
+
+app.use('/clothing-matcher', (req, res, next) => {
     if (!req.session.userId) {
         req.session.userId = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        console.log('Created anonymous session for clothing matcher:', req.session.userId);
+        logger.info('Created anonymous session for clothing matcher:', { userId: req.session.userId });
     }
     next();
 });
@@ -1409,16 +1446,13 @@ app.get('/blog', (req, res) => {
     res.redirect('/blog/index.html');
 });
 
-// Clothing Matcher routes (must come before static files)
+// Clothing Matcher routes
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 app.get('/clothing-matcher', (req, res) => res.sendFile(path.join(__dirname, 'clothing-matcher', 'index.html')));
-app.get('/clothing-matcher/', (req, res) => res.sendFile(path.join(__dirname, 'clothing-matcher', 'index.html')));
 
-// Serve static files for clothing-matcher
-app.use('/clothing-matcher', express.static(path.join(__dirname, 'clothing-matcher')));
-
-app.use(express.static(path.join(__dirname)));
-app.use('/uploads', express.static(UPLOAD_ROOT));
+app.use('/clothing-matcher', express.static(path.join(__dirname, 'clothing-matcher'), cacheOptions));
+app.use(express.static(path.join(__dirname), cacheOptions));
+app.use('/uploads', express.static(UPLOAD_ROOT, { maxAge: '30d' }));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

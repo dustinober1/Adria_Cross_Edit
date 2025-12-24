@@ -6,3 +6,8 @@
 {"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-24T19:59:33.048Z"}
 {"level":"info","message":"Migrations completed successfully (initial schema).","timestamp":"2025-12-24T19:59:33.201Z"}
 {"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-24T19:59:33.202Z"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-24T20:01:01.561Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2025-12-24T20:01:01.600Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-24T20:01:01.712Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-24T20:01:01.716Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-24T20:01:01.717Z"}

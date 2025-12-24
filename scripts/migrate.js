@@ -8,40 +8,43 @@ const logger = require('../logger');
  * This handles basic creation and seeding.
  */
 async function runMigrations(dbPoolOrWrapper) {
-    const migrationPath = path.join(__dirname, '../migrations/001_initial_schema.sql');
+    const migrationsDir = path.join(__dirname, '../migrations');
     try {
-        let sql = fs.readFileSync(migrationPath, 'utf8');
+        const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort();
 
-        // Simple compatibility check: SQLite doesn't use SERIAL or TIMESTAMP (it uses INTEGER PRIMARY KEY and DATETIME)
-        // However, standard PG SERIAL/TIMESTAMP often works in many wrappers or we can adjust here.
-        if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) {
-            sql = sql.replace(/SERIAL PRIMARY KEY/g, 'INTEGER PRIMARY KEY AUTOINCREMENT');
-            sql = sql.replace(/TIMESTAMP/g, 'DATETIME');
-            sql = sql.replace(/ON CONFLICT \(name\) DO NOTHING/g, ''); // SQLite INSERT OR IGNORE
-            // SQLite specific tweaks if needed...
-        }
+        for (const file of files) {
+            logger.info(`Running migration: ${file}`);
+            const migrationPath = path.join(migrationsDir, file);
+            let sql = fs.readFileSync(migrationPath, 'utf8');
 
-        const queries = sql.split(';').filter(q => q.trim().length > 0);
+            // Simple compatibility check: SQLite doesn't use SERIAL or TIMESTAMP
+            if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) {
+                sql = sql.replace(/SERIAL PRIMARY KEY/g, 'INTEGER PRIMARY KEY AUTOINCREMENT');
+                sql = sql.replace(/TIMESTAMP/g, 'DATETIME');
+                sql = sql.replace(/ON CONFLICT \(name\) DO NOTHING/g, '');
+            }
 
-        for (let query of queries) {
-            try {
-                // For SQLite INSERT OR IGNORE fallback
-                if (sql.includes('clothing_categories') && query.includes('INSERT INTO')) {
-                    const sqliteQuery = query.replace('INSERT INTO', 'INSERT OR IGNORE INTO');
-                    await dbPoolOrWrapper.query(sqliteQuery);
-                } else {
-                    await dbPoolOrWrapper.query(query);
+            const queries = sql.split(';').filter(q => q.trim().length > 0);
+
+            for (let query of queries) {
+                try {
+                    // For SQLite INSERT OR IGNORE fallback
+                    if (sql.includes('clothing_categories') && query.includes('INSERT INTO')) {
+                        const sqliteQuery = query.replace('INSERT INTO', 'INSERT OR IGNORE INTO');
+                        await dbPoolOrWrapper.query(sqliteQuery);
+                    } else {
+                        await dbPoolOrWrapper.query(query);
+                    }
+                } catch (err) {
+                    if (err.message.includes('already exists') || err.message.includes('duplicate')) {
+                        continue;
+                    }
+                    logger.error(`Migration query failed in ${file}: ${query.substring(0, 100)}...`, err);
                 }
-            } catch (err) {
-                // If it's a "table already exists" or "column already exists" error, we can often ignore
-                if (err.message.includes('already exists') || err.message.includes('duplicate')) {
-                    continue;
-                }
-                logger.error(`Migration query failed: ${query.substring(0, 100)}...`, err);
             }
         }
 
-        logger.info('Migrations completed successfully (initial schema).');
+        logger.info('All migrations completed successfully.');
     } catch (err) {
         logger.error('Failed to run migrations:', err);
         throw err;
