@@ -2222,3 +2222,13 @@ iframe[src*="docs.google.com/forms"] {
         padding: 1.5rem;
     }
 }
+
+/* ==========================================
+   HIGHLIGHT SECTION STYLE
+   (Forces the "even" section styling for card containers)
+   ========================================== */
+.highlight-section {
+    background: #faf8f5 !important;
+    padding: 1.5rem !important;
+    border-radius: 10px;
+}
