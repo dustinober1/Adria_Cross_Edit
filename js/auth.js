@@ -44,7 +44,7 @@ const Auth = {
             // Update user display
             userDisplays.forEach(el => {
                 const name = this.state.user.displayName || this.state.user.username || 'Client';
-                el.textContent = `Hi, ${name.split(' ')[0]}`;
+                el.innerHTML = `<a href="/member-portal.html" style="text-decoration:none; color:inherit;">Hi, ${name.split(' ')[0]}</a>`;
                 el.style.display = 'block';
             });
 

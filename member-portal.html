@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Portal | Adria Cross Edit</title>
+    <link rel="icon" href="images/icon-152x152.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" defer></script>
+    <link rel="stylesheet" href="css/landing.min.css">
+    <style>
+        .portal-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .portal-header h1 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .portal-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #f8f8f8;
+        }
+
+        .profile-info h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+        }
+
+        .profile-info p {
+            margin: 0;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #444;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group input[readonly] {
+            background-color: #f9f9f9;
+            cursor: not-allowed;
+        }
+
+        .btn-save {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .btn-save:hover {
+            opacity: 0.9;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: #fdfbf8;
+            border: 1px dashed #d4a574;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="top-nav" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html" class="has-logo">
+                    <img src="images/icon-144x144.webp" alt="Adria Cross Edit Logo" class="logo-image" loading="lazy"
+                        width="50" height="50">
+                    <span class="logo-text">Adria Cross</span>
+                </a>
+            </div>
+            <button class="nav-toggle" id="navToggle">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="clothing-matcher/">Clothing Matcher</a></li>
+                <li class="auth-user-display" style="display:none; color: var(--primary); font-weight: 600;"></li>
+                <li><a href="#" class="auth-link" data-action="logout">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main id="main-content" role="main" style="padding-top: 100px; min-height: 80vh;">
+        <div class="article-container">
+            
+            <div class="portal-header">
+                <h1>Member Portal</h1>
+                <p>Manage your profile and preferences</p>
+            </div>
+
+            <!-- Profile Section -->
+            <div class="portal-card">
+                <div class="profile-header">
+                    <img id="profile-pic" src="images/adria-stylist.webp" alt="Profile" class="profile-pic">
+                    <div class="profile-info">
+                        <h2 id="display-name">Loading...</h2>
+                        <p id="user-email">...</p>
+                        <span class="status-badge status-confirmed" style="margin-top: 0.5rem; display: inline-block; padding: 0.2rem 0.8rem; background: #e8f5e9; color: #2e7d32; border-radius: 12px; font-size: 0.8rem;">Member</span>
+                    </div>
+                </div>
+
+                <form id="profile-form">
+                    <div class="form-group">
+                        <label for="input-name">Display Name</label>
+                        <input type="text" id="input-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-email">Email Address</label>
+                        <input type="email" id="input-email" readonly>
+                        <small style="color: #888;">Email cannot be changed as it is linked to your login provider.</small>
+                    </div>
+                    
+                    <div id="profile-status" style="margin-bottom: 1rem; display: none;"></div>
+                    <button type="submit" class="btn-save">Save Changes</button>
+                </form>
+            </div>
+
+            <!-- Coming Soon Section -->
+            <div class="article-section">
+                <h2 style="text-align: center; margin-bottom: 1.5rem;">Coming Soon</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <span class="feature-icon">📅</span>
+                        <h3>Appointment History</h3>
+                        <p>View past and upcoming appointments with details.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">👗</span>
+                        <h3>Digital Wardrobe</h3>
+                        <p>Advanced wardrobe management and outfit planning.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">💳</span>
+                        <h3>Billing & Invoices</h3>
+                        <p>View invoices and manage payment methods.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer" role="contentinfo">
+        <div class="footer-bottom">
+            <p class="footer-copyright">© 2025 Adria Cross. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Portal Logic
+        document.addEventListener('DOMContentLoaded', async () => {
+            const auth = await Auth.checkStatus();
+            
+            if (!auth.isAuthenticated) {
+                window.location.href = '/index.html?login=required';
+                return;
+            }
+
+            // Populate Profile
+            const user = auth.user;
+            document.getElementById('display-name').textContent = user.displayName || user.username;
+            document.getElementById('user-email').textContent = user.email || 'No email linked';
+            document.getElementById('input-name').value = user.displayName || user.username || '';
+            document.getElementById('input-email').value = user.email || '';
+            
+            if (user.profilePicture) {
+                document.getElementById('profile-pic').src = user.profilePicture;
+            } else {
+                // Generate initial avatar
+                const initial = (user.displayName || user.username || 'U')[0].toUpperCase();
+                document.getElementById('profile-pic').src = `https://ui-avatars.com/api/?name=${initial}&background=c19a5d&color=fff`;
+            }
+
+            // Handle Form Submit
+            document.getElementById('profile-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = e.target.querySelector('button');
+                const status = document.getElementById('profile-status');
+                
+                btn.disabled = true;
+                btn.textContent = 'Saving...';
+                status.style.display = 'none';
+
+                try {
+                    const res = await fetch('/api/user/profile', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            displayName: document.getElementById('input-name').value
+                        })
+                    });
+
+                    if (res.ok) {
+                        status.innerHTML = '<span style="color: green;">✓ Profile updated successfully</span>';
+                        status.style.display = 'block';
+                        // Update global auth state
+                        await Auth.checkStatus();
+                        Auth.updateUI();
+                        // Update local header
+                        document.getElementById('display-name').textContent = document.getElementById('input-name').value;
+                    } else {
+                        throw new Error('Update failed');
+                    }
+                } catch (err) {
+                    status.innerHTML = '<span style="color: red;">❌ Failed to update profile</span>';
+                    status.style.display = 'block';
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Save Changes';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
