@@ -351,8 +351,6 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
 // Determine session database path (same logic as SQLite init)
-const path = require('path');
-const fs = require('fs');
 let sessionDbPath = process.env.DATABASE_URL?.replace('sqlite:', '') || './adria_cross.db';
 if (process.env.NODE_ENV === 'production' && !path.isAbsolute(sessionDbPath)) {
     sessionDbPath = path.join('/tmp', 'adria_cross.db');
