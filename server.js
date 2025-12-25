@@ -363,13 +363,21 @@ app.use(cookieParser());
 
 // Determine session database path (same logic as SQLite init)
 let sessionDbPath = process.env.DATABASE_URL?.replace('sqlite:', '') || './adria_cross.db';
+let sessionDbDir = '.';
+let sessionDbFilename = sessionDbPath;
+
 if (process.env.NODE_ENV === 'production' && !path.isAbsolute(sessionDbPath)) {
-    sessionDbPath = path.join('/tmp', 'adria_cross.db');
+    sessionDbDir = '/tmp';
+    sessionDbFilename = 'adria_cross.db';
+    sessionDbPath = path.join(sessionDbDir, sessionDbFilename);
     logger.info(`Production: Session DB at ${sessionDbPath}`);
+} else {
+    // For absolute paths or development, extract dir and filename
+    sessionDbDir = path.dirname(sessionDbPath);
+    sessionDbFilename = path.basename(sessionDbPath);
 }
 
 // Ensure database directory exists before session store initialization
-const sessionDbDir = path.dirname(sessionDbPath);
 if (!fs.existsSync(sessionDbDir)) {
     logger.info(`Creating session DB directory: ${sessionDbDir}`);
     fs.mkdirSync(sessionDbDir, { recursive: true });
@@ -386,7 +394,8 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     store: new SQLiteStore({
-        db: sessionDbPath,
+        dir: sessionDbDir,
+        db: sessionDbFilename,
         table: 'sessions'
     }),
     cookie: {
