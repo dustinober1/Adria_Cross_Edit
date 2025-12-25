@@ -229,8 +229,240 @@ body {
 }
 
 /* ============================================
-   Verification Section
+   Auth Promo Section (Unlock Unlimited)
    ============================================ */
+.auth-promo-section {
+    background: var(--bg-white);
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.promo-banner {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.promo-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.promo-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.promo-text {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    margin-bottom: 1.5rem;
+}
+
+.promo-features {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.promo-feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.promo-feature .feature-icon {
+    font-size: 1.2rem;
+}
+
+/* Auth Tabs */
+.auth-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 1rem;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    position: relative;
+}
+
+.auth-tab:hover {
+    background: var(--bg-light);
+    color: var(--text-dark);
+}
+
+.auth-tab.active {
+    color: var(--primary-color);
+}
+
+.auth-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary-color);
+}
+
+/* Auth Panels */
+.auth-panel {
+    padding: 2rem;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.auth-form .form-group {
+    margin-bottom: 0;
+}
+
+.btn-full {
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.auth-help {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.auth-help a {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-help a:hover {
+    text-decoration: underline;
+}
+
+/* Social Auth Styles */
+.social-auth-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0 0 1rem 0;
+    width: 100%;
+}
+
+.btn-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-white);
+    color: #333;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    text-decoration: none;
+}
+
+.btn-social:hover {
+    background-color: var(--bg-light);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.btn-social img {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+}
+
+.btn-google {
+    color: #3c4043;
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1rem 0;
+    color: var(--text-lighter);
+    font-size: 0.9rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.auth-divider span {
+    padding: 0 15px;
+}
+
+/* Limit Warning */
+.limit-warning {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+    border: 1px solid #ffc107;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.warning-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.warning-icon {
+    font-size: 1.5rem;
+}
+
+.warning-text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.warning-text strong {
+    color: #856404;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.warning-text p {
+    margin: 0;
+    color: #6d5700;
+    font-size: 0.9rem;
+}
+
+/* Legacy Verification Section (keep for backwards compat) */
 .verification-section {
     background: var(--bg-white);
     border-radius: 16px;
@@ -673,6 +905,29 @@ body {
     .verification-form {
         flex-direction: column;
         max-width: 100%;
+    }
+
+    /* Auth Promo Section Mobile */
+    .promo-features {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .promo-title {
+        font-size: 1.5rem;
+    }
+
+    .promo-text {
+        font-size: 1rem;
+    }
+
+    .auth-panel {
+        padding: 1.5rem;
+    }
+
+    .warning-content {
+        flex-direction: column;
+        text-align: center;
     }
 }
 

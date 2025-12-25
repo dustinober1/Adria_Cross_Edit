@@ -59,110 +59,118 @@
                 <p class="matcher-subtitle">Upload your wardrobe and discover perfect outfit combinations</p>
             </div>
 
-            <!-- Client Verification Section -->
-            <div class="verification-section" id="verificationSection" style="display: none;">
-                <h2 class="verification-title">🎯 Unlock Unlimited Access</h2>
-                <p style="text-align: center; margin-bottom: 1.5rem; color: var(--text-light);">
-                    Are you an existing client? Sign in or enter your email and verification code to unlock unlimited uploads and
-                    premium features.
-                </p>
-                <!-- Social Login Buttons Component -->
-                <style>
-                    .social-auth-container {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 12px;
-                        margin: 20px 0;
-                        width: 100%;
-                    }
-                
-                    .btn-social {
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        width: 100%;
-                        padding: 12px;
-                        border: 1px solid #ddd;
-                        border-radius: 8px;
-                        background-color: #fff;
-                        color: #333;
-                        font-family: 'Montserrat', sans-serif;
-                        font-weight: 600;
-                        font-size: 1rem;
-                        cursor: pointer;
-                        transition: all 0.2s ease;
-                        text-decoration: none;
-                    }
-                
-                    .btn-social:hover {
-                        background-color: #f5f5f5;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                        transform: translateY(-1px);
-                    }
-                
-                    .btn-social img {
-                        width: 20px;
-                        height: 20px;
-                        margin-right: 12px;
-                    }
-                
-                    .btn-google {
-                        color: #3c4043;
-                    }
-                
-                    .auth-divider {
-                        display: flex;
-                        align-items: center;
-                        text-align: center;
-                        margin: 15px 0;
-                        color: #888;
-                        font-size: 0.9rem;
-                    }
-                    
-                    .auth-divider::before,
-                    .auth-divider::after {
-                        content: '';
-                        flex: 1;
-                        border-bottom: 1px solid #ddd;
-                    }
-                    
-                    .auth-divider span {
-                        padding: 0 10px;
-                    }
-                </style>
-                
-                <div class="social-auth-container">
-                    <a href="/auth/google" class="btn-social btn-google">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
-                        Sign in with Google
-                    </a>
+            <!-- Auth Promo Section - Shown to non-authenticated users -->
+            <div class="auth-promo-section" id="authPromoSection" style="display: none;">
+                <div class="promo-banner">
+                    <div class="promo-icon">✨</div>
+                    <h2 class="promo-title">Unlock Unlimited Uploads</h2>
+                    <p class="promo-text">
+                        Create a <strong>FREE account</strong> to upload unlimited clothing items and save your wardrobe
+                        permanently!
+                    </p>
+                    <div class="promo-features">
+                        <div class="promo-feature">
+                            <span class="feature-icon">📸</span>
+                            <span>Unlimited uploads</span>
+                        </div>
+                        <div class="promo-feature">
+                            <span class="feature-icon">💾</span>
+                            <span>Save your wardrobe</span>
+                        </div>
+                        <div class="promo-feature">
+                            <span class="feature-icon">👗</span>
+                            <span>Personalized matches</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="auth-divider">
-                    <span>OR</span>
+
+                <!-- Auth Tabs -->
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-auth-tab="login"
+                        onclick="switchAuthTab('login')">Login</button>
+                    <button class="auth-tab" data-auth-tab="register" onclick="switchAuthTab('register')">Create
+                        Account</button>
                 </div>
-                <form class="verification-form" id="verificationForm">
-                    <input type="email" id="clientEmail" placeholder="Your email address" class="form-input" required>
-                    <button type="submit" class="btn btn-primary">Request Code</button>
-                </form>
-                <div id="codeEntrySection" style="display: none; margin-top: 1.5rem;">
-                    <input type="text" id="verificationCode" placeholder="Enter 6-digit code" class="form-input"
-                        maxlength="6" style="text-align: center; letter-spacing: 2px; font-size: 1.2rem;">
-                    <button type="button" class="btn btn-primary"
-                        onclick="app.actions.verifyCode(document.getElementById('clientEmail').value, document.getElementById('verificationCode').value)">Verify</button>
+
+                <!-- Login Panel -->
+                <div class="auth-panel" id="loginPanel">
+                    <div class="social-auth-container">
+                        <a href="/auth/google" class="btn-social btn-google">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                                alt="Google Logo">
+                            Sign in with Google
+                        </a>
+                    </div>
+                    <div class="auth-divider">
+                        <span>OR</span>
+                    </div>
+                    <form class="auth-form" id="loginForm">
+                        <div class="form-group">
+                            <input type="text" id="loginUsername" placeholder="Email or Username" class="form-input"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="loginPassword" placeholder="Password" class="form-input"
+                                required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">Login</button>
+                    </form>
+                    <p class="auth-help">Don't have an account? <a href="#"
+                            onclick="switchAuthTab('register'); return false;">Create one for free!</a></p>
+                </div>
+
+                <!-- Register Panel -->
+                <div class="auth-panel" id="registerPanel" style="display: none;">
+                    <div class="social-auth-container">
+                        <a href="/auth/google" class="btn-social btn-google">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                                alt="Google Logo">
+                            Sign up with Google
+                        </a>
+                    </div>
+                    <div class="auth-divider">
+                        <span>OR</span>
+                    </div>
+                    <form class="auth-form" id="registerForm">
+                        <div class="form-group">
+                            <input type="text" id="regUsername" placeholder="Choose a username" class="form-input"
+                                required minlength="3">
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="regEmail" placeholder="Email address" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="regDisplayName" placeholder="Your name (optional)"
+                                class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="regPassword" placeholder="Password (min 6 characters)"
+                                class="form-input" required minlength="6">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">Create Free Account</button>
+                    </form>
+                    <p class="auth-help">Already have an account? <a href="#"
+                            onclick="switchAuthTab('login'); return false;">Login here</a></p>
                 </div>
             </div>
 
-            <!-- Category Limits Display -->
+            <!-- Upload Limit Warning - Shown when limit is reached -->
+            <div class="limit-warning" id="limitWarning" style="display: none;">
+                <div class="warning-content">
+                    <span class="warning-icon">⚠️</span>
+                    <div class="warning-text">
+                        <strong>You've reached the limit of 2 items per category.</strong>
+                        <p>Create a free account to unlock unlimited uploads!</p>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="showAuthSection()">Create Free Account</button>
+                </div>
+            </div>
+
+            <!-- Authenticated User Limits Display -->
             <div class="limits-display" id="limitsDisplay" style="display: none;">
                 <h3 class="limits-title">📊 Your Upload Limits</h3>
                 <div class="limits-grid">
                     <!-- Limits will be populated by JavaScript -->
-                </div>
-                <div style="text-align: center; margin-top: 1.5rem;">
-                    <button class="btn btn-secondary"
-                        onclick="document.getElementById('verificationSection').style.display = 'block'; document.getElementById('limitsDisplay').style.display = 'none';">
-                        Verify Client Access
-                    </button>
                 </div>
             </div>
 
@@ -343,6 +351,140 @@
     <script src="/js/main.min.js"></script>
     <script src="/clothing-matcher/js/matcher.js"></script>
     <script src="/js/auth.js"></script>
+    <script>
+        // Auth Tab Switching
+        function switchAuthTab(tab) {
+            const loginPanel = document.getElementById('loginPanel');
+            const registerPanel = document.getElementById('registerPanel');
+            const tabs = document.querySelectorAll('.auth-tab');
+
+            tabs.forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-auth-tab="${tab}"]`)?.classList.add('active');
+
+            if (tab === 'login') {
+                loginPanel.style.display = 'block';
+                registerPanel.style.display = 'none';
+            } else {
+                loginPanel.style.display = 'none';
+                registerPanel.style.display = 'block';
+            }
+        }
+
+        // Show Auth Section
+        function showAuthSection() {
+            const authSection = document.getElementById('authPromoSection');
+            if (authSection) {
+                authSection.style.display = 'block';
+                authSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // Check Auth Status and Update UI
+        async function checkMatcherAuth() {
+            try {
+                const response = await fetch('/api/auth/status');
+                const data = await response.json();
+
+                const authPromo = document.getElementById('authPromoSection');
+                const limitsDisplay = document.getElementById('limitsDisplay');
+
+                if (data.authenticated) {
+                    // User is logged in - hide auth promo, show limits
+                    if (authPromo) authPromo.style.display = 'none';
+                    if (limitsDisplay) limitsDisplay.style.display = 'block';
+                } else {
+                    // User is not logged in - show auth promo
+                    if (authPromo) authPromo.style.display = 'block';
+                    if (limitsDisplay) limitsDisplay.style.display = 'none';
+                }
+
+                return data;
+            } catch (error) {
+                console.error('Auth check error:', error);
+                return { authenticated: false };
+            }
+        }
+
+        // Login Form Handler
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const btn = this.querySelector('button[type="submit"]');
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Logging in...';
+                    btn.disabled = true;
+
+                    try {
+                        const response = await fetch('/api/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                username: document.getElementById('loginUsername').value,
+                                password: document.getElementById('loginPassword').value
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.success) {
+                            window.location.reload();
+                        } else {
+                            alert(data.error || 'Login failed. Please check your credentials.');
+                        }
+                    } catch (error) {
+                        alert('Login failed. Please try again.');
+                    } finally {
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    }
+                });
+            }
+
+            if (registerForm) {
+                registerForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const btn = this.querySelector('button[type="submit"]');
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Creating account...';
+                    btn.disabled = true;
+
+                    try {
+                        const response = await fetch('/api/register', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                username: document.getElementById('regUsername').value,
+                                email: document.getElementById('regEmail').value,
+                                displayName: document.getElementById('regDisplayName').value,
+                                password: document.getElementById('regPassword').value
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.success) {
+                            alert('Account created successfully! Welcome aboard! 🎉');
+                            window.location.reload();
+                        } else {
+                            alert(data.error || 'Registration failed. Please try again.');
+                        }
+                    } catch (error) {
+                        alert('Registration failed. Please try again.');
+                    } finally {
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    }
+                });
+            }
+
+            // Check auth status on load
+            checkMatcherAuth();
+        });
+    </script>
 </body>
 
 </html>
