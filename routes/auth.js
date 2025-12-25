@@ -13,9 +13,9 @@ router.get('/google', (req, res, next) => {
             })(req, res, next);
         } else {
             logger.error('Google Auth Error: Strategy "google" is not configured.');
-            res.status(501).json({ 
-                error: 'Configuration Error', 
-                message: 'Google Sign-In is not configured on this server.' 
+            res.status(501).json({
+                error: 'Configuration Error',
+                message: 'Google Sign-In is not configured on this server.'
             });
         }
     } catch (err) {
@@ -26,16 +26,23 @@ router.get('/google', (req, res, next) => {
 
 // GET /auth/google/callback
 // Handles the callback from Google
-router.get('/google/callback', 
+router.get('/google/callback',
     passport.authenticate('google', { failureRedirect: '/?login=failed' }),
     (req, res) => {
         // Successful authentication
-        logger.info(`User ${req.user.email} logged in via Google`);
-        
-        // Redirect to member portal or intended page
-        const returnTo = req.session.returnTo || '/member-portal.html';
-        delete req.session.returnTo;
-        res.redirect(returnTo);
+        const userEmail = req.user?.email || req.user?.id || 'unknown user';
+        logger.info(`User ${userEmail} logged in via Google`);
+
+        // Ensure session is saved before redirect
+        req.session.save((err) => {
+            if (err) {
+                logger.error('Session save error after Google auth:', err);
+            }
+            // Redirect to member portal or intended page
+            const returnTo = req.session.returnTo || '/member-portal.html';
+            delete req.session.returnTo;
+            res.redirect(returnTo);
+        });
     }
 );
 
@@ -59,6 +66,8 @@ router.get('/api/auth/status', (req, res) => {
             authenticated: true,
             user: {
                 id: req.user.id,
+                username: req.user.username,
+                email: req.user.email,
                 displayName: req.user.displayName,
                 profilePicture: req.user.profilePicture,
                 role: req.user.role,
@@ -66,7 +75,7 @@ router.get('/api/auth/status', (req, res) => {
             }
         });
     } else {
-        res.json({ 
+        res.json({
             authenticated: false,
             // Diagnostic info
             hasPassport: !!passport,

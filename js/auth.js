@@ -7,21 +7,21 @@ const Auth = {
         loading: true
     },
 
-    init: async function() {
+    init: async function () {
         await this.checkStatus();
         this.updateUI();
         this.setupListeners();
     },
 
-    checkStatus: async function() {
+    checkStatus: async function () {
         try {
             const response = await fetch('/api/auth/status');
             const data = await response.json();
-            
+
             this.state.isAuthenticated = data.authenticated;
             this.state.user = data.user;
             this.state.loading = false;
-            
+
             return this.state;
         } catch (error) {
             console.error('Auth check failed:', error);
@@ -30,7 +30,7 @@ const Auth = {
         }
     },
 
-    updateUI: function() {
+    updateUI: function () {
         const body = document.body;
         const authLinks = document.querySelectorAll('.auth-link'); // Login/Logout nav items
         const userDisplays = document.querySelectorAll('.auth-user-display'); // "Hi, Adria"
@@ -56,10 +56,10 @@ const Auth = {
                     link.dataset.action = 'logout';
                 }
             });
-            
+
             // Show content requiring login
             loginSections.forEach(el => el.style.display = 'none'); // Hide "Please login" msg
-            
+
             // Admin checks
             if (this.state.user.role === 'admin') {
                 adminElements.forEach(el => el.style.display = 'block');
@@ -80,14 +80,14 @@ const Auth = {
                     delete link.dataset.action;
                 }
             });
-            
-             // Show login prompts
+
+            // Show login prompts
             loginSections.forEach(el => el.style.display = 'block');
             adminElements.forEach(el => el.style.display = 'none');
         }
     },
 
-    setupListeners: function() {
+    setupListeners: function () {
         document.addEventListener('click', async (e) => {
             if (e.target.matches('[data-action="logout"]') || e.target.closest('[data-action="logout"]')) {
                 e.preventDefault();
@@ -106,23 +106,21 @@ const Auth = {
         }
     },
 
-    logout: async function() {
+    logout: async function () {
         try {
-            const response = await fetch('/routes/auth/logout', { method: 'POST' }); 
-            // Try standard route first, if 404 try api route (handling different router setups)
+            const response = await fetch('/api/auth/logout', { method: 'POST' });
             if (!response.ok) {
-                 await fetch('/api/auth/logout', { method: 'POST' });
+                console.error('Logout request failed:', response.status);
             }
-            
-            window.location.reload();
+            window.location.href = '/';
         } catch (error) {
             console.error('Logout failed:', error);
             // Force reload anyway to clear client state if possible
-            window.location.reload();
+            window.location.href = '/';
         }
     },
 
-    showToast: function(message, type = 'info') {
+    showToast: function (message, type = 'info') {
         // Simple toast implementation or use existing if avail
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
@@ -135,7 +133,7 @@ const Auth = {
         toast.style.borderRadius = '8px';
         toast.style.zIndex = '9999';
         toast.textContent = message;
-        
+
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }

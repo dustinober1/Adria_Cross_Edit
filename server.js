@@ -305,7 +305,7 @@ app.use(helmet({
             defaultSrc: ["'self'"],
             scriptSrc: ["'self'", "'unsafe-inline'", "https://js.squareupsandbox.com", "https://js.squareup.com", "https://www.googletagmanager.com", "https://www.google-analytics.com", "https://cdnjs.cloudflare.com"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://use.fontawesome.com", "https://cdnjs.cloudflare.com"],
-            imgSrc: ["'self'", "data:", "https://www.google-analytics.com", "https://*.cdninstagram.com", "https://*.fbcdn.net"],
+            imgSrc: ["'self'", "data:", "https://www.google-analytics.com", "https://*.cdninstagram.com", "https://*.fbcdn.net", "https://www.gstatic.com", "https://*.gstatic.com", "https://lh3.googleusercontent.com", "https://*.googleusercontent.com", "https://ui-avatars.com"],
             connectSrc: ["'self'", "https://www.google-analytics.com", "https://stats.g.doubleclick.net", "https://cdnjs.cloudflare.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://use.fontawesome.com", "https://cdnjs.cloudflare.com"],
             objectSrc: ["'none'"],
@@ -360,7 +360,7 @@ app.get('/api/user/profile', isAuthenticated, async (req, res) => {
     try {
         const userId = req.user ? req.user.id : req.session.userId;
         const result = await pool.query('SELECT id, username, email, display_name, profile_picture, role FROM users WHERE id = $1', [userId]);
-        
+
         if (result.rows.length > 0) {
             const user = result.rows[0];
             res.json({
@@ -384,7 +384,7 @@ app.put('/api/user/profile', isAuthenticated, async (req, res) => {
     try {
         const userId = req.user ? req.user.id : req.session.userId;
         const { displayName } = req.body;
-        
+
         await pool.query('UPDATE users SET display_name = $1 WHERE id = $2', [displayName, userId]);
         res.json({ success: true });
     } catch (err) {
