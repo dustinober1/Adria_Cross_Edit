@@ -5,9 +5,24 @@ const logger = require('../logger');
 
 // GET /auth/google
 // Initiates the Google OAuth 2.0 flow
-router.get('/google', passport.authenticate('google', {
-    scope: ['profile', 'email']
-}));
+router.get('/google', (req, res, next) => {
+    try {
+        if (passport._strategies && passport._strategies.google) {
+            passport.authenticate('google', {
+                scope: ['profile', 'email']
+            })(req, res, next);
+        } else {
+            logger.error('Google Auth Error: Strategy "google" is not configured.');
+            res.status(501).json({ 
+                error: 'Configuration Error', 
+                message: 'Google Sign-In is not configured on this server.' 
+            });
+        }
+    } catch (err) {
+        logger.error('Google Auth Route Error:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 // GET /auth/google/callback
 // Handles the callback from Google
