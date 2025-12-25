@@ -217,10 +217,16 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) 
                 // Verify the admin was created
                 const verifyAdmin = await db.get('SELECT id, username FROM users WHERE username = ?', ['admin']);
                 logger.info(`Admin verification: ${JSON.stringify(verifyAdmin)}`);
-            } else if (hasRoleColumn && adminCheck.role !== 'admin') {
-                // Ensure existing admin user has admin role
-                await db.run('UPDATE users SET role = ? WHERE username = ?', ['admin', 'admin']);
-                logger.info('Updated admin user role to admin');
+            } else if (hasRoleColumn) {
+                // Check if admin user needs role update
+                logger.info(`Admin user exists, current role: "${adminCheck.role}"`);
+                if (!adminCheck.role || adminCheck.role !== 'admin') {
+                    // Ensure existing admin user has admin role
+                    await db.run('UPDATE users SET role = ? WHERE username = ?', ['admin', 'admin']);
+                    logger.info('Updated admin user role to admin');
+                } else {
+                    logger.info('Admin user already has correct role');
+                }
             }
 
             logger.info('SQLite database initialized successfully');
