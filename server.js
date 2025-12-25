@@ -4,6 +4,7 @@ const cors = require('cors');
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
+const SQLiteStore = require('connect-sqlite3')(session);
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
@@ -334,10 +335,14 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'dev-only-insecure-secret',
     resave: false,
     saveUninitialized: false,
+    store: new SQLiteStore({
+        db: process.env.DATABASE_URL?.replace('sqlite:', '') || './adria_cross.db',
+        table: 'sessions'
+    }),
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
-        sameSite: 'lax', // Relaxed slightly for OAuth redirects
+        sameSite: 'lax',
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
 }));
