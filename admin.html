@@ -921,7 +921,7 @@
         <section id="dashboard-section">
             <div class="dashboard-header">
                 <h1>Owner Dashboard</h1>
-                <button onclick="logout()"
+                <button id="logout-btn"
                     style="padding:0.5rem 1rem; background:none; border:1px solid #ccc; border-radius:5px; cursor:pointer;">Logout</button>
             </div>
 
@@ -1072,9 +1072,9 @@
 
                     <!-- Calendar Navigation -->
                     <div class="calendar-nav">
-                        <button class="cal-nav-btn" onclick="changeMonth(-1)">◀ Previous</button>
+                        <button class="cal-nav-btn" id="cal-prev-month">◀ Previous</button>
                         <h3 id="calendar-month-title"></h3>
-                        <button class="cal-nav-btn" onclick="changeMonth(1)">Next ▶</button>
+                        <button class="cal-nav-btn" id="cal-next-month">Next ▶</button>
                     </div>
 
                     <!-- Month Calendar Grid -->
@@ -1106,13 +1106,13 @@
     <!-- Date Override Modal -->
     <div id="date-modal" class="modal">
         <div class="modal-content" style="max-width: 550px;">
-            <span class="close-modal" onclick="closeDateModal()">&times;</span>
+            <span class="close-modal" id="close-date-modal">&times;</span>
             <h2 id="date-modal-title">Set Availability</h2>
             <p id="date-modal-subtitle" style="color: #666; margin-bottom: 1.5rem;"></p>
 
             <div class="date-modal-toggle">
                 <label>
-                    <input type="checkbox" id="date-enabled-toggle" onchange="toggleDateEnabled()">
+                    <input type="checkbox" id="date-enabled-toggle">
                     <span id="date-enabled-label">Make this date available for bookings</span>
                 </label>
             </div>
@@ -1125,29 +1125,29 @@
                 <div style="margin: 1rem 0;">
                     <p style="font-size: 0.85rem; color: #888; margin-bottom: 0.5rem;">Quick add:</p>
                     <div class="quick-times">
-                        <button class="quick-time-btn" onclick="quickAddSlot('9:00 AM')">9 AM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('10:00 AM')">10 AM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('11:00 AM')">11 AM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('12:00 PM')">12 PM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('1:00 PM')">1 PM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('2:00 PM')">2 PM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('3:00 PM')">3 PM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('4:00 PM')">4 PM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('5:00 PM')">5 PM</button>
-                        <button class="quick-time-btn" onclick="quickAddSlot('6:00 PM')">6 PM</button>
+                        <button class="quick-time-btn" data-time="9:00 AM">9 AM</button>
+                        <button class="quick-time-btn" data-time="10:00 AM">10 AM</button>
+                        <button class="quick-time-btn" data-time="11:00 AM">11 AM</button>
+                        <button class="quick-time-btn" data-time="12:00 PM">12 PM</button>
+                        <button class="quick-time-btn" data-time="1:00 PM">1 PM</button>
+                        <button class="quick-time-btn" data-time="2:00 PM">2 PM</button>
+                        <button class="quick-time-btn" data-time="3:00 PM">3 PM</button>
+                        <button class="quick-time-btn" data-time="4:00 PM">4 PM</button>
+                        <button class="quick-time-btn" data-time="5:00 PM">5 PM</button>
+                        <button class="quick-time-btn" data-time="6:00 PM">6 PM</button>
                     </div>
                 </div>
 
                 <div class="add-slot-row" style="margin-top: 1rem;">
                     <input type="text" placeholder="Custom time (e.g. 7:30 PM)" id="new-date-slot"
                         style="flex: 1; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
-                    <button class="btn-view" onclick="addDateSlot()">+ Add</button>
+                    <button class="btn-view" id="add-date-slot-btn">+ Add</button>
                 </div>
             </div>
 
             <div class="date-modal-actions">
-                <button class="btn-secondary" onclick="clearAllSlots()">Clear All Slots</button>
-                <button class="btn-primary" onclick="saveDateOverride()">Save Changes</button>
+                <button class="btn-secondary" id="clear-all-slots-btn">Clear All Slots</button>
+                <button class="btn-primary" id="save-date-override-btn">Save Changes</button>
             </div>
         </div>
     </div>
@@ -1155,7 +1155,7 @@
     <!-- Details Modal -->
     <div id="details-modal" class="modal">
         <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <span class="close-modal" id="close-details-modal">&times;</span>
             <div id="modal-data"></div>
         </div>
     </div>
@@ -1185,6 +1185,7 @@
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('dashboard-section').style.display = 'block';
             initTabHandlers(); // Initialize tab click handlers (CSP-compliant)
+            initEventHandlers(); // Initialize all event handlers (CSP-compliant)
             loadAppointments();
             loadIntake();
             loadOverrides();
@@ -1202,7 +1203,7 @@
                     <td>${app.service}</td>
                     <td><span class="status-badge status-${app.status}">${app.status}</span></td>
                     <td>
-                        <button onclick="updateApp(${app.id}, 'confirmed')" class="btn-view" style="background:#28a745">Confirm</button>
+                        <button data-app-id="${app.id}" data-action="confirm-appointment" class="btn-view" style="background:#28a745">Confirm</button>
                     </td>
                 </tr>
             `).join('');
@@ -1218,7 +1219,7 @@
                     <td>${new Date(sub.created_at).toLocaleDateString()}</td>
                     <td><b>${sub.name}</b><br>${sub.email}</td>
                     <td>${sub.form_type}</td>
-                    <td><button onclick="viewIntake(${sub.id})" class="btn-view">View Full Profile</button></td>
+                    <td><button data-intake-id="${sub.id}" data-action="view-intake" class="btn-view">View Full Profile</button></td>
                 </tr>
             `).join('');
             window.allIntake = data;
@@ -1296,7 +1297,7 @@
                 }
 
                 html += `
-                    <div class="${classes.join(' ')}" onclick="openDateModal('${dateStr}')">
+                    <div class="${classes.join(' ')}" data-date="${dateStr}">
                         <div class="cal-day-number">${day}</div>
                         <div class="cal-day-indicator">
                             ${indicators.map(i => `<span class="cal-indicator-dot ${i}"></span>`).join('')}
@@ -1374,11 +1375,6 @@
             document.getElementById('date-modal').style.display = 'block';
         }
 
-        function closeDateModal() {
-            document.getElementById('date-modal').style.display = 'none';
-            selectedDateData = null;
-        }
-
         function toggleDateEnabled() {
             const enabled = document.getElementById('date-enabled-toggle').checked;
             const container = document.getElementById('date-slots-container');
@@ -1404,7 +1400,7 @@
             } else {
                 list.innerHTML = sortedSlots.map(s => `
                     <div class="slot-pill">
-                        ${s} <span class="remove-slot" onclick="removeDateSlot('${s}')">&times;</span>
+                        ${s} <span class="remove-slot" data-slot="${s}">&times;</span>
                     </div>
                 `).join('');
             }
@@ -1470,7 +1466,7 @@
             });
 
             await loadOverrides();
-            closeDateModal();
+            closeDateModalFn();
         }
 
 
@@ -1490,7 +1486,7 @@
             if (files && files.length > 0) {
                 html += `<div class="photo-gallery">`;
                 files.forEach(f => {
-                    html += `<img src="/uploads/${f}" onclick="window.open('/uploads/${f}')">`;
+                    html += `<img src="/uploads/${f}" data-photo="/uploads/${f}" class="gallery-photo">`;
                 });
                 html += `</div>`;
             }
@@ -1555,6 +1551,108 @@
                     switchTab(tabName, this);
                 });
             });
+        }
+
+        // Initialize all event handlers using event delegation (CSP-compliant)
+        function initEventHandlers() {
+            // Logout button
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', logout);
+            }
+
+            // Calendar navigation
+            const prevMonthBtn = document.getElementById('cal-prev-month');
+            const nextMonthBtn = document.getElementById('cal-next-month');
+            if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => changeMonth(-1));
+            if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => changeMonth(1));
+
+            // Date modal close
+            const closeDateModal = document.getElementById('close-date-modal');
+            if (closeDateModal) {
+                closeDateModal.addEventListener('click', closeDateModalFn);
+            }
+
+            // Details modal close
+            const closeDetailsModal = document.getElementById('close-details-modal');
+            if (closeDetailsModal) {
+                closeDetailsModal.addEventListener('click', closeModalFn);
+            }
+
+            // Date enabled toggle
+            const dateEnabledToggle = document.getElementById('date-enabled-toggle');
+            if (dateEnabledToggle) {
+                dateEnabledToggle.addEventListener('change', toggleDateEnabled);
+            }
+
+            // Quick time buttons
+            document.querySelectorAll('.quick-time-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    quickAddSlot(this.dataset.time);
+                });
+            });
+
+            // Add date slot button
+            const addDateSlotBtn = document.getElementById('add-date-slot-btn');
+            if (addDateSlotBtn) {
+                addDateSlotBtn.addEventListener('click', addDateSlot);
+            }
+
+            // Clear all slots button
+            const clearAllSlotsBtn = document.getElementById('clear-all-slots-btn');
+            if (clearAllSlotsBtn) {
+                clearAllSlotsBtn.addEventListener('click', clearAllSlots);
+            }
+
+            // Save date override button
+            const saveDateOverrideBtn = document.getElementById('save-date-override-btn');
+            if (saveDateOverrideBtn) {
+                saveDateOverrideBtn.addEventListener('click', saveDateOverride);
+            }
+
+            // Event delegation for dynamically generated elements
+            document.addEventListener('click', function(e) {
+                // Calendar day clicks (date-modal)
+                const calDay = e.target.closest('.cal-day[data-date]');
+                if (calDay && !calDay.classList.contains('empty')) {
+                    openDateModal(calDay.dataset.date);
+                    return;
+                }
+
+                // Remove slot clicks
+                if (e.target.classList.contains('remove-slot')) {
+                    removeDateSlot(e.target.dataset.slot);
+                    return;
+                }
+
+                // Confirm appointment button
+                if (e.target.matches('[data-action="confirm-appointment"]')) {
+                    updateApp(parseInt(e.target.dataset.appId), 'confirmed');
+                    return;
+                }
+
+                // View intake button
+                if (e.target.matches('[data-action="view-intake"]')) {
+                    viewIntake(parseInt(e.target.dataset.intakeId));
+                    return;
+                }
+
+                // Gallery photo click
+                if (e.target.classList.contains('gallery-photo')) {
+                    window.open(e.target.dataset.photo);
+                    return;
+                }
+            });
+        }
+
+        // Rename functions to avoid conflicts with element IDs
+        function closeDateModalFn() {
+            document.getElementById('date-modal').style.display = 'none';
+            selectedDateData = null;
+        }
+
+        function closeModalFn() {
+            document.getElementById('details-modal').style.display = 'none';
         }
 
         function closeModal() { document.getElementById('details-modal').style.display = 'none'; }
