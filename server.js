@@ -141,11 +141,33 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) 
                 if (!db) {
                     throw new Error('Database not initialized');
                 }
-                if (sql.trim().toLowerCase().startsWith('select')) {
-                    const result = await db.all(sql, params);
+
+                // Convert PostgreSQL-style $1, $2, etc. to SQLite ? placeholders
+                let sqliteQuery = sql;
+                let sqliteParams = params;
+
+                // Check if the query uses PostgreSQL-style placeholders
+                if (sql.includes('$1')) {
+                    // Replace $N with ? and reorder params if needed
+                    // PostgreSQL allows reusing the same placeholder ($1 can appear multiple times)
+                    // SQLite requires one ? for each parameter position
+                    const placeholderMatches = sql.match(/\$(\d+)/g) || [];
+                    sqliteParams = [];
+
+                    placeholderMatches.forEach(placeholder => {
+                        const index = parseInt(placeholder.substring(1)) - 1; // $1 -> index 0
+                        sqliteParams.push(params[index]);
+                    });
+
+                    // Replace all $N with ?
+                    sqliteQuery = sql.replace(/\$\d+/g, '?');
+                }
+
+                if (sqliteQuery.trim().toLowerCase().startsWith('select')) {
+                    const result = await db.all(sqliteQuery, sqliteParams);
                     return { rows: result };
                 } else {
-                    await db.run(sql, params);
+                    await db.run(sqliteQuery, sqliteParams);
                     return { rows: [] };
                 }
             } catch (error) {
