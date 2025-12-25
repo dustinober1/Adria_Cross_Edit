@@ -171,7 +171,12 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) 
             if (!adminCheck) {
                 const password = process.env.ADMIN_PASSWORD || 'adria2025';
                 const hash = bcrypt.hashSync(password, 10);
-                await db.run('INSERT INTO users (username, password) VALUES (?, ?)', ['admin', hash]);
+                await db.run('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', ['admin', hash, 'admin']);
+                logger.info('Created default admin user with admin role');
+            } else if (adminCheck.role !== 'admin') {
+                // Ensure existing admin user has admin role
+                await db.run('UPDATE users SET role = ? WHERE username = ?', ['admin', 'admin']);
+                logger.info('Updated admin user role to admin');
             }
 
             logger.info('SQLite database initialized successfully');
