@@ -121,11 +121,15 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) 
         logger.info(`Production: Using SQLite at ${dbPath}`);
     }
 
-    // Ensure database directory exists
+    // Ensure database directory exists (synchronously, before any DB operations)
     const dbDir = path.dirname(dbPath);
     if (!fs.existsSync(dbDir)) {
         logger.info(`Creating database directory: ${dbDir}`);
-        fs.mkdirSync(dbDir, { recursive: true });
+        try {
+            fs.mkdirSync(dbDir, { recursive: true });
+        } catch (mkdirErr) {
+            logger.error(`Failed to create database directory ${dbDir}:`, mkdirErr);
+        }
     }
 
     let db;
@@ -177,8 +181,15 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) 
         }
     }
 
-    // Initialize SQLite database immediately
-    initSqliteDb();
+    // Initialize SQLite database immediately and wait for it
+    (async () => {
+        try {
+            await initSqliteDb();
+        } catch (err) {
+            logger.error('Fatal: Database initialization failed, exiting:', err);
+            process.exit(1);
+        }
+    })();
 } else {
     // PostgreSQL configuration
     const { Pool } = require('pg');
@@ -362,6 +373,12 @@ const sessionDbDir = path.dirname(sessionDbPath);
 if (!fs.existsSync(sessionDbDir)) {
     logger.info(`Creating session DB directory: ${sessionDbDir}`);
     fs.mkdirSync(sessionDbDir, { recursive: true });
+}
+
+// Touch the database file to ensure it exists before SQLiteStore tries to open it
+if (!fs.existsSync(sessionDbPath)) {
+    logger.info(`Creating empty database file: ${sessionDbPath}`);
+    fs.closeSync(fs.openSync(sessionDbPath, 'w'));
 }
 
 app.use(session({
