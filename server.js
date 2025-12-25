@@ -190,11 +190,17 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) 
 
             // Create default admin user if not exists
             const adminCheck = await db.get('SELECT * FROM users WHERE username = ?', ['admin']);
+            logger.info(`Admin check result: ${adminCheck ? 'user exists' : 'user not found'}`);
             if (!adminCheck) {
                 const password = process.env.ADMIN_PASSWORD || 'adria2025';
+                logger.info(`Creating admin user with password from ${process.env.ADMIN_PASSWORD ? 'ADMIN_PASSWORD env var' : 'default'}`);
                 const hash = bcrypt.hashSync(password, 10);
                 await db.run('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', ['admin', hash, 'admin']);
                 logger.info('Created default admin user with admin role');
+
+                // Verify the admin was created
+                const verifyAdmin = await db.get('SELECT id, username, role FROM users WHERE username = ?', ['admin']);
+                logger.info(`Admin verification: ${JSON.stringify(verifyAdmin)}`);
             } else if (adminCheck.role !== 'admin') {
                 // Ensure existing admin user has admin role
                 await db.run('UPDATE users SET role = ? WHERE username = ?', ['admin', 'admin']);
@@ -723,11 +729,24 @@ app.post('/api/login', loginLimiter, async (req, res) => {
 
     try {
         const { username, password } = req.body;
+        logger.info(`Login attempt for username: ${username}`);
+
         const user = await pool.query('SELECT * FROM users WHERE username = $1 OR email = $1', [username]);
-        if (user.rows[0] && bcrypt.compareSync(password, user.rows[0].password)) {
-            req.session.userId = user.rows[0].id;
-            res.json({ success: true });
+        logger.info(`User query result: ${user.rows.length} rows found`);
+
+        if (user.rows[0]) {
+            logger.info(`Found user: id=${user.rows[0].id}, username=${user.rows[0].username}, role=${user.rows[0].role}, hasPassword=${!!user.rows[0].password}`);
+            const passwordMatch = bcrypt.compareSync(password, user.rows[0].password);
+            logger.info(`Password match: ${passwordMatch}`);
+
+            if (passwordMatch) {
+                req.session.userId = user.rows[0].id;
+                res.json({ success: true });
+            } else {
+                res.status(401).json({ error: 'Invalid username or password' });
+            }
         } else {
+            logger.info('No user found with that username/email');
             res.status(401).json({ error: 'Invalid username or password' });
         }
     } catch (err) {
