@@ -1529,17 +1529,21 @@
 
             // Render calendar when switching to availability tab
             if (tab === 'availability') {
-                renderCalendar();
+                try {
+                    renderCalendar();
+                } catch (e) {
+                    console.error('Error rendering calendar:', e);
+                }
             }
 
             // Load invoices when switching to invoices tab
             if (tab === 'invoices') {
-                loadInvoices();
+                loadInvoices().catch(e => console.error('Error loading invoices:', e));
             }
 
             // Load blog posts when switching to blog tab
             if (tab === 'blog') {
-                loadBlogPosts();
+                loadBlogPosts().catch(e => console.error('Error loading blog posts:', e));
             }
         }
 
@@ -1959,15 +1963,6 @@
                 btn.textContent = '📤 Create & Send Invoice';
             }
         });
-
-        // Update switchTab to load invoices
-        const originalSwitchTab = switchTab;
-        switchTab = function (tab) {
-            originalSwitchTab(tab);
-            if (tab === 'invoices') {
-                loadInvoices();
-            }
-        };
     </script>
     <script src="js/auth.js"></script>
 </body>
