@@ -105,3 +105,14 @@
 {"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-25T01:02:34.749Z"}
 {"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-25T01:02:34.750Z"}
 {"level":"info","message":"Created anonymous session for clothing matcher:","timestamp":"2025-12-25T01:10:16.358Z","userId":"anon_1766625016358_5np70e4sm"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-25T01:27:23.968Z"}
+{"level":"info","message":"Server starting in development mode on port 3000","timestamp":"2025-12-25T01:27:23.970Z"}
+{"level":"info","message":"Run: http://localhost:3000","timestamp":"2025-12-25T01:27:23.997Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2025-12-25T01:27:23.999Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-25T01:27:24.003Z"}
+{"level":"info","message":"Running migration: 003_oauth_schema.sql","timestamp":"2025-12-25T01:27:24.004Z"}
+{"level":"info","message":"Running migration: 004_oauth_password_nullable.sql","timestamp":"2025-12-25T01:27:24.005Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: -- Migration: 004_oauth_password_nullable.sql\n-- Description: Make password column nullable to suppo... SQLITE_ERROR: near \"ALTER\": syntax error","stack":"Error: SQLITE_ERROR: near \"ALTER\": syntax error","timestamp":"2025-12-25T01:27:24.006Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: \n\n-- Add a comment explaining the nullable password\nCOMMENT ON COLUMN users.password IS 'Password ha... SQLITE_ERROR: near \"COMMENT\": syntax error","stack":"Error: SQLITE_ERROR: near \"COMMENT\": syntax error","timestamp":"2025-12-25T01:27:24.006Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-25T01:27:24.006Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-25T01:27:24.006Z"}

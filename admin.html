@@ -1596,7 +1596,14 @@
                 body: JSON.stringify({ username: e.target[0].value, password: e.target[1].value })
             });
             if (res.ok) {
-                window.location.href = '/member-portal.html';
+                // Check if user is admin to stay on admin dashboard
+                const authRes = await fetch('/api/auth/status');
+                const authData = await authRes.json();
+                if (authData.authenticated && authData.user.role === 'admin') {
+                    showDashboard();
+                } else {
+                    window.location.href = '/member-portal.html';
+                }
             } else {
                 const err = await res.json();
                 alert(err.error || 'Login failed');
