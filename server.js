@@ -361,32 +361,23 @@ app.use(express.json({ limit: '10kb' })); // Limit JSON size
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
-// Determine session database path (same logic as SQLite init)
-let sessionDbPath = process.env.DATABASE_URL?.replace('sqlite:', '') || './adria_cross.db';
+// Determine session database path - SEPARATE from main app DB to avoid conflicts
+// Session store uses its own SQLite file to prevent locking issues
 let sessionDbDir = '.';
-let sessionDbFilename = sessionDbPath;
+let sessionDbFilename = 'sessions.db';
 
-if (process.env.NODE_ENV === 'production' && !path.isAbsolute(sessionDbPath)) {
+if (process.env.NODE_ENV === 'production') {
     sessionDbDir = '/tmp';
-    sessionDbFilename = 'adria_cross.db';
-    sessionDbPath = path.join(sessionDbDir, sessionDbFilename);
-    logger.info(`Production: Session DB at ${sessionDbPath}`);
-} else {
-    // For absolute paths or development, extract dir and filename
-    sessionDbDir = path.dirname(sessionDbPath);
-    sessionDbFilename = path.basename(sessionDbPath);
+    sessionDbFilename = 'sessions.db';
+    logger.info(`Production: Session DB at /tmp/sessions.db`);
 }
 
-// Ensure database directory exists before session store initialization
+const sessionDbPath = path.join(sessionDbDir, sessionDbFilename);
+
+// Ensure session database directory exists
 if (!fs.existsSync(sessionDbDir)) {
     logger.info(`Creating session DB directory: ${sessionDbDir}`);
     fs.mkdirSync(sessionDbDir, { recursive: true });
-}
-
-// Touch the database file to ensure it exists before SQLiteStore tries to open it
-if (!fs.existsSync(sessionDbPath)) {
-    logger.info(`Creating empty database file: ${sessionDbPath}`);
-    fs.closeSync(fs.openSync(sessionDbPath, 'w'));
 }
 
 app.use(session({
