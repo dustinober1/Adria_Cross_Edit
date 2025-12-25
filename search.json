@@ -1,58 +1,65 @@
 [
-    {
-        "title": "Closet Edit",
-        "category": "Service",
-        "url": "/services.html#closet-edit",
-        "keywords": "closet cleanout, wardrobe detox, organization, declutter",
-        "summary": "A comprehensive review of your current wardrobe to edit, organize, and revitalize your style."
-    },
-    {
-        "title": "Luxe Shopping Experience",
-        "category": "Service",
-        "url": "/services.html#shopping",
-        "keywords": "personal shopping, personal shopper, new clothes, buying",
-        "summary": "A curated shopping trip tailored to your budget, style, and needs."
-    },
-    {
-        "title": "Color Analysis",
-        "category": "Service",
-        "url": "/services.html#color-analysis",
-        "keywords": "color palette, seasonal colors, best colors, skin tone",
-        "summary": "Discover the colors that make you glow with a professional color analysis session."
-    },
-    {
-        "title": "How to Build a Capsule Wardrobe",
-        "category": "Blog",
-        "url": "/blog/how-to-build-a-capsule-wardrobe.html",
-        "keywords": "essentials, basics, minimal wardrobe, mixing matching",
-        "summary": "Discover the essentials for a versatile closet that makes getting dressed effortless every day."
-    },
-    {
-        "title": "Mixing Patterns Like a Pro",
-        "category": "Blog",
-        "url": "/blog/mixing-patterns-like-a-pro.html",
-        "keywords": "prints, stripes, florals, fashion tips",
-        "summary": "Learn how to combine stripes, florals, and prints for bold, stylish looks."
-    },
-    {
-        "title": "Seasonal Color Trends 2025",
-        "category": "Blog",
-        "url": "/blog/seasonal-color-trends-2025.html",
-        "keywords": "trends, lavender, gold, green, blue, fashion 2025",
-        "summary": "Stay ahead of the curve with this year's hottest colors and how to wear them."
-    },
-    {
-        "title": "Virtual Styling",
-        "category": "FAQ",
-        "url": "/contact.html",
-        "keywords": "remote styling, online stylist, zoom",
-        "summary": "Yes, every service can be completed virtually for your convenience."
-    },
-    {
-        "title": "Book a Consultation",
-        "category": "Contact",
-        "url": "/contact.html#calendar-section",
-        "keywords": "appointment, booking, call, meet",
-        "summary": "Schedule a free 15-minute consultation to discuss your style goals."
-    }
+  {
+    "title": "Closet Edit",
+    "category": "Service",
+    "url": "/services.html#closet-edit",
+    "keywords": "closet cleanout, wardrobe detox, organization, declutter",
+    "summary": "A comprehensive review of your current wardrobe to edit, organize, and revitalize your style."
+  },
+  {
+    "title": "Luxe Shopping Experience",
+    "category": "Service",
+    "url": "/services.html#shopping",
+    "keywords": "personal shopping, personal shopper, new clothes, buying",
+    "summary": "A curated shopping trip tailored to your budget, style, and needs."
+  },
+  {
+    "title": "Color Analysis",
+    "category": "Service",
+    "url": "/services.html#color-analysis",
+    "keywords": "color palette, seasonal colors, best colors, skin tone",
+    "summary": "Discover the colors that make you glow with a professional color analysis session."
+  },
+  {
+    "title": "How to Build a Capsule Wardrobe",
+    "category": "Blog",
+    "url": "/blog/how-to-build-a-capsule-wardrobe.html",
+    "keywords": "essentials, basics, minimal wardrobe, mixing matching",
+    "summary": "Discover the essentials for a versatile closet that makes getting dressed effortless every day."
+  },
+  {
+    "title": "Mixing Patterns Like a Pro",
+    "category": "Blog",
+    "url": "/blog/mixing-patterns-like-a-pro.html",
+    "keywords": "prints, stripes, florals, fashion tips",
+    "summary": "Learn how to combine stripes, florals, and prints for bold, stylish looks."
+  },
+  {
+    "title": "Seasonal Color Trends 2025",
+    "category": "Blog",
+    "url": "/blog/seasonal-color-trends-2025.html",
+    "keywords": "trends, lavender, gold, green, blue, fashion 2025",
+    "summary": "Stay ahead of the curve with this year's hottest colors and how to wear them."
+  },
+  {
+    "title": "Virtual Styling",
+    "category": "FAQ",
+    "url": "/contact.html",
+    "keywords": "remote styling, online stylist, zoom",
+    "summary": "Yes, every service can be completed virtually for your convenience."
+  },
+  {
+    "title": "Book a Consultation",
+    "category": "Contact",
+    "url": "/contact.html#calendar-section",
+    "keywords": "appointment, booking, call, meet",
+    "summary": "Schedule a free 15-minute consultation to discuss your style goals."
+  },
+  {
+    "title": "The Ultimate Guide to Finding Your Signature Style",
+    "category": "Blog",
+    "url": "/blog/the-ultimate-guide-to-finding-your-signature-style.html",
+    "keywords": "blog, the ultimate guide to finding your signature style",
+    "summary": "Stop staring at a full closet with \"nothing to wear\" and start dressing with confidence."
+  }
 ]

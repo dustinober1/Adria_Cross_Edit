@@ -60,7 +60,8 @@ router.get('/api/auth/diagnostic', (req, res) => {
 
 // GET /api/auth/status
 // Returns current authentication status for the frontend
-router.get('/api/auth/status', (req, res) => {
+router.get('/api/auth/status', async (req, res) => {
+    // Check Passport authentication first
     if (req.isAuthenticated()) {
         res.json({
             authenticated: true,
@@ -74,6 +75,33 @@ router.get('/api/auth/status', (req, res) => {
                 provider: req.user.provider
             }
         });
+    }
+    // Fall back to session-based authentication (from /api/login)
+    else if (req.session && req.session.userId) {
+        try {
+            // Import pool dynamically to avoid circular dependency
+            const pool = require('../server').pool;
+            const result = await pool.query('SELECT id, username, email, display_name, role FROM users WHERE id = $1', [req.session.userId]);
+            if (result.rows.length > 0) {
+                const user = result.rows[0];
+                res.json({
+                    authenticated: true,
+                    user: {
+                        id: user.id,
+                        username: user.username,
+                        email: user.email,
+                        displayName: user.display_name,
+                        role: user.role,
+                        provider: 'local'
+                    }
+                });
+            } else {
+                res.json({ authenticated: false });
+            }
+        } catch (err) {
+            logger.error('Auth status error:', err);
+            res.json({ authenticated: false });
+        }
     } else {
         res.json({
             authenticated: false,

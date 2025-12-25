@@ -303,11 +303,11 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://js.squareupsandbox.com", "https://js.squareup.com", "https://www.googletagmanager.com", "https://www.google-analytics.com", "https://cdnjs.cloudflare.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://js.squareupsandbox.com", "https://js.squareup.com", "https://www.googletagmanager.com", "https://www.google-analytics.com", "https://cdnjs.cloudflare.com", "https://cdn.quilljs.com"],
             scriptSrcAttr: ["'unsafe-inline'"], // Allow inline onclick handlers
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://use.fontawesome.com", "https://cdnjs.cloudflare.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://use.fontawesome.com", "https://cdnjs.cloudflare.com", "https://cdn.quilljs.com"],
             imgSrc: ["'self'", "data:", "https://www.google-analytics.com", "https://*.cdninstagram.com", "https://*.fbcdn.net", "https://www.gstatic.com", "https://*.gstatic.com", "https://lh3.googleusercontent.com", "https://*.googleusercontent.com", "https://ui-avatars.com"],
-            connectSrc: ["'self'", "https://www.google-analytics.com", "https://stats.g.doubleclick.net", "https://cdnjs.cloudflare.com"],
+            connectSrc: ["'self'", "https://www.google-analytics.com", "https://stats.g.doubleclick.net", "https://cdnjs.cloudflare.com", "https://cdn.quilljs.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://use.fontawesome.com", "https://cdnjs.cloudflare.com"],
             objectSrc: ["'none'"],
             mediaSrc: ["'self'"],
@@ -1595,4 +1595,4 @@ if (require.main === module) {
     app.listen(port, () => logger.info(`Run: http://localhost:${port}`));
 }
 
-module.exports = app;
+module.exports = { app, pool };

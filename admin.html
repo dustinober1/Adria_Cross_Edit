@@ -1676,10 +1676,18 @@
                         // Create thumbnail
                         const thumb = document.createElement('div');
                         thumb.className = 'uploaded-image-thumb';
-                        thumb.innerHTML = `
-                            <img src="${data.url}" alt="Uploaded image">
-                            <button class="insert-btn" onclick="insertImage('${data.url}')">Insert</button>
-                        `;
+
+                        const img = document.createElement('img');
+                        img.src = data.url;
+                        img.alt = 'Uploaded image';
+                        thumb.appendChild(img);
+
+                        const insertBtn = document.createElement('button');
+                        insertBtn.className = 'insert-btn';
+                        insertBtn.textContent = 'Insert';
+                        insertBtn.addEventListener('click', () => insertImage(data.url));
+                        thumb.appendChild(insertBtn);
+
                         imagesContainer.appendChild(thumb);
                     }
                 } catch (err) {
