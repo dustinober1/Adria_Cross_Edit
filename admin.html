@@ -967,11 +967,11 @@
             </div>
 
             <div class="admin-tabs">
-                <button class="tab-btn active" onclick="switchTab('appointments')">Appointments</button>
-                <button class="tab-btn" onclick="switchTab('intake')">Intake Profiles</button>
-                <button class="tab-btn" onclick="switchTab('availability')">Availability Settings</button>
-                <button class="tab-btn" onclick="switchTab('blog')">Blog Posts</button>
-                <button class="tab-btn" onclick="switchTab('invoices')">💳 Invoices</button>
+                <button class="tab-btn active" data-tab="appointments">Appointments</button>
+                <button class="tab-btn" data-tab="intake">Intake Profiles</button>
+                <button class="tab-btn" data-tab="availability">Availability Settings</button>
+                <button class="tab-btn" data-tab="blog">Blog Posts</button>
+                <button class="tab-btn" data-tab="invoices">💳 Invoices</button>
             </div>
 
             <!-- Invoices Tab -->
@@ -1213,6 +1213,7 @@
         function showDashboard() {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('dashboard-section').style.display = 'block';
+            initTabHandlers(); // Initialize tab click handlers (CSP-compliant)
             loadAppointments();
             loadIntake();
             loadOverrides();
@@ -1536,18 +1537,18 @@
             loadAppointments();
         }
 
-        function switchTab(tab) {
+        function switchTab(tab, clickedBtn = null) {
             // Remove active from all tabs and content
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
-            // Find and activate the correct tab button
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            tabButtons.forEach(btn => {
-                if (btn.getAttribute('onclick')?.includes(`'${tab}'`)) {
-                    btn.classList.add('active');
-                }
-            });
+            // Activate the clicked button or find by data-tab
+            if (clickedBtn) {
+                clickedBtn.classList.add('active');
+            } else {
+                const tabBtn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+                if (tabBtn) tabBtn.classList.add('active');
+            }
 
             // Show the selected tab content
             const tabContent = document.getElementById(`${tab}-tab`);
@@ -1564,6 +1565,16 @@
             if (tab === 'invoices') {
                 loadInvoices();
             }
+        }
+
+        // Initialize tab click handlers (CSP-compliant - no inline onclick)
+        function initTabHandlers() {
+            document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const tabName = this.getAttribute('data-tab');
+                    switchTab(tabName, this);
+                });
+            });
         }
 
         function closeModal() { document.getElementById('details-modal').style.display = 'none'; }
