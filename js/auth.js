@@ -75,7 +75,7 @@ const Auth = {
             authLinks.forEach(link => {
                 if (link.dataset.action === 'logout') {
                     link.textContent = 'Login';
-                    link.href = '/admin.html'; // Or modal trigger
+                    link.href = '/login.html'; // Client login page
                     link.dataset.type = 'login';
                     delete link.dataset.action;
                 }

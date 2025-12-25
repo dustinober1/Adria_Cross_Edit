@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="description"
+        content="Login or create a free account to access your personalized styling tools, wardrobe matcher, and exclusive client features.">
+    <meta name="keywords" content="login, sign up, client portal, personal styling, wardrobe matcher, Adria Cross">
+    <meta name="author" content="Adria Cross">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/icon-152x152.png" type="image/png">
+    <title>Login / Sign Up — Adria Cross Personal Styling</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" defer></script>
+    <link rel="stylesheet" href="css/landing.min.css">
+    <style>
+        .login-page-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+        }
+
+        .login-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            padding-top: 100px;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 3rem;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+            border: 3px solid var(--primary, #c19a5d);
+        }
+
+        .login-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+        }
+
+        /* Auth Tabs */
+        .auth-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 1rem;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-tab.active {
+            background: var(--primary, #c19a5d);
+            color: white;
+        }
+
+        .auth-tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        /* Social Auth */
+        .social-auth-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin-bottom: 0.75rem;
+        }
+
+        .btn-google {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-google:hover {
+            background: #f5f5f5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-google img {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Divider */
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-divider span {
+            padding: 0 1rem;
+        }
+
+        /* Form Styles */
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-input {
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary, #c19a5d);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(193, 154, 93, 0.2);
+        }
+
+        .btn-submit {
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary, #c19a5d) 0%, #d4af37 100%);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(193, 154, 93, 0.4);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Auth Help */
+        .auth-help {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-top: 1.5rem;
+        }
+
+        .auth-help a {
+            color: var(--primary, #c19a5d);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-help a:hover {
+            text-decoration: underline;
+        }
+
+        /* Features List */
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .feature-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Message Display */
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid rgba(46, 204, 113, 0.4);
+            color: #2ecc71;
+        }
+
+        .message.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.4);
+            color: #e74c3c;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .login-card {
+                padding: 2rem 1.5rem;
+                border-radius: 16px;
+            }
+
+            .login-title {
+                font-size: 1.5rem;
+            }
+
+            .features-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body class="login-page-container">
+    <!-- Navigation Bar -->
+    <nav class="top-nav" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html" class="has-logo">
+                    <img src="images/icon-144x144.webp" alt="Adria Cross Edit Logo" class="logo-image" loading="lazy"
+                        width="50" height="50">
+                    <span class="logo-text">Adria Cross</span>
+                </a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="blog.html">Blog</a></li>
+                <li><a href="clothing-matcher/">Clothing Matcher</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li class="auth-user-display" style="display:none; color: var(--primary); font-weight: 600;"></li>
+                <li><a href="/login.html" class="auth-link active" data-type="login">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="login-main" id="main-content" role="main">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="images/icon-144x144.webp" alt="Adria Cross Edit" class="login-logo">
+                <h1 class="login-title">Welcome</h1>
+                <p class="login-subtitle">Sign in to access your personal styling tools</p>
+            </div>
+
+            <!-- Message Display -->
+            <div class="message" id="authMessage"></div>
+
+            <!-- Auth Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-auth-tab="login" onclick="switchAuthTab('login')">Login</button>
+                <button class="auth-tab" data-auth-tab="register" onclick="switchAuthTab('register')">Sign Up</button>
+            </div>
+
+            <!-- Login Panel -->
+            <div class="auth-panel" id="loginPanel">
+                <div class="social-auth-container">
+                    <a href="/auth/google" class="btn-social btn-google">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
+                        Continue with Google
+                    </a>
+                </div>
+                <div class="auth-divider">
+                    <span>or use email</span>
+                </div>
+                <form class="auth-form" id="loginForm">
+                    <div class="form-group">
+                        <input type="text" id="loginUsername" placeholder="Email or Username" class="form-input"
+                            required autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="loginPassword" placeholder="Password" class="form-input" required
+                            autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn-submit">Login</button>
+                </form>
+                <p class="auth-help">Don't have an account? <a href="#"
+                        onclick="switchAuthTab('register'); return false;">Create one for free!</a></p>
+            </div>
+
+            <!-- Register Panel -->
+            <div class="auth-panel" id="registerPanel" style="display: none;">
+                <div class="social-auth-container">
+                    <a href="/auth/google" class="btn-social btn-google">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
+                        Sign up with Google
+                    </a>
+                </div>
+                <div class="auth-divider">
+                    <span>or create with email</span>
+                </div>
+                <form class="auth-form" id="registerForm">
+                    <div class="form-group">
+                        <input type="text" id="regUsername" placeholder="Choose a username" class="form-input" required
+                            minlength="3" autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="regEmail" placeholder="Email address" class="form-input" required
+                            autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="regDisplayName" placeholder="Your name (optional)" class="form-input"
+                            autocomplete="name">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="regPassword" placeholder="Password (min 6 characters)"
+                            class="form-input" required minlength="6" autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="btn-submit">Create Free Account</button>
+                </form>
+                <p class="auth-help">Already have an account? <a href="#"
+                        onclick="switchAuthTab('login'); return false;">Login here</a></p>
+            </div>
+
+            <!-- Features -->
+            <div class="features-list">
+                <div class="feature-item">
+                    <span class="feature-icon">👗</span>
+                    <span>Clothing Matcher</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📸</span>
+                    <span>Wardrobe Uploads</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">💾</span>
+                    <span>Save Your Outfits</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✨</span>
+                    <span>Style Insights</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Site Footer -->
+    <footer class="site-footer" role="contentinfo">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h3>Adria Cross</h3>
+                <p>Personal Stylist helping you discover your style, save time, and feel unstoppable with a curated,
+                    wearable wardrobe.</p>
+            </div>
+            <nav class="footer-nav" aria-label="Footer navigation">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Me</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="blog.html">Style Blog</a></li>
+                    <li><a href="clothing-matcher/">Clothing Matcher</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="admin.html">Admin</a></li>
+                </ul>
+            </nav>
+            <div class="footer-contact">
+                <h4>Get In Touch</h4>
+                <p>📧 <a href="mailto:hello@adriacrossedit.com">hello@adriacrossedit.com</a></p>
+                <p>📍 Available for in-person & virtual styling</p>
+                <p>📅 <a href="contact.html#calendar-section">Book a Free Consultation</a></p>
+            </div>
+            <div class="footer-social">
+                <h4>Follow Along</h4>
+                <div class="footer-social-links">
+                    <a href="https://www.instagram.com/adriacrossedit/" target="_blank" aria-label="Instagram"
+                        title="Follow on Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://www.facebook.com/adria.chittenden" target="_blank" aria-label="Facebook"
+                        title="Follow on Facebook"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="https://x.com/AdriaCross1618" target="_blank" aria-label="X" title="Follow on X"><i
+                            class="fa-brands fa-x-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-copyright">© 2025 Adria Cross. All rights reserved.</p>
+            <div class="footer-legal">
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms-of-service.html">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark/light mode">
+        🌙
+    </button>
+
+    <script src="js/main.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Auth Tab Switching
+        function switchAuthTab(tab) {
+            const loginPanel = document.getElementById('loginPanel');
+            const registerPanel = document.getElementById('registerPanel');
+            const tabs = document.querySelectorAll('.auth-tab');
+
+            tabs.forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-auth-tab="${tab}"]`)?.classList.add('active');
+
+            if (tab === 'login') {
+                loginPanel.style.display = 'block';
+                registerPanel.style.display = 'none';
+            } else {
+                loginPanel.style.display = 'none';
+                registerPanel.style.display = 'block';
+            }
+        }
+
+        // Show message
+        function showMessage(message, type = 'error') {
+            const msgEl = document.getElementById('authMessage');
+            msgEl.textContent = message;
+            msgEl.className = `message ${type}`;
+            msgEl.style.display = 'block';
+        }
+
+        // Check if user is already logged in
+        async function checkAuthAndRedirect() {
+            try {
+                const response = await fetch('/api/auth/status');
+                const data = await response.json();
+
+                if (data.authenticated) {
+                    // User is already logged in, redirect to member portal or home
+                    window.location.href = '/member-portal.html';
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+            }
+        }
+
+        // Login Form Handler
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            const originalText = btn.textContent;
+            btn.textContent = 'Logging in...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: document.getElementById('loginUsername').value,
+                        password: document.getElementById('loginPassword').value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showMessage('Login successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        // Redirect to member portal or previous page
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const redirect = urlParams.get('redirect') || '/member-portal.html';
+                        window.location.href = redirect;
+                    }, 500);
+                } else {
+                    showMessage(data.error || 'Login failed. Please check your credentials.', 'error');
+                }
+            } catch (error) {
+                showMessage('Login failed. Please try again.', 'error');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // Register Form Handler
+        document.getElementById('registerForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            const originalText = btn.textContent;
+            btn.textContent = 'Creating account...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: document.getElementById('regUsername').value,
+                        email: document.getElementById('regEmail').value,
+                        displayName: document.getElementById('regDisplayName').value,
+                        password: document.getElementById('regPassword').value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showMessage('Account created successfully! Welcome aboard! 🎉', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/member-portal.html';
+                    }, 1000);
+                } else {
+                    showMessage(data.error || 'Registration failed. Please try again.', 'error');
+                }
+            } catch (error) {
+                showMessage('Registration failed. Please try again.', 'error');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // Check URL params for tab switching (e.g., /login.html?tab=register)
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            if (tab === 'register' || tab === 'signup') {
+                switchAuthTab('register');
+            }
+
+            // Check if already authenticated
+            checkAuthAndRedirect();
+        });
+    </script>
+</body>
+
+</html>
