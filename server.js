@@ -1340,6 +1340,217 @@ app.post('/api/blog', isAuthenticated, async (req, res) => {
     }
 });
 
+// List all Blog Posts
+app.get('/api/blog', isAuthenticated, (req, res) => {
+    try {
+        const blogDir = path.join(__dirname, 'blog');
+        const files = fs.readdirSync(blogDir).filter(f => f.endsWith('.html') && f !== 'index.html');
+
+        const posts = files.map(filename => {
+            const filePath = path.join(blogDir, filename);
+            const content = fs.readFileSync(filePath, 'utf8');
+
+            // Extract title from <h1>
+            const titleMatch = content.match(/<h1[^>]*>([^<]+)<\/h1>/);
+            const title = titleMatch ? titleMatch[1] : filename.replace('.html', '');
+
+            // Extract date from meta
+            const dateMatch = content.match(/Published on ([^•<]+)/);
+            const date = dateMatch ? dateMatch[1].trim() : 'Unknown';
+
+            // Extract summary from meta description
+            const summaryMatch = content.match(/<meta name="description" content="([^"]+)"/);
+            const summary = summaryMatch ? summaryMatch[1] : '';
+
+            return {
+                slug: filename.replace('.html', ''),
+                filename,
+                title,
+                date,
+                summary
+            };
+        });
+
+        // Sort by date (newest first)
+        posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        res.json(posts);
+    } catch (err) {
+        console.error('Blog list error:', err);
+        res.status(500).json({ error: 'Failed to list blog posts' });
+    }
+});
+
+// Get single Blog Post for editing
+app.get('/api/blog/:slug', isAuthenticated, (req, res) => {
+    try {
+        const { slug } = req.params;
+        const filePath = path.join(__dirname, 'blog', `${slug}.html`);
+
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: 'Blog post not found' });
+        }
+
+        const content = fs.readFileSync(filePath, 'utf8');
+
+        // Extract title
+        const titleMatch = content.match(/<h1[^>]*>([^<]+)<\/h1>/);
+        const title = titleMatch ? titleMatch[1] : '';
+
+        // Extract summary from meta description
+        const summaryMatch = content.match(/<meta name="description" content="([^"]+)"/);
+        const summary = summaryMatch ? summaryMatch[1] : '';
+
+        // Extract blog content (between blog-content div)
+        const contentMatch = content.match(/<div class="blog-content">([\s\S]*?)<a href="\.\.\/blog\.html" class="back-link">/);
+        const blogContent = contentMatch ? contentMatch[1].trim() : '';
+
+        res.json({
+            slug,
+            title,
+            summary,
+            content: blogContent
+        });
+    } catch (err) {
+        console.error('Blog get error:', err);
+        res.status(500).json({ error: 'Failed to get blog post' });
+    }
+});
+
+// Update Blog Post
+app.put('/api/blog/:slug', isAuthenticated, async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const { title, summary, content } = req.body;
+
+        if (!title || !summary || !content) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        const filePath = path.join(__dirname, 'blog', `${slug}.html`);
+
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: 'Blog post not found' });
+        }
+
+        // Read existing file to preserve the date
+        const existingContent = fs.readFileSync(filePath, 'utf8');
+        const dateMatch = existingContent.match(/Published on ([^•]+) •/);
+        const dateStr = dateMatch ? dateMatch[1].trim() : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        // Generate updated HTML
+        const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title} | Adria Cross Style Blog</title>
+    <meta name="description" content="${summary}">
+    <link rel="stylesheet" href="../css/landing.min.css">
+    <style>
+        .blog-post-header { text-align: center; margin-top: 8rem; margin-bottom: 3rem; padding: 0 1rem; }
+        .blog-post-header h1 { color: #d4a574; font-size: 2.5rem; font-family: 'Montserrat', sans-serif; margin-bottom: 1rem; }
+        .blog-meta { color: #888; font-size: 0.9rem; font-family: 'Montserrat', sans-serif; }
+        .blog-content { max-width: 800px; margin: 0 auto 4rem auto; padding: 2rem; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(212, 165, 116, 0.08); font-family: 'Montserrat', sans-serif; line-height: 1.8; color: #444; }
+        .blog-content h2, .blog-content h3 { color: #c19a5d; margin-top: 2rem; margin-bottom: 1rem; }
+        .blog-content ul { margin-left: 1.5rem; margin-bottom: 1.5rem; }
+        .blog-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0; }
+        .back-link { display: block; margin: 2rem auto; text-align: center; font-weight: 600; color: #c19a5d; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-logo"><a href="../index.html" class="has-logo"><img src="../images/icon-152x152.png" class="logo-image"><span class="logo-text">Adria Cross</span></a></div>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../blog.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <main>
+        <article>
+            <div class="blog-post-header">
+                <h1>${title}</h1>
+                <p class="blog-meta">Published on ${dateStr} • By Adria Cross (Updated ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })})</p>
+            </div>
+            <div class="blog-content">
+                ${content}
+                <a href="../blog.html" class="back-link">← Back to Blog</a>
+            </div>
+        </article>
+    </main>
+    <footer class="site-footer"><div class="footer-bottom"><p class="footer-copyright">© 2025 Adria Cross. All rights reserved.</p></div></footer>
+</body>
+</html>`;
+
+        fs.writeFileSync(filePath, htmlContent);
+
+        // Update the blog index with new title/summary
+        const indexPath = path.join(__dirname, 'blog.html');
+        let indexHtml = fs.readFileSync(indexPath, 'utf8');
+
+        // Create a regex to find and update the article for this post
+        const articleRegex = new RegExp(`<article class="blog-article">[\\s\\S]*?<a href="blog/${slug}\\.html"[^>]*>Read Article →</a>[\\s\\S]*?</article>`, 'g');
+
+        const updatedArticle = `<article class="blog-article">
+                <h2><a href="blog/${slug}.html" style="text-decoration: none; color: inherit;">${title}</a></h2>
+                <p class="blog-meta">Published on ${dateStr}</p>
+                <p>${summary}</p>
+                <a href="blog/${slug}.html" class="btn-cta btn-secondary-cta" style="padding: 0.5rem 1rem; font-size: 0.9rem; margin-top: 1rem; display: inline-block;">Read Article →</a>
+            </article>`;
+
+        if (articleRegex.test(indexHtml)) {
+            indexHtml = indexHtml.replace(articleRegex, updatedArticle);
+            fs.writeFileSync(indexPath, indexHtml);
+        }
+
+        res.json({ success: true, message: 'Blog post updated' });
+    } catch (err) {
+        console.error('Blog update error:', err);
+        res.status(500).json({ error: 'Failed to update blog post' });
+    }
+});
+
+// Delete Blog Post
+app.delete('/api/blog/:slug', isAuthenticated, async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const filePath = path.join(__dirname, 'blog', `${slug}.html`);
+
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: 'Blog post not found' });
+        }
+
+        // Delete the file
+        fs.unlinkSync(filePath);
+
+        // Remove from blog index
+        const indexPath = path.join(__dirname, 'blog.html');
+        let indexHtml = fs.readFileSync(indexPath, 'utf8');
+
+        const articleRegex = new RegExp(`<article class="blog-article">[\\s\\S]*?<a href="blog/${slug}\\.html"[^>]*>Read Article →</a>[\\s\\S]*?</article>\\s*`, 'g');
+        indexHtml = indexHtml.replace(articleRegex, '');
+        fs.writeFileSync(indexPath, indexHtml);
+
+        // Remove from search index
+        const searchPath = path.join(__dirname, 'search.json');
+        if (fs.existsSync(searchPath)) {
+            let searchData = JSON.parse(fs.readFileSync(searchPath, 'utf8'));
+            searchData = searchData.filter(item => !item.url.includes(`/blog/${slug}.html`));
+            fs.writeFileSync(searchPath, JSON.stringify(searchData, null, 2));
+        }
+
+        res.json({ success: true, message: 'Blog post deleted' });
+    } catch (err) {
+        console.error('Blog delete error:', err);
+        res.status(500).json({ error: 'Failed to delete blog post' });
+    }
+});
+
 // ============================================
 // Square Payment & Invoice Endpoints
 // ============================================

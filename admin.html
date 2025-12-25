@@ -977,8 +977,18 @@
 
             <!-- Blog Tab -->
             <div id="blog-tab" class="tab-content">
+                <!-- Existing Blog Posts -->
+                <div class="table-card" style="max-width: 800px; margin-bottom: 2rem;">
+                    <h2>📚 Existing Blog Posts</h2>
+                    <div id="blog-posts-list" style="margin-top: 1rem;">
+                        <p style="color: #888;">Loading posts...</p>
+                    </div>
+                </div>
+
+                <!-- Create/Edit Blog Post Form -->
                 <div class="table-card" style="max-width: 800px;">
-                    <h2>📝 Write New Blog Post</h2>
+                    <h2 id="blog-form-title">📝 Write New Blog Post</h2>
+                    <input type="hidden" id="blog-edit-slug" value="">
                     <form id="blog-form" style="margin-top: 1.5rem;">
                         <input type="text" id="blog-title"
                             placeholder="Article Title (e.g. 5 Ways to style a white tee)" required
@@ -1006,7 +1016,9 @@
                         </div>
 
                         <div class="form-actions" style="display: flex; gap: 1rem;">
-                            <button type="submit" class="btn-primary">🚀 Publish Post</button>
+                            <button type="submit" class="btn-primary" id="blog-submit-btn">🚀 Publish Post</button>
+                            <button type="button" class="btn-secondary" id="blog-cancel-btn"
+                                style="display: none;">Cancel Edit</button>
                         </div>
                     </form>
                     <div id="blog-status" style="margin-top: 1rem; border-radius: 8px; font-weight: 600;"></div>
@@ -1524,6 +1536,11 @@
             if (tab === 'invoices') {
                 loadInvoices();
             }
+
+            // Load blog posts when switching to blog tab
+            if (tab === 'blog') {
+                loadBlogPosts();
+            }
         }
 
         // Initialize tab click handlers (CSP-compliant - no inline onclick)
@@ -1563,10 +1580,113 @@
             }
         });
 
+        // Blog Post Management Functions
+        async function loadBlogPosts() {
+            const listEl = document.getElementById('blog-posts-list');
+            if (!listEl) return;
+
+            try {
+                const res = await fetch('/api/blog');
+                if (!res.ok) throw new Error('Failed to load posts');
+
+                const posts = await res.json();
+
+                if (posts.length === 0) {
+                    listEl.innerHTML = '<p style="color: #888;">No blog posts yet. Create your first one below!</p>';
+                    return;
+                }
+
+                listEl.innerHTML = posts.map(post => `
+                    <div class="blog-post-item" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid #eee; border-radius: 8px; margin-bottom: 0.5rem;">
+                        <div>
+                            <strong style="color: #333;">${post.title}</strong>
+                            <span style="color: #888; font-size: 0.85rem; margin-left: 1rem;">${post.date}</span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn-view" data-slug="${post.slug}" data-action="edit" style="padding: 0.5rem 1rem;">✏️ Edit</button>
+                            <button class="btn-view" data-slug="${post.slug}" data-action="delete" style="padding: 0.5rem 1rem; background: #dc3545;">🗑️ Delete</button>
+                            <a href="/blog/${post.slug}.html" target="_blank" class="btn-view" style="padding: 0.5rem 1rem; background: #28a745; text-decoration: none;">👁️ View</a>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Add event listeners to buttons
+                listEl.querySelectorAll('button[data-action="edit"]').forEach(btn => {
+                    btn.addEventListener('click', () => editBlogPost(btn.dataset.slug));
+                });
+                listEl.querySelectorAll('button[data-action="delete"]').forEach(btn => {
+                    btn.addEventListener('click', () => deleteBlogPost(btn.dataset.slug));
+                });
+            } catch (err) {
+                console.error('Error loading blog posts:', err);
+                listEl.innerHTML = '<p style="color: #dc3545;">Failed to load posts. Please refresh.</p>';
+            }
+        }
+
+        async function editBlogPost(slug) {
+            try {
+                const res = await fetch(`/api/blog/${slug}`);
+                if (!res.ok) throw new Error('Failed to load post');
+
+                const post = await res.json();
+
+                // Populate form
+                document.getElementById('blog-title').value = post.title;
+                document.getElementById('blog-summary').value = post.summary;
+                document.getElementById('blog-edit-slug').value = post.slug;
+                quill.root.innerHTML = post.content;
+
+                // Update UI for edit mode
+                document.getElementById('blog-form-title').textContent = '✏️ Edit Blog Post';
+                document.getElementById('blog-submit-btn').textContent = '💾 Update Post';
+                document.getElementById('blog-cancel-btn').style.display = 'inline-block';
+
+                // Scroll to form
+                document.getElementById('blog-form').scrollIntoView({ behavior: 'smooth' });
+            } catch (err) {
+                console.error('Error loading post for edit:', err);
+                alert('Failed to load post for editing. Please try again.');
+            }
+        }
+
+        async function deleteBlogPost(slug) {
+            if (!confirm('Are you sure you want to delete this blog post? This cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/blog/${slug}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Failed to delete');
+
+                alert('Blog post deleted successfully!');
+                loadBlogPosts();
+            } catch (err) {
+                console.error('Error deleting post:', err);
+                alert('Failed to delete post. Please try again.');
+            }
+        }
+
+        function resetBlogForm() {
+            document.getElementById('blog-form').reset();
+            document.getElementById('blog-edit-slug').value = '';
+            quill.setContents([]);
+            document.getElementById('uploaded-images-container').innerHTML = '';
+            document.getElementById('blog-form-title').textContent = '📝 Write New Blog Post';
+            document.getElementById('blog-submit-btn').textContent = '🚀 Publish Post';
+            document.getElementById('blog-cancel-btn').style.display = 'none';
+            document.getElementById('blog-status').style.display = 'none';
+        }
+
+        // Cancel edit button handler
+        document.getElementById('blog-cancel-btn').addEventListener('click', resetBlogForm);
+
+        // Blog form submit handler (create or update)
         document.getElementById('blog-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = e.target.querySelector('button');
+            const btn = document.getElementById('blog-submit-btn');
             const status = document.getElementById('blog-status');
+            const editSlug = document.getElementById('blog-edit-slug').value;
+            const isEditMode = !!editSlug;
 
             // Validate content
             const content = quill.root.innerHTML;
@@ -1580,7 +1700,7 @@
             }
 
             btn.disabled = true;
-            btn.textContent = 'Publishing...';
+            btn.textContent = isEditMode ? 'Updating...' : 'Publishing...';
             status.style.display = 'none';
 
             const payload = {
@@ -1590,34 +1710,42 @@
             };
 
             try {
-                const res = await fetch('/api/blog', {
-                    method: 'POST',
+                const url = isEditMode ? `/api/blog/${editSlug}` : '/api/blog';
+                const method = isEditMode ? 'PUT' : 'POST';
+
+                const res = await fetch(url, {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
                 if (res.ok) {
                     const data = await res.json();
-                    status.innerHTML = `✅ Published successfully! <a href="${data.url}" target="_blank">View Post</a>`;
+                    if (isEditMode) {
+                        status.innerHTML = `✅ Post updated successfully! <a href="/blog/${editSlug}.html" target="_blank">View Post</a>`;
+                    } else {
+                        status.innerHTML = `✅ Published successfully! <a href="${data.url}" target="_blank">View Post</a>`;
+                    }
                     status.style.color = '#155724';
                     status.style.background = '#d4edda';
                     status.style.padding = '1rem';
                     status.style.display = 'block';
-                    e.target.reset();
-                    quill.setContents([]);
-                    document.getElementById('uploaded-images-container').innerHTML = '';
+
+                    // Reset form and reload posts
+                    resetBlogForm();
+                    loadBlogPosts();
                 } else {
-                    throw new Error('Failed to publish');
+                    throw new Error('Failed to save');
                 }
             } catch (err) {
-                status.textContent = '❌ Error publishing post. Please try again.';
+                status.textContent = `❌ Error ${isEditMode ? 'updating' : 'publishing'} post. Please try again.`;
                 status.style.color = '#721c24';
                 status.style.background = '#f8d7da';
                 status.style.padding = '1rem';
                 status.style.display = 'block';
             } finally {
                 btn.disabled = false;
-                btn.textContent = '🚀 Publish Post';
+                btn.textContent = isEditMode ? '💾 Update Post' : '🚀 Publish Post';
             }
         });
 

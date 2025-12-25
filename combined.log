@@ -193,3 +193,14 @@
 {"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: \n\n-- Add a comment explaining the nullable password\nCOMMENT ON COLUMN users.password IS 'Password ha... SQLITE_ERROR: near \"COMMENT\": syntax error","stack":"Error: SQLITE_ERROR: near \"COMMENT\": syntax error","timestamp":"2025-12-25T01:46:52.782Z"}
 {"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-25T01:46:52.782Z"}
 {"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-25T01:46:52.782Z"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-25T01:57:21.855Z"}
+{"level":"info","message":"Server starting in development mode on port 3000","timestamp":"2025-12-25T01:57:21.857Z"}
+{"level":"info","message":"Run: http://localhost:3000","timestamp":"2025-12-25T01:57:21.877Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2025-12-25T01:57:21.878Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-25T01:57:21.882Z"}
+{"level":"info","message":"Running migration: 003_oauth_schema.sql","timestamp":"2025-12-25T01:57:21.883Z"}
+{"level":"info","message":"Running migration: 004_oauth_password_nullable.sql","timestamp":"2025-12-25T01:57:21.884Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: -- Migration: 004_oauth_password_nullable.sql\n-- Description: Make password column nullable to suppo... SQLITE_ERROR: near \"ALTER\": syntax error","stack":"Error: SQLITE_ERROR: near \"ALTER\": syntax error","timestamp":"2025-12-25T01:57:21.885Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: \n\n-- Add a comment explaining the nullable password\nCOMMENT ON COLUMN users.password IS 'Password ha... SQLITE_ERROR: near \"COMMENT\": syntax error","stack":"Error: SQLITE_ERROR: near \"COMMENT\": syntax error","timestamp":"2025-12-25T01:57:21.885Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-25T01:57:21.885Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-25T01:57:21.885Z"}
