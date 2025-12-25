@@ -60,13 +60,21 @@
                     <span class="logo-text">Adria Cross</span>
                 </a>
             </div>
-            <ul class="nav-menu">
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="services.html">Services</a></li>
                 <li><a href="blog.html">Blog</a></li>
+                <li><a href="clothing-matcher/">Clothing Matcher</a></li>
                 <li><a href="contact.html">Contact</a></li>
-                <li><a href="admin.html">Admin</a></li>
+                <li class="auth-user-display" style="display:none; color: var(--primary); font-weight: 600;"></li>
+                <li><a href="/admin.html" class="auth-link" data-type="login">Login</a></li>
+                <li><button class="search-btn search-trigger" aria-label="Open search">🔍</button></li>
             </ul>
         </div>
     </nav>
@@ -166,6 +174,9 @@
             </div>
         </div>
     </footer>
+
+    <script src="js/main.min.js"></script>
+    <script src="js/auth.js"></script>
 </body>
 
 </html>

@@ -1670,11 +1670,22 @@
             document.getElementById('blog-form').reset();
             document.getElementById('blog-edit-slug').value = '';
             quill.setContents([]);
-            document.getElementById('uploaded-images-container').innerHTML = '';
+            // Clear uploaded images container
+            const imagesContainer = document.getElementById('uploaded-images-container');
+            if (imagesContainer) {
+                imagesContainer.innerHTML = '';
+            }
             document.getElementById('blog-form-title').textContent = '📝 Write New Blog Post';
             document.getElementById('blog-submit-btn').textContent = '🚀 Publish Post';
             document.getElementById('blog-cancel-btn').style.display = 'none';
-            document.getElementById('blog-status').style.display = 'none';
+            const status = document.getElementById('blog-status');
+            if (status) {
+                status.style.display = 'none';
+                status.textContent = '';
+                status.style.background = '';
+                status.style.color = '';
+                status.style.padding = '';
+            }
         }
 
         // Cancel edit button handler
@@ -1789,14 +1800,29 @@
             const files = e.target.files;
 
             for (let file of files) {
+                // Client-side validation: max 10MB
+                if (file.size > 10 * 1024 * 1024) {
+                    alert(`File "${file.name}" is too large. Maximum size is 10MB.`);
+                    continue;
+                }
+
                 const formData = new FormData();
                 formData.append('image', file);
+
+                // Show loading indicator
+                const loadingThumb = document.createElement('div');
+                loadingThumb.className = 'uploaded-image-thumb';
+                loadingThumb.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#f8f8f8;color:#888;font-size:0.7rem;">Uploading...</div>';
+                imagesContainer.appendChild(loadingThumb);
 
                 try {
                     const res = await fetch('/api/blog/upload-image', {
                         method: 'POST',
                         body: formData
                     });
+
+                    // Remove loading indicator
+                    loadingThumb.remove();
 
                     if (res.ok) {
                         const data = await res.json();
@@ -1813,13 +1839,22 @@
                         const insertBtn = document.createElement('button');
                         insertBtn.className = 'insert-btn';
                         insertBtn.textContent = 'Insert';
-                        insertBtn.addEventListener('click', () => insertImage(data.url));
+                        insertBtn.type = 'button'; // Prevent form submission
+                        insertBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            insertImage(data.url);
+                        });
                         thumb.appendChild(insertBtn);
 
                         imagesContainer.appendChild(thumb);
+                    } else {
+                        const errData = await res.json().catch(() => ({ error: 'Upload failed' }));
+                        alert(`Failed to upload "${file.name}": ${errData.error || 'Unknown error'}`);
                     }
                 } catch (err) {
+                    loadingThumb.remove();
                     console.error('Image upload failed:', err);
+                    alert(`Failed to upload "${file.name}". Please try again.`);
                 }
             }
 

@@ -1239,6 +1239,20 @@ app.post('/api/blog/upload-image', isAuthenticated, blogUpload.single('image'), 
     });
 });
 
+// Handle multer errors for blog upload
+app.use('/api/blog/upload-image', (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(413).json({ error: 'File size exceeds 10MB limit' });
+        }
+        return res.status(400).json({ error: err.message });
+    }
+    if (err) {
+        return res.status(400).json({ error: err.message });
+    }
+    next();
+});
+
 // Create Blog Post
 app.post('/api/blog', isAuthenticated, async (req, res) => {
     try {
