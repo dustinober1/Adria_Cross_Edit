@@ -348,6 +348,13 @@ configurePassport(app, pool);
 app.use('/auth', authRoutes);
 app.use(authRoutes); // For API routes mounted at root/api level inside authRoutes
 
+app.get('/api/debug/strategies', (req, res) => {
+    res.json({
+        strategies: passport._strategies ? Object.keys(passport._strategies) : [],
+        passportInitialized: !!passport._strategies
+    });
+});
+
 // User Profile Endpoints
 app.get('/api/user/profile', isAuthenticated, async (req, res) => {
     try {
