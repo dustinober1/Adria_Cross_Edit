@@ -238,3 +238,47 @@
 {"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: \n\n-- Add a comment explaining the nullable password\nCOMMENT ON COLUMN users.password IS 'Password ha... SQLITE_ERROR: near \"COMMENT\": syntax error","stack":"Error: SQLITE_ERROR: near \"COMMENT\": syntax error","timestamp":"2025-12-25T02:43:33.517Z"}
 {"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-25T02:43:33.517Z"}
 {"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-25T02:43:33.518Z"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-25T03:06:44.977Z"}
+{"level":"info","message":"Server starting in development mode on port 3000","timestamp":"2025-12-25T03:06:44.979Z"}
+{"level":"info","message":"Run: http://localhost:3000","timestamp":"2025-12-25T03:06:44.993Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2025-12-25T03:06:44.995Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-25T03:06:44.998Z"}
+{"level":"info","message":"Running migration: 003_oauth_schema.sql","timestamp":"2025-12-25T03:06:44.998Z"}
+{"level":"info","message":"Running migration: 004_oauth_password_nullable.sql","timestamp":"2025-12-25T03:06:44.999Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: -- Migration: 004_oauth_password_nullable.sql\n-- Description: Make password column nullable to suppo... SQLITE_ERROR: near \"ALTER\": syntax error","stack":"Error: SQLITE_ERROR: near \"ALTER\": syntax error","timestamp":"2025-12-25T03:06:44.999Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: \n\n-- Add a comment explaining the nullable password\nCOMMENT ON COLUMN users.password IS 'Password ha... SQLITE_ERROR: near \"COMMENT\": syntax error","stack":"Error: SQLITE_ERROR: near \"COMMENT\": syntax error","timestamp":"2025-12-25T03:06:44.999Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-25T03:06:44.999Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-25T03:06:45.000Z"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-25T03:11:07.956Z"}
+{"level":"info","message":"Server starting in development mode on port 3000","timestamp":"2025-12-25T03:11:07.959Z"}
+{"level":"info","message":"Run: http://localhost:3000","timestamp":"2025-12-25T03:11:07.974Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2025-12-25T03:11:07.975Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-25T03:11:07.979Z"}
+{"level":"info","message":"Running migration: 003_oauth_schema.sql","timestamp":"2025-12-25T03:11:07.979Z"}
+{"level":"info","message":"Running migration: 004_oauth_password_nullable.sql","timestamp":"2025-12-25T03:11:07.980Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: -- Migration: 004_oauth_password_nullable.sql\n-- Description: Make password column nullable to suppo... SQLITE_ERROR: near \"ALTER\": syntax error","stack":"Error: SQLITE_ERROR: near \"ALTER\": syntax error","timestamp":"2025-12-25T03:11:07.980Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: \n\n-- Add a comment explaining the nullable password\nCOMMENT ON COLUMN users.password IS 'Password ha... SQLITE_ERROR: near \"COMMENT\": syntax error","stack":"Error: SQLITE_ERROR: near \"COMMENT\": syntax error","timestamp":"2025-12-25T03:11:07.981Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-25T03:11:07.981Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-25T03:11:07.981Z"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-25T03:49:34.452Z"}
+{"level":"info","message":"Server starting in development mode on port 3000","timestamp":"2025-12-25T03:49:34.454Z"}
+{"level":"info","message":"Run: http://localhost:3000","timestamp":"2025-12-25T03:49:34.470Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2025-12-25T03:49:34.471Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-25T03:49:34.476Z"}
+{"level":"info","message":"Running migration: 003_oauth_schema.sql","timestamp":"2025-12-25T03:49:34.477Z"}
+{"level":"info","message":"Running migration: 004_oauth_password_nullable.sql","timestamp":"2025-12-25T03:49:34.478Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: -- Migration: 004_oauth_password_nullable.sql\n-- Description: Make password column nullable to suppo... SQLITE_ERROR: near \"ALTER\": syntax error","stack":"Error: SQLITE_ERROR: near \"ALTER\": syntax error","timestamp":"2025-12-25T03:49:34.478Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: \n\n-- Add a comment explaining the nullable password\nCOMMENT ON COLUMN users.password IS 'Password ha... SQLITE_ERROR: near \"COMMENT\": syntax error","stack":"Error: SQLITE_ERROR: near \"COMMENT\": syntax error","timestamp":"2025-12-25T03:49:34.478Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-25T03:49:34.478Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-25T03:49:34.479Z"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-25T03:57:05.621Z"}
+{"level":"info","message":"Server starting in development mode on port 3000","timestamp":"2025-12-25T03:57:05.623Z"}
+{"level":"info","message":"Run: http://localhost:3000","timestamp":"2025-12-25T03:57:05.639Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2025-12-25T03:57:05.640Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-25T03:57:05.647Z"}
+{"level":"info","message":"Running migration: 003_oauth_schema.sql","timestamp":"2025-12-25T03:57:05.647Z"}
+{"level":"info","message":"Running migration: 004_oauth_password_nullable.sql","timestamp":"2025-12-25T03:57:05.648Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: -- Migration: 004_oauth_password_nullable.sql\n-- Description: Make password column nullable to suppo... SQLITE_ERROR: near \"ALTER\": syntax error","stack":"Error: SQLITE_ERROR: near \"ALTER\": syntax error","timestamp":"2025-12-25T03:57:05.648Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: \n\n-- Add a comment explaining the nullable password\nCOMMENT ON COLUMN users.password IS 'Password ha... SQLITE_ERROR: near \"COMMENT\": syntax error","stack":"Error: SQLITE_ERROR: near \"COMMENT\": syntax error","timestamp":"2025-12-25T03:57:05.649Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-25T03:57:05.649Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-25T03:57:05.649Z"}
