@@ -1163,6 +1163,17 @@
 
 
     <script>
+        // ============================================================================
+        // ADMIN DASHBOARD - STARTUP DIAGNOSTICS
+        // ============================================================================
+        console.log('%c[Admin] Dashboard loading...', 'color: #c19a5d; font-weight: bold');
+        console.log('[Admin] Page URL:', window.location.href);
+        console.log('[Admin] Timestamp:', new Date().toISOString());
+        console.log('[Admin] Cookies:', document.cookie);
+
+        // ============================================================================
+        // STATE
+        // ============================================================================
         // Calendar State
         let currentCalendarDate = new Date();
         let overrides = {};
@@ -1170,29 +1181,53 @@
         let selectedDateData = null;
 
         async function checkAuth() {
+            console.log('[Admin] Checking authentication status...');
             const res = await fetch('/api/auth/status');
+
+            if (!res.ok) {
+                console.error('[Admin] Auth check failed:', res.status, res.statusText);
+                return;
+            }
+
             const data = await res.json();
+            console.log('[Admin] Auth response:', data);
+
             if (data.authenticated) {
+                console.log('[Admin] ✓ User authenticated, role:', data.user?.role);
                 if (data.user.role === 'admin') {
+                    console.log('[Admin] ✓ Admin role confirmed, showing dashboard');
                     showDashboard();
                 } else {
+                    console.log('[Admin] User is not admin, redirecting to member portal');
                     window.location.href = '/member-portal.html';
                 }
+            } else {
+                console.log('[Admin] User not authenticated, showing login form');
             }
         }
 
         function showDashboard() {
+            console.log('[Admin] ========== SHOWING DASHBOARD ==========');
+            console.log('[Admin] Session ID:', document.cookie.match(/connect\.sid=([^;]+)/)?.[1] || 'none');
+            console.log('[Admin] User Agent:', navigator.userAgent.substring(0, 50) + '...');
+
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('dashboard-section').style.display = 'block';
+
+            console.log('[Admin] Dashboard section displayed');
             initTabHandlers(); // Initialize tab click handlers (CSP-compliant)
             initEventHandlers(); // Initialize all event handlers (CSP-compliant)
+
             loadAppointments();
             loadIntake();
             loadOverrides();
         }
 
         async function loadAppointments() {
-            const res = await fetch('/api/appointments');
+            console.log('[Admin] Loading appointments...');
+            const res = await fetch('/api/appointments', {
+                headers: { 'Accept': 'application/json' }
+            });
             const data = await res.json();
             appointments = data;
             const body = document.getElementById('appointments-body');
@@ -1505,6 +1540,8 @@
         }
 
         function switchTab(tab, clickedBtn = null) {
+            console.log(`[Admin] Switching to tab: ${tab}`);
+
             // Remove active from all tabs and content
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1514,13 +1551,20 @@
                 clickedBtn.classList.add('active');
             } else {
                 const tabBtn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
-                if (tabBtn) tabBtn.classList.add('active');
+                if (tabBtn) {
+                    tabBtn.classList.add('active');
+                } else {
+                    console.warn(`[Admin] Tab button not found for: ${tab}`);
+                }
             }
 
             // Show the selected tab content
             const tabContent = document.getElementById(`${tab}-tab`);
             if (tabContent) {
                 tabContent.classList.add('active');
+                console.log(`[Admin] Tab content displayed: ${tab}-tab`);
+            } else {
+                console.error(`[Admin] Tab content not found: ${tab}-tab`);
             }
 
             // Render calendar when switching to availability tab
@@ -1545,7 +1589,11 @@
 
         // Initialize tab click handlers (CSP-compliant - no inline onclick)
         function initTabHandlers() {
-            document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+            const tabButtons = document.querySelectorAll('.tab-btn[data-tab]');
+            console.log(`[Admin] Initializing tab handlers for ${tabButtons.length} buttons`);
+            tabButtons.forEach(btn => {
+                const tabName = btn.getAttribute('data-tab');
+                console.log(`[Admin] Attaching handler to tab: ${tabName}`);
                 btn.addEventListener('click', function () {
                     const tabName = this.getAttribute('data-tab');
                     switchTab(tabName, this);
@@ -1555,34 +1603,48 @@
 
         // Initialize all event handlers using event delegation (CSP-compliant)
         function initEventHandlers() {
+            console.log('[Admin] Initializing event handlers...');
+
             // Logout button
             const logoutBtn = document.getElementById('logout-btn');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', logout);
+                console.log('[Admin] ✓ Logout handler attached');
+            } else {
+                console.warn('[Admin] ✗ Logout button not found');
             }
 
             // Calendar navigation
             const prevMonthBtn = document.getElementById('cal-prev-month');
             const nextMonthBtn = document.getElementById('cal-next-month');
-            if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => changeMonth(-1));
-            if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => changeMonth(1));
+            if (prevMonthBtn) {
+                prevMonthBtn.addEventListener('click', () => changeMonth(-1));
+                console.log('[Admin] ✓ Calendar prev month handler attached');
+            }
+            if (nextMonthBtn) {
+                nextMonthBtn.addEventListener('click', () => changeMonth(1));
+                console.log('[Admin] ✓ Calendar next month handler attached');
+            }
 
             // Date modal close
             const closeDateModal = document.getElementById('close-date-modal');
             if (closeDateModal) {
                 closeDateModal.addEventListener('click', closeDateModalFn);
+                console.log('[Admin] ✓ Date modal close handler attached');
             }
 
             // Details modal close
             const closeDetailsModal = document.getElementById('close-details-modal');
             if (closeDetailsModal) {
                 closeDetailsModal.addEventListener('click', closeModalFn);
+                console.log('[Admin] ✓ Details modal close handler attached');
             }
 
             // Date enabled toggle
             const dateEnabledToggle = document.getElementById('date-enabled-toggle');
             if (dateEnabledToggle) {
                 dateEnabledToggle.addEventListener('change', toggleDateEnabled);
+                console.log('[Admin] ✓ Date enabled toggle handler attached');
             }
 
             // Quick time buttons
