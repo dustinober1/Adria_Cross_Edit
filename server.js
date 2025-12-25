@@ -1,4 +1,4 @@
-// Server configuration - Updated Dec 24, 2025 18:10
+// Server configuration - Updated Dec 25, 2025 00:15 UTC
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
