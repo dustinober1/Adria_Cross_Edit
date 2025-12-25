@@ -104,6 +104,7 @@ if (!process.env.ADMIN_PASSWORD) {
 
 let pool;
 let db;
+let dbReady = Promise.resolve(); // Default to resolved for PostgreSQL
 
 // Initialize database based on DATABASE_URL
 if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) {
@@ -214,15 +215,11 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) 
         }
     }
 
-    // Initialize SQLite database immediately and wait for it
-    (async () => {
-        try {
-            await initSqliteDb();
-        } catch (err) {
-            logger.error('Fatal: Database initialization failed, exiting:', err);
-            process.exit(1);
-        }
-    })();
+    // Assign to outer dbReady for server startup to await
+    dbReady = initSqliteDb().catch(err => {
+        logger.error('Fatal: Database initialization failed, exiting:', err);
+        process.exit(1);
+    });
 } else {
     // PostgreSQL configuration
     const { Pool } = require('pg');
@@ -1918,7 +1915,10 @@ app.use((err, req, res, next) => {
 });
 
 if (require.main === module) {
-    app.listen(port, () => logger.info(`Run: http://localhost:${port}`));
+    // Wait for database to be ready before accepting connections
+    dbReady.then(() => {
+        app.listen(port, () => logger.info(`Run: http://localhost:${port}`));
+    });
 }
 
 module.exports = { app, pool };
