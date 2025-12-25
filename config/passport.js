@@ -1,12 +1,13 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const AppleStrategy = require('passport-apple');
+// Note: passport-apple can be added later when Apple Sign-in is implemented
+// const AppleStrategy = require('passport-apple');
 const fs = require('fs');
 const path = require('path');
 const logger = require('../logger');
 
 module.exports = function configurePassport(app, pool) {
-    
+
     // Serialize user to session
     passport.serializeUser((user, done) => {
         done(null, user.id);
@@ -53,7 +54,7 @@ module.exports = function configurePassport(app, pool) {
 
                 // Check if user exists
                 let result = await pool.query('SELECT * FROM users WHERE email = $1 OR (provider = $2 AND provider_id = $3)', [email, 'google', googleId]);
-                
+
                 let user;
                 if (result.rows.length > 0) {
                     // Update existing user with Google info if missing
@@ -68,22 +69,22 @@ module.exports = function configurePassport(app, pool) {
                     // Create new user
                     // Use email as username if available, otherwise generate one
                     const username = email.split('@')[0] + '_' + Math.floor(Math.random() * 1000);
-                    
+
                     const insertResult = await pool.query(
                         'INSERT INTO users (username, email, provider, provider_id, display_name, profile_picture, email_verified, role) VALUES ($1, $2, $3, $4, $5, $6, TRUE, $7) RETURNING *',
                         [username, email, 'google', googleId, displayName, photo, 'client']
                     );
                     user = insertResult.rows[0] || (insertResult.rows ? insertResult.rows[0] : null); // Handle different DB adapters
-                    
+
                     // For better-sqlite3 wrapper which might not support RETURNING * fully in same way as pg
                     if (!user) {
-                         const newUser = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-                         user = newUser.rows[0];
+                        const newUser = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+                        user = newUser.rows[0];
                     }
                 }
 
                 // Store tokens (Optional: implement oauth_tokens table logic here if needed for API access later)
-                
+
                 return done(null, user);
 
             } catch (err) {
