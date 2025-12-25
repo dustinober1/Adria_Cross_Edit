@@ -31,11 +31,26 @@ async function runMigrations(dbPoolOrWrapper) {
 
             for (let query of queries) {
                 try {
-                    let execQuery = query;
-                    // For SQLite INSERT OR IGNORE fallback
-                    if (isSqlite && sql.includes('clothing_categories') && query.includes('INSERT INTO')) {
-                        execQuery = query.replace('INSERT INTO', 'INSERT OR IGNORE INTO');
+                    let execQuery = query.trim();
+
+                    // Skip PostgreSQL-only statements for SQLite
+                    if (isSqlite) {
+                        // Skip ALTER COLUMN statements (SQLite doesn't support them well)
+                        if (execQuery.includes('ALTER COLUMN') || execQuery.includes('ALTER TABLE') && execQuery.includes('DROP NOT NULL')) {
+                            logger.info(`Skipping PostgreSQL-only statement: ${execQuery.substring(0, 60)}...`);
+                            continue;
+                        }
+                        // Skip COMMENT ON statements
+                        if (execQuery.startsWith('COMMENT ON')) {
+                            logger.info(`Skipping COMMENT statement for SQLite`);
+                            continue;
+                        }
+                        // For SQLite INSERT OR IGNORE fallback
+                        if (sql.includes('clothing_categories') && execQuery.includes('INSERT INTO')) {
+                            execQuery = execQuery.replace('INSERT INTO', 'INSERT OR IGNORE INTO');
+                        }
                     }
+
                     await dbPoolOrWrapper.query(execQuery);
                 } catch (err) {
                     if (err.message.includes('already exists') || err.message.includes('duplicate')) {

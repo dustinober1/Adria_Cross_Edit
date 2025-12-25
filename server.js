@@ -185,24 +185,39 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) 
                 filename: dbPath,
                 driver: sqlite3.Database
             });
+            logger.info('SQLite database opened successfully');
 
-            // Run central migrations
+            // Run central migrations and wait for completion
+            logger.info('Starting migrations...');
             await runMigrations(pool);
+            logger.info('Migrations completed, now creating admin user...');
 
             // Create default admin user if not exists
+            // First, check if the role column exists (migration 003)
+            const tableInfo = await db.all('PRAGMA table_info(users)');
+            const hasRoleColumn = tableInfo.some(col => col.name === 'role');
+            logger.info(`Users table columns: ${tableInfo.map(c => c.name).join(', ')}, hasRoleColumn: ${hasRoleColumn}`);
+
             const adminCheck = await db.get('SELECT * FROM users WHERE username = ?', ['admin']);
-            logger.info(`Admin check result: ${adminCheck ? 'user exists' : 'user not found'}`);
+            logger.info(`Admin check result: ${adminCheck ? 'user exists with id=' + adminCheck.id : 'user not found'}`);
+
             if (!adminCheck) {
                 const password = process.env.ADMIN_PASSWORD || 'adria2025';
                 logger.info(`Creating admin user with password from ${process.env.ADMIN_PASSWORD ? 'ADMIN_PASSWORD env var' : 'default'}`);
                 const hash = bcrypt.hashSync(password, 10);
-                await db.run('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', ['admin', hash, 'admin']);
-                logger.info('Created default admin user with admin role');
+
+                // Insert with or without role column depending on schema state
+                if (hasRoleColumn) {
+                    await db.run('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', ['admin', hash, 'admin']);
+                } else {
+                    await db.run('INSERT INTO users (username, password) VALUES (?, ?)', ['admin', hash]);
+                }
+                logger.info('Created default admin user');
 
                 // Verify the admin was created
-                const verifyAdmin = await db.get('SELECT id, username, role FROM users WHERE username = ?', ['admin']);
+                const verifyAdmin = await db.get('SELECT id, username FROM users WHERE username = ?', ['admin']);
                 logger.info(`Admin verification: ${JSON.stringify(verifyAdmin)}`);
-            } else if (adminCheck.role !== 'admin') {
+            } else if (hasRoleColumn && adminCheck.role !== 'admin') {
                 // Ensure existing admin user has admin role
                 await db.run('UPDATE users SET role = ? WHERE username = ?', ['admin', 'admin']);
                 logger.info('Updated admin user role to admin');
