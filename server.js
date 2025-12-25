@@ -306,12 +306,21 @@ const initDb = async () => {
     try {
         await runMigrations(pool);
 
-        // Defaults
+        // Defaults - Create admin user
         const userCheck = await pool.query('SELECT * FROM users WHERE username = $1', ['admin']);
         if (userCheck.rows.length === 0) {
-            const password = process.env.ADMIN_PASSWORD || 'adria-dev-2025';
+            const password = process.env.ADMIN_PASSWORD || 'adria2025';
             const hash = bcrypt.hashSync(password, 10);
-            await pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', ['admin', hash]);
+            await pool.query('INSERT INTO users (username, password, role) VALUES ($1, $2, $3)', ['admin', hash, 'admin']);
+            logger.info('Created default admin user with admin role');
+        } else {
+            // Check if existing admin user has the correct role
+            const adminUser = userCheck.rows[0];
+            logger.info(`Admin user exists, current role: "${adminUser.role}"`);
+            if (!adminUser.role || adminUser.role !== 'admin') {
+                await pool.query('UPDATE users SET role = $1 WHERE username = $2', ['admin', 'admin']);
+                logger.info('Updated admin user role to admin');
+            }
         }
 
         const availCheck = await pool.query('SELECT COUNT(*) FROM availability_config');
