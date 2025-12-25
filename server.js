@@ -110,8 +110,24 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) 
     // SQLite configuration
     const sqlite = require('sqlite');
     const { open } = require('sqlite');
+    const fs = require('fs');
+    const path = require('path');
 
-    const dbPath = process.env.DATABASE_URL.replace('sqlite:', '');
+    let dbPath = process.env.DATABASE_URL.replace('sqlite:', '');
+
+    // In production/Render, use /tmp for writable SQLite database storage
+    if (process.env.NODE_ENV === 'production' && !path.isAbsolute(dbPath)) {
+        dbPath = path.join('/tmp', 'adria_cross.db');
+        logger.info(`Production: Using SQLite at ${dbPath}`);
+    }
+
+    // Ensure database directory exists
+    const dbDir = path.dirname(dbPath);
+    if (!fs.existsSync(dbDir)) {
+        logger.info(`Creating database directory: ${dbDir}`);
+        fs.mkdirSync(dbDir, { recursive: true });
+    }
+
     let db;
 
     // Create wrapper pool-like interface for SQLite
@@ -137,6 +153,7 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) 
     // Initialize SQLite database
     async function initSqliteDb() {
         try {
+            logger.info(`Opening SQLite database at: ${dbPath}`);
             db = await open({
                 filename: dbPath,
                 driver: sqlite3.Database
@@ -156,6 +173,7 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:')) 
             logger.info('SQLite database initialized successfully');
         } catch (err) {
             logger.error('Error initializing SQLite database:', err);
+            throw err; // Re-throw to fail fast in production
         }
     }
 
@@ -331,12 +349,29 @@ app.use(cors()); // Enable CORS for all routes
 app.use(express.json({ limit: '10kb' })); // Limit JSON size
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
+
+// Determine session database path (same logic as SQLite init)
+const fs = require('fs');
+const path = require('path');
+let sessionDbPath = process.env.DATABASE_URL?.replace('sqlite:', '') || './adria_cross.db';
+if (process.env.NODE_ENV === 'production' && !path.isAbsolute(sessionDbPath)) {
+    sessionDbPath = path.join('/tmp', 'adria_cross.db');
+    logger.info(`Production: Session DB at ${sessionDbPath}`);
+}
+
+// Ensure database directory exists before session store initialization
+const sessionDbDir = path.dirname(sessionDbPath);
+if (!fs.existsSync(sessionDbDir)) {
+    logger.info(`Creating session DB directory: ${sessionDbDir}`);
+    fs.mkdirSync(sessionDbDir, { recursive: true });
+}
+
 app.use(session({
     secret: process.env.SESSION_SECRET || 'dev-only-insecure-secret',
     resave: false,
     saveUninitialized: false,
     store: new SQLiteStore({
-        db: process.env.DATABASE_URL?.replace('sqlite:', '') || './adria_cross.db',
+        db: sessionDbPath,
         table: 'sessions'
     }),
     cookie: {
