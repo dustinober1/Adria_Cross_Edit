@@ -832,8 +832,8 @@
         <!-- Authentication Section -->
         <section id="login-section">
             <div id="auth-header">
-                <h2 id="auth-title">Welcome Back</h2>
-                <p id="auth-subtitle">Login to your account</p>
+                <h2 id="auth-title">Owner Portal</h2>
+                <p id="auth-subtitle">Administrator access only</p>
             </div>
 
             <!-- Social Login Buttons -->
@@ -899,51 +899,21 @@
                 .auth-divider span {
                     padding: 0 10px;
                 }
-
-                .auth-toggle-link {
-                    margin-top: 1.5rem;
-                    display: block;
-                    color: var(--primary);
-                    text-decoration: none;
-                    font-weight: 600;
-                    cursor: pointer;
-                }
-
-                .auth-toggle-link:hover {
-                    text-decoration: underline;
-                }
-
-                #signup-form {
-                    display: none;
-                }
             </style>
 
-            <!-- Login Form -->
+            <!-- Admin Login Form -->
             <form id="login-form">
-                <input type="text" id="username" placeholder="Username or Email" required
+                <input type="text" id="username" placeholder="Admin Username" required
                     style="width:100%; padding:1rem; margin-bottom:1rem; border:1px solid #eee; border-radius:8px;">
                 <input type="password" id="password" placeholder="Password" required
                     style="width:100%; padding:1rem; margin-bottom:1rem; border:1px solid #eee; border-radius:8px;">
                 <button type="submit"
                     style="width:100%; padding:1rem; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Login</button>
-                <a class="auth-toggle-link" onclick="toggleAuth('signup')">Don't have an account? Sign Up</a>
-            </form>
-
-            <!-- Signup Form -->
-            <form id="signup-form">
-                <input type="text" id="reg-username" placeholder="Username" required
-                    style="width:100%; padding:1rem; margin-bottom:1rem; border:1px solid #eee; border-radius:8px;">
-                <input type="email" id="reg-email" placeholder="Email Address" required
-                    style="width:100%; padding:1rem; margin-bottom:1rem; border:1px solid #eee; border-radius:8px;">
-                <input type="text" id="reg-display-name" placeholder="Full Name (Optional)"
-                    style="width:100%; padding:1rem; margin-bottom:1rem; border:1px solid #eee; border-radius:8px;">
-                <input type="password" id="reg-password" placeholder="Password (min 6 characters)" required
-                    minlength="6"
-                    style="width:100%; padding:1rem; margin-bottom:1rem; border:1px solid #eee; border-radius:8px;">
-                <button type="submit"
-                    style="width:100%; padding:1rem; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Create
-                    Account</button>
-                <a class="auth-toggle-link" onclick="toggleAuth('login')">Already have an account? Login</a>
+                <p style="margin-top: 1.5rem; color: #888; font-size: 0.9rem; text-align: center;">
+                    This portal is for administrators only.<br>
+                    <a href="/member-portal.html" style="color: var(--primary); text-decoration: none;">Looking for the
+                        Member Portal?</a>
+                </p>
             </form>
         </section>
 
@@ -1569,25 +1539,6 @@
         function closeModal() { document.getElementById('details-modal').style.display = 'none'; }
         async function logout() { await fetch('/api/logout', { method: 'POST' }); window.location.reload(); }
 
-        function toggleAuth(mode) {
-            const loginForm = document.getElementById('login-form');
-            const signupForm = document.getElementById('signup-form');
-            const title = document.getElementById('auth-title');
-            const subtitle = document.getElementById('auth-subtitle');
-
-            if (mode === 'signup') {
-                loginForm.style.display = 'none';
-                signupForm.style.display = 'block';
-                title.textContent = 'Create Account';
-                subtitle.textContent = 'Join the Adria Cross styling community';
-            } else {
-                loginForm.style.display = 'block';
-                signupForm.style.display = 'none';
-                title.textContent = 'Welcome Back';
-                subtitle.textContent = 'Login to your account';
-            }
-        }
-
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const res = await fetch('/api/login', {
@@ -1596,40 +1547,19 @@
                 body: JSON.stringify({ username: e.target[0].value, password: e.target[1].value })
             });
             if (res.ok) {
-                // Check if user is admin to stay on admin dashboard
+                // Check if user is admin - only admins can access this portal
                 const authRes = await fetch('/api/auth/status');
                 const authData = await authRes.json();
                 if (authData.authenticated && authData.user.role === 'admin') {
                     showDashboard();
                 } else {
-                    window.location.href = '/member-portal.html';
+                    // Non-admin user - log them out and show error
+                    await fetch('/api/auth/logout', { method: 'POST' });
+                    alert('Access denied. This portal is for administrators only. Please use the Member Portal.');
                 }
             } else {
                 const err = await res.json();
                 alert(err.error || 'Login failed');
-            }
-        });
-
-        document.getElementById('signup-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const payload = {
-                username: document.getElementById('reg-username').value,
-                email: document.getElementById('reg-email').value,
-                displayName: document.getElementById('reg-display-name').value,
-                password: document.getElementById('reg-password').value
-            };
-
-            const res = await fetch('/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (res.ok) {
-                window.location.href = '/member-portal.html';
-            } else {
-                const err = await res.json();
-                alert(err.error || 'Registration failed');
             }
         });
 
