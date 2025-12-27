@@ -1,0 +1,31 @@
+{
+  "projectDir": "/Users/dustinober/Projects/Adria_Cross_Edit",
+  "taskDescription": "Update all pricing information in the website based on new pricing structure:\n\n- Color Analysis: $200 (was $175)\n- One-Event Styling: $250 (unchanged)\n- The Closet Edit: $395 (was $350)\n- Personal Shopping: $150/hour (3-hour minimum = $450+)\n- Wardrobe Overhaul: $1,200 (unchanged)\n- Style Starter Bundle: $450 (was $450 with different savings)\n- Complete Confidence Bundle: $1,300 (was $1,250)\n\nAdd \"30 days of email support with a guaranteed 48-hour response time included with all packages\" notice.\n\nFiles to update:\n- services.html (main pricing page)\n- index.html (schema priceRange)",
+  "lastUpdated": "2025-12-27T21:30:38.415Z",
+  "features": [
+    {
+      "id": "feature-1",
+      "description": "Update services.html with new individual service prices (Color Analysis $200, Closet Edit $395)",
+      "status": "completed",
+      "passes": true
+    },
+    {
+      "id": "feature-2",
+      "description": "Update services.html bundle pricing (Style Starter $450, Complete Confidence $1,300)",
+      "status": "completed",
+      "passes": true
+    },
+    {
+      "id": "feature-3",
+      "description": "Update services.html to add email support notice (30 days, 48-hour response)",
+      "status": "completed",
+      "passes": true
+    },
+    {
+      "id": "feature-4",
+      "description": "Update index.html schema priceRange from '$175-$1,200' to '$200-$1,200'",
+      "status": "completed",
+      "passes": true
+    }
+  ]
+}
