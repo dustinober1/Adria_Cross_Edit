@@ -1014,8 +1014,20 @@ app.post('/api/appointments/:id/decline', isAuthenticated, async (req, res) => {
             <p>Best,<br>Adria Cross</p>
         `;
 
-        sendEmail(clientEmail, 'Appointment Declined - Adria Cross', declineHtml)
-            .catch(err => logger.error('Failed to send decline email:', err));
+        // Send decline email to client (await and handle errors)
+        if (!process.env.EMAIL_HOST) {
+            logger.warn('EMAIL_HOST not configured - decline email will not be sent');
+            return res.status(500).json({ error: 'Email not configured. Please contact administrator.' });
+        }
+
+        try {
+            await sendEmail(clientEmail, 'Appointment Declined - Adria Cross', declineHtml);
+            logger.info(`Decline email sent to ${clientEmail}`);
+        } catch (emailErr) {
+            logger.error('Failed to send decline email:', emailErr);
+            // Return error so admin knows email wasn't sent
+            return res.status(500).json({ error: 'Failed to send decline email. Please try again.' });
+        }
 
         res.json({ success: true });
     } catch (err) {
@@ -1066,8 +1078,20 @@ app.post('/api/appointments/:id/propose-times', isAuthenticated, async (req, res
             <p>Best,<br>Adria Cross</p>
         `;
 
-        sendEmail(clientEmail, 'Alternative Times Proposed - Adria Cross', proposeHtml)
-            .catch(err => logger.error('Failed to send propose times email:', err));
+        // Send proposal email to client (await and handle errors)
+        if (!process.env.EMAIL_HOST) {
+            logger.warn('EMAIL_HOST not configured - proposal email will not be sent');
+            return res.status(500).json({ error: 'Email not configured. Please contact administrator.' });
+        }
+
+        try {
+            await sendEmail(clientEmail, 'Alternative Times Proposed - Adria Cross', proposeHtml);
+            logger.info(`Proposal email sent to ${clientEmail}`);
+        } catch (emailErr) {
+            logger.error('Failed to send proposal email:', emailErr);
+            // Return error so admin knows email wasn't sent
+            return res.status(500).json({ error: 'Failed to send proposal email. Please try again.' });
+        }
 
         res.json({ success: true });
     } catch (err) {
