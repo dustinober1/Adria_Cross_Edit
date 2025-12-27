@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS appointments (
     service TEXT,
     message TEXT,
     status TEXT DEFAULT 'pending',
+    proposed_times TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

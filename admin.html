@@ -191,6 +191,11 @@
             color: #155724;
         }
 
+        .status-declined {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
         .day-config-card {
             border: 1px solid #eee;
             border-radius: 12px;
@@ -1160,7 +1165,52 @@
         </div>
     </div>
 
+    <!-- Decline Appointment Modal -->
+    <div id="decline-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-modal" id="close-decline-modal">&times;</span>
+            <h2>Decline Appointment</h2>
+            <p id="decline-modal-info" style="color: #666; margin-bottom: 1.5rem;"></p>
+            <form id="decline-form" style="display: grid; gap: 1rem;">
+                <div>
+                    <label for="decline-reason" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Reason for Decline</label>
+                    <textarea id="decline-reason" required placeholder="Explain why you're declining this appointment..." style="width: 100%; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; resize: vertical; min-height: 120px;"></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button type="button" class="btn-secondary" id="cancel-decline-btn" style="flex: 1;">Cancel</button>
+                    <button type="submit" class="btn-primary" style="flex: 1; background: #dc3545;">Decline Appointment</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
+    <!-- Propose New Time Modal -->
+    <div id="propose-time-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close-modal" id="close-propose-modal">&times;</span>
+            <h2>Propose New Times</h2>
+            <p id="propose-modal-info" style="color: #666; margin-bottom: 1.5rem;"></p>
+            <form id="propose-time-form" style="display: grid; gap: 1rem;">
+                <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Select 2-3 Alternative Times</label>
+                    <p style="color: #666; font-size: 0.9rem; margin: 0.5rem 0 1rem 0;">Available time slots:</p>
+                    <div id="available-slots" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.5rem; margin-bottom: 1rem;"></div>
+                </div>
+                <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Selected Times</label>
+                    <div id="selected-times" style="display: flex; flex-direction: column; gap: 0.5rem; min-height: 60px; padding: 0.5rem; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd;"></div>
+                </div>
+                <div>
+                    <label for="propose-message" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Optional Message</label>
+                    <textarea id="propose-message" placeholder="Let them know why you're proposing these times..." style="width: 100%; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; resize: vertical; min-height: 80px;"></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button type="button" class="btn-secondary" id="cancel-propose-btn" style="flex: 1;">Cancel</button>
+                    <button type="submit" class="btn-primary" style="flex: 1; background: #007bff;">Send Proposal</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         // ============================================================================
@@ -1179,6 +1229,7 @@
         let overrides = {};
         let appointments = [];
         let selectedDateData = null;
+        let selectedAppointmentForDecline = null;
 
         async function checkAuth() {
             console.log('[Admin] Checking authentication status...');
@@ -1239,6 +1290,8 @@
                     <td><span class="status-badge status-${app.status}">${app.status}</span></td>
                     <td>
                         <button data-app-id="${app.id}" data-action="confirm-appointment" class="btn-view" style="background:#28a745">Confirm</button>
+                        <button data-app-id="${app.id}" data-action="propose-time" class="btn-view" style="background:#007bff; margin: 0 2px;">Propose Time</button>
+                        <button data-app-id="${app.id}" data-action="decline-appointment" class="btn-view" style="background:#dc3545">Decline</button>
                     </td>
                 </tr>
             `).join('');
@@ -1417,6 +1470,28 @@
 
             if (selectedDateData) {
                 selectedDateData.is_enabled = enabled;
+
+                // Auto-generate time slots when enabling a day
+                if (enabled && selectedDateData.slots.length === 0) {
+                    // Morning slot: 8 AM - 12 PM EST
+                    const morningSlots = [
+                        '8:00 AM',
+                        '9:00 AM',
+                        '10:00 AM',
+                        '11:00 AM'
+                    ];
+
+                    // Afternoon slot: 1 PM - 4 PM EST
+                    const afternoonSlots = [
+                        '1:00 PM',
+                        '2:00 PM',
+                        '3:00 PM',
+                        '4:00 PM'
+                    ];
+
+                    selectedDateData.slots = [...morningSlots, ...afternoonSlots];
+                    renderDateSlots();
+                }
             }
         }
 
@@ -1539,6 +1614,158 @@
             loadAppointments();
         }
 
+        function openDeclineModal(appointmentId) {
+            const appointment = appointments.find(a => a.id === appointmentId);
+            if (!appointment) return;
+
+            selectedAppointmentForDecline = appointment;
+            document.getElementById('decline-modal-info').textContent =
+                `${appointment.name} - ${appointment.date} at ${appointment.time} (${appointment.service})`;
+            document.getElementById('decline-reason').value = '';
+            document.getElementById('decline-modal').style.display = 'block';
+        }
+
+        function closeDeclineModal() {
+            document.getElementById('decline-modal').style.display = 'none';
+            selectedAppointmentForDecline = null;
+            document.getElementById('decline-reason').value = '';
+        }
+
+        async function submitDecline(e) {
+            e.preventDefault();
+            if (!selectedAppointmentForDecline) return;
+
+            const reason = document.getElementById('decline-reason').value.trim();
+            if (!reason) {
+                alert('Please enter a reason for declining.');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/appointments/${selectedAppointmentForDecline.id}/decline`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason })
+                });
+
+                if (res.ok) {
+                    alert('Appointment declined and client notified.');
+                    closeDeclineModal();
+                    loadAppointments();
+                } else {
+                    const err = await res.json();
+                    alert(`Error: ${err.error || 'Failed to decline appointment'}`);
+                }
+            } catch (err) {
+                console.error('Error declining appointment:', err);
+                alert('Failed to decline appointment. Please try again.');
+            }
+        }
+
+        let selectedAppointmentForPropose = null;
+        let selectedProposedTimes = [];
+
+        async function openProposeTimeModal(appointmentId) {
+            const appointment = appointments.find(a => a.id === appointmentId);
+            if (!appointment) return;
+
+            selectedAppointmentForPropose = appointment;
+            selectedProposedTimes = [];
+
+            document.getElementById('propose-modal-info').textContent =
+                `${appointment.name} - ${appointment.date} at ${appointment.time} (${appointment.service})`;
+            document.getElementById('propose-message').value = '';
+
+            // Get available slots for the appointment date
+            const slotsRes = await fetch(`/api/available-slots?date=${appointment.date}`);
+            const availableSlots = await slotsRes.json();
+
+            // Populate available slots
+            const slotsContainer = document.getElementById('available-slots');
+            slotsContainer.innerHTML = availableSlots.map(slot => `
+                <button type="button" class="slot-button" data-slot="${slot}" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer; transition: all 0.2s;">
+                    ${slot}
+                </button>
+            `).join('');
+
+            // Add click handlers to slot buttons
+            slotsContainer.querySelectorAll('.slot-button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const slot = btn.dataset.slot;
+                    if (selectedProposedTimes.includes(slot)) {
+                        selectedProposedTimes = selectedProposedTimes.filter(s => s !== slot);
+                        btn.style.background = 'white';
+                        btn.style.color = 'black';
+                    } else if (selectedProposedTimes.length < 3) {
+                        selectedProposedTimes.push(slot);
+                        btn.style.background = '#007bff';
+                        btn.style.color = 'white';
+                    } else {
+                        alert('Please select a maximum of 3 time slots.');
+                    }
+                    updateSelectedTimes();
+                });
+            });
+
+            document.getElementById('propose-time-modal').style.display = 'block';
+        }
+
+        function updateSelectedTimes() {
+            const container = document.getElementById('selected-times');
+            if (selectedProposedTimes.length === 0) {
+                container.innerHTML = '<span style="color: #999;">No times selected yet</span>';
+            } else {
+                container.innerHTML = selectedProposedTimes.map(time => `
+                    <span style="padding: 0.5rem; background: #e8f4ff; border-radius: 4px; border-left: 3px solid #007bff;">
+                        ${time}
+                    </span>
+                `).join('');
+            }
+        }
+
+        function closeProposeTimeModal() {
+            document.getElementById('propose-time-modal').style.display = 'none';
+            selectedAppointmentForPropose = null;
+            selectedProposedTimes = [];
+            document.getElementById('propose-message').value = '';
+        }
+
+        async function submitProposeTime(e) {
+            e.preventDefault();
+            if (!selectedAppointmentForPropose) return;
+
+            if (selectedProposedTimes.length === 0) {
+                alert('Please select at least one time slot.');
+                return;
+            }
+
+            const message = document.getElementById('propose-message').value.trim();
+
+            try {
+                const res = await fetch(`/api/appointments/${selectedAppointmentForPropose.id}/propose-times`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        proposed_times: selectedProposedTimes,
+                        message
+                    })
+                });
+
+                if (res.ok) {
+                    alert('Proposed times sent to client.');
+                    closeProposeTimeModal();
+                    loadAppointments();
+                } else {
+                    const err = await res.json();
+                    alert(`Error: ${err.error || 'Failed to propose times'}`);
+                }
+            } catch (err) {
+                console.error('Error proposing times:', err);
+                alert('Failed to propose times. Please try again.');
+            }
+        }
+
         function switchTab(tab, clickedBtn = null) {
             console.log(`[Admin] Switching to tab: ${tab}`);
 
@@ -1640,6 +1867,48 @@
                 console.log('[Admin] ✓ Details modal close handler attached');
             }
 
+            // Decline modal close
+            const closeDeclineModalBtn = document.getElementById('close-decline-modal');
+            if (closeDeclineModalBtn) {
+                closeDeclineModalBtn.addEventListener('click', closeDeclineModal);
+                console.log('[Admin] ✓ Decline modal close handler attached');
+            }
+
+            // Decline form submit
+            const declineForm = document.getElementById('decline-form');
+            if (declineForm) {
+                declineForm.addEventListener('submit', submitDecline);
+                console.log('[Admin] ✓ Decline form handler attached');
+            }
+
+            // Cancel decline button
+            const cancelDeclineBtn = document.getElementById('cancel-decline-btn');
+            if (cancelDeclineBtn) {
+                cancelDeclineBtn.addEventListener('click', closeDeclineModal);
+                console.log('[Admin] ✓ Cancel decline button handler attached');
+            }
+
+            // Propose time modal close
+            const closeProposeModalBtn = document.getElementById('close-propose-modal');
+            if (closeProposeModalBtn) {
+                closeProposeModalBtn.addEventListener('click', closeProposeTimeModal);
+                console.log('[Admin] ✓ Propose time modal close handler attached');
+            }
+
+            // Propose time form submit
+            const proposeTimeForm = document.getElementById('propose-time-form');
+            if (proposeTimeForm) {
+                proposeTimeForm.addEventListener('submit', submitProposeTime);
+                console.log('[Admin] ✓ Propose time form handler attached');
+            }
+
+            // Cancel propose button
+            const cancelProposeBtn = document.getElementById('cancel-propose-btn');
+            if (cancelProposeBtn) {
+                cancelProposeBtn.addEventListener('click', closeProposeTimeModal);
+                console.log('[Admin] ✓ Cancel propose button handler attached');
+            }
+
             // Date enabled toggle
             const dateEnabledToggle = document.getElementById('date-enabled-toggle');
             if (dateEnabledToggle) {
@@ -1690,6 +1959,18 @@
                 // Confirm appointment button
                 if (e.target.matches('[data-action="confirm-appointment"]')) {
                     updateApp(parseInt(e.target.dataset.appId), 'confirmed');
+                    return;
+                }
+
+                // Propose time button
+                if (e.target.matches('[data-action="propose-time"]')) {
+                    openProposeTimeModal(parseInt(e.target.dataset.appId));
+                    return;
+                }
+
+                // Decline appointment button
+                if (e.target.matches('[data-action="decline-appointment"]')) {
+                    openDeclineModal(parseInt(e.target.dataset.appId));
                     return;
                 }
 

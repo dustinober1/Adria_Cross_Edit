@@ -1,6 +1,5 @@
 - update default hours to 8-12 and 1-4
-- link node mailer to main email. 
-- send email from info@adriacrossedit.com to adria@adraicrossedit.com for all new signup and form completions.
+- send email from info@adriacrossedit.com to adria@adraicrossedit.com for all new signup and form completions using node mailer.
 
 Color Analysis	        2 hours	    $200	    Learning your best colors
 One-Event Styling	    2 hours	    $250	    Special occasions

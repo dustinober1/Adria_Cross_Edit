@@ -15,8 +15,8 @@ EMAIL_HOST=smtp.example.com
 EMAIL_PORT=587
 EMAIL_USER=your-email@example.com
 EMAIL_PASS=your-password-or-app-key
-EMAIL_FROM="Adria Cross <hello@adriacrossedit.com>"
-ADMIN_EMAIL="hello@adriacrossedit.com"
+EMAIL_FROM="Adria Cross <adria@adriacrossedit.com>"
+ADMIN_EMAIL="adria@adriacrossedit.com"
 ```
 
 ## 2. Backend Implementation (`server.js`)

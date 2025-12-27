@@ -369,7 +369,7 @@ const sendEmail = async (to, subject, html, retries = 3) => {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
             await transporter.sendMail({
-                from: process.env.EMAIL_FROM || '"Adria Cross" <hello@adriacrossedit.com>',
+                from: process.env.EMAIL_FROM || '"Adria Cross" <info@adriacrossedit.com>',
                 to,
                 subject,
                 html
@@ -635,7 +635,7 @@ app.get('/confirm-newsletter', async (req, res) => {
         await sendEmail(email, 'Welcome to Adria Cross Newsletter!', welcomeHtml);
 
         // Notify Adria
-        sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com,info@adriacrossedit.com', 'New Newsletter Subscriber!', `<h3>New Subscriber</h3><p><strong>Email:</strong> ${email}</p>`).catch(err => logger.error('Admin notification failed', err));
+        sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com', 'New Newsletter Subscriber!', `<h3>New Subscriber</h3><p><strong>Email:</strong> ${email}</p>`).catch(err => logger.error('Admin notification failed', err));
 
         // Redirect to homepage with success message
         res.redirect('/index.html?newsletter=confirmed');
@@ -710,7 +710,7 @@ app.post('/api/appointments', appointmentLimiter, async (req, res) => {
 
         // Fire and forget email sending
         Promise.all([
-            sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com,info@adriacrossedit.com', service === 'other' ? `New Inquiry: ${name}` : `New Booking: ${name} - ${date}`, adminHtml),
+            sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com', service === 'other' ? `New Inquiry: ${name}` : `New Booking: ${name} - ${date}`, adminHtml),
             sendEmail(email, emailSubject, userHtml)
         ]).catch(err => logger.error('Email sending failed', err));
 
@@ -735,7 +735,7 @@ app.post('/api/intake', upload.array('photos', 5), async (req, res) => {
         const userHtml = `<h3>Profile Received</h3><p>Hi ${name},</p><p>Thank you for submitting your style profile. I have received your information and photos.</p><p>I'll be in touch soon!</p><p>Best,<br>Adria Cross</p>`;
 
         Promise.all([
-            sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com,info@adriacrossedit.com', `New Intake: ${name} (${form_type})`, adminHtml),
+            sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com', `New Intake: ${name} (${form_type})`, adminHtml),
             sendEmail(email, 'Style Profile Received - Adria Cross', userHtml)
         ]).catch(err => console.error('Email sending failed', err));
 
@@ -831,6 +831,91 @@ app.get('/api/appointments', isAuthenticated, async (req, res) => {
     res.json(data.rows);
 });
 
+// Helper function to get the next 30-minute slot
+function getNextTimeSlot(timeStr, minutesOffset = 30) {
+    // Parse time string like "9:00 AM" into minutes
+    const match = timeStr.match(/(\d+):(\d+)\s+(AM|PM)/i);
+    if (!match) return null;
+
+    let hours = parseInt(match[1]);
+    let minutes = parseInt(match[2]);
+    const period = match[3].toUpperCase();
+
+    // Convert to 24-hour format
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+
+    // Add the offset minutes
+    minutes += minutesOffset;
+    if (minutes >= 60) {
+        hours += Math.floor(minutes / 60);
+        minutes = minutes % 60;
+    }
+
+    // Convert back to 12-hour format
+    let newPeriod = hours >= 12 ? 'PM' : 'AM';
+    let newHours = hours % 12 || 12;
+
+    return `${newHours}:${minutes.toString().padStart(2, '0')} ${newPeriod}`;
+}
+
+// Helper function to get all slots in the same session (morning 8-12 or afternoon 1-4)
+function getSessionSlots(timeStr) {
+    // Parse time to determine if it's morning or afternoon
+    const match = timeStr.match(/(\d+):(\d+)\s+(AM|PM)/i);
+    if (!match) return [];
+
+    let hours = parseInt(match[1]);
+    const period = match[3].toUpperCase();
+
+    // Convert to 24-hour format
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+
+    // Determine which session this time falls into
+    let isMorning = false;
+    if ((hours >= 8 && hours < 12) || (period === 'AM' && hours >= 8)) {
+        isMorning = true;
+    } else if ((hours >= 13 && hours < 16) || (period === 'PM' && hours >= 1 && hours < 4)) {
+        isMorning = false;
+    }
+
+    // Common time slots for sessions
+    const morningSlots = ['8:00 AM', '8:30 AM', '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM'];
+    const afternoonSlots = ['1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM'];
+
+    return isMorning ? morningSlots : afternoonSlots;
+}
+
+// Helper function to determine all blocked times based on existing appointments
+async function getBlockedTimes(date, pool) {
+    const booked = await pool.query(
+        'SELECT time, service FROM appointments WHERE date = $1 AND status != $2',
+        [date, 'cancelled']
+    );
+
+    const blockedTimes = new Set();
+
+    // Process each booked appointment
+    for (const appointment of booked.rows) {
+        blockedTimes.add(appointment.time); // Block the booked time itself
+
+        if (appointment.service === 'consultation') {
+            // 15-min consultation blocks 30 minutes
+            const blockedSlot = getNextTimeSlot(appointment.time, 30);
+            if (blockedSlot) {
+                blockedTimes.add(blockedSlot);
+            }
+        } else if (appointment.service === 'closet-edit') {
+            // Closet edit blocks entire morning (8-12) or afternoon (1-4) session
+            const sessionSlots = getSessionSlots(appointment.time);
+            sessionSlots.forEach(slot => blockedTimes.add(slot));
+        }
+    }
+
+    return blockedTimes;
+}
+
 app.get('/api/available-slots', async (req, res) => {
     const { date } = req.query;
     if (!date) return res.json([]);
@@ -847,9 +932,11 @@ app.get('/api/available-slots', async (req, res) => {
 
     if (!isEnabled) return res.json([]);
 
-    const booked = await pool.query('SELECT time FROM appointments WHERE date = $1 AND status != $2', [date, 'cancelled']);
-    const bookedTimes = booked.rows.map(b => b.time);
-    res.json(allSlots.filter(s => !bookedTimes.includes(s)));
+    // Get all blocked times (including time blocking logic)
+    const blockedTimes = await getBlockedTimes(date, pool);
+
+    // Filter out blocked times
+    res.json(allSlots.filter(s => !blockedTimes.has(s)));
 });
 
 app.get('/api/availability-overrides', isAuthenticated, async (req, res) => {
@@ -890,6 +977,99 @@ app.get('/api/intake', isAuthenticated, async (req, res) => {
 app.patch('/api/appointments/:id', isAuthenticated, async (req, res) => {
     await pool.query('UPDATE appointments SET status = $1 WHERE id = $2', [req.body.status, req.params.id]);
     res.json({ success: true });
+});
+
+app.post('/api/appointments/:id/decline', isAuthenticated, async (req, res) => {
+    const { reason } = req.body;
+    if (!reason || reason.trim().length === 0) {
+        return res.status(400).json({ error: 'Decline reason is required.' });
+    }
+
+    try {
+        // Get appointment details
+        const appointmentResult = await pool.query('SELECT * FROM appointments WHERE id = $1', [req.params.id]);
+        if (appointmentResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Appointment not found.' });
+        }
+
+        const appointment = appointmentResult.rows[0];
+
+        // Update appointment status to declined
+        await pool.query('UPDATE appointments SET status = $1 WHERE id = $2', ['declined', req.params.id]);
+
+        // Send decline email to client
+        const clientEmail = appointment.email;
+        const clientName = appointment.name;
+        const declineHtml = `
+            <h3>Appointment Declined</h3>
+            <p>Hi ${clientName},</p>
+            <p>Unfortunately, I need to decline your appointment request for <strong>${appointment.service}</strong> on ${appointment.date} at ${appointment.time}.</p>
+            <p><strong>Reason:</strong></p>
+            <p>${reason.replace(/\n/g, '<br>')}</p>
+            <p>Please feel free to contact me if you'd like to discuss alternative times or have any questions.</p>
+            <p>Best,<br>Adria Cross</p>
+        `;
+
+        sendEmail(clientEmail, 'Appointment Declined - Adria Cross', declineHtml)
+            .catch(err => logger.error('Failed to send decline email:', err));
+
+        res.json({ success: true });
+    } catch (err) {
+        logger.error('Error declining appointment:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post('/api/appointments/:id/propose-times', isAuthenticated, async (req, res) => {
+    const { proposed_times, message } = req.body;
+
+    if (!proposed_times || !Array.isArray(proposed_times) || proposed_times.length === 0) {
+        return res.status(400).json({ error: 'At least one proposed time is required.' });
+    }
+
+    try {
+        // Get appointment details
+        const appointmentResult = await pool.query('SELECT * FROM appointments WHERE id = $1', [req.params.id]);
+        if (appointmentResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Appointment not found.' });
+        }
+
+        const appointment = appointmentResult.rows[0];
+        const proposedTimesJson = JSON.stringify(proposed_times);
+
+        // Update appointment with proposed times and status
+        await pool.query(
+            'UPDATE appointments SET status = $1, proposed_times = $2 WHERE id = $3',
+            ['proposed', proposedTimesJson, req.params.id]
+        );
+
+        // Send proposal email to client
+        const clientEmail = appointment.email;
+        const clientName = appointment.name;
+
+        const timesList = proposed_times.map(time => `<li>${time}</li>`).join('');
+
+        const proposeHtml = `
+            <h3>Alternative Times Proposed</h3>
+            <p>Hi ${clientName},</p>
+            <p>I wanted to follow up on your appointment request for <strong>${appointment.service}</strong>. Unfortunately, the originally requested time on ${appointment.date} doesn't work for my schedule.</p>
+            <p>However, I have the following times available:</p>
+            <ul>
+                ${timesList}
+            </ul>
+            ${message ? `<p><strong>Message:</strong></p><p>${message.replace(/\n/g, '<br>')}</p>` : ''}
+            <p>Please let me know which time works best for you by replying to this email.</p>
+            <p>Best,<br>Adria Cross</p>
+        `;
+
+        sendEmail(clientEmail, 'Alternative Times Proposed - Adria Cross', proposeHtml)
+            .catch(err => logger.error('Failed to send propose times email:', err));
+
+        res.json({ success: true });
+    } catch (err) {
+        logger.error('Error proposing times:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
 // Clothing Matcher database initialization is now handled by global migrations.
@@ -1057,7 +1237,7 @@ app.post('/api/clothing/request-verification', async (req, res) => {
         await sendEmail(email, 'Your Clothing Matcher Verification Code', emailHtml);
 
         // Notify Adria
-        sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com,info@adriacrossedit.com', 'Clothing Matcher: Verification Requested', `<h3>Verification Requested</h3><p><strong>Email:</strong> ${email}</p><p>Code: ${code}</p>`).catch(err => logger.error('Admin notification failed', err));
+        sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com', 'Clothing Matcher: Verification Requested', `<h3>Verification Requested</h3><p><strong>Email:</strong> ${email}</p><p>Code: ${code}</p>`).catch(err => logger.error('Admin notification failed', err));
 
         res.json({ success: true, message: 'Verification code sent to your email' });
     } catch (err) {
@@ -1978,7 +2158,7 @@ app.post('/api/square/webhook', (req, res) => {
     if (event.type === 'payment.updated' || event.type === 'invoice.payment_made') {
         const amount = event.data?.object?.payment?.amount_money?.amount || 'N/A';
         const currency = event.data?.object?.payment?.amount_money?.currency || '';
-        sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com,info@adriacrossedit.com', 'Square Payment Notification', `<h3>Payment Event</h3><p>Type: ${event.type}</p><p>Amount: ${amount} ${currency}</p>`).catch(err => logger.error('Admin notification failed', err));
+        sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com', 'Square Payment Notification', `<h3>Payment Event</h3><p>Type: ${event.type}</p><p>Amount: ${amount} ${currency}</p>`).catch(err => logger.error('Admin notification failed', err));
     }
     res.sendStatus(200);
 });
