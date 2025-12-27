@@ -942,8 +942,7 @@
             <div id="invoices-tab" class="tab-content">
                 <div class="table-card" style="max-width: 900px;">
                     <h2>💳 Create & Manage Invoices</h2>
-                    <p style="color: #666; margin-bottom: 1.5rem;">Send invoices to clients via Square. They'll receive
-                        an email with a link to pay online.</p>
+                    <p style="color: #666; margin-bottom: 1.5rem;">Create professional checkout links for clients to pay online. They'll have multiple payment options including Apple Pay, Google Pay, and more.</p>
 
                     <form id="invoice-form" class="invoice-form" style="margin-bottom: 2rem;">
                         <div class="invoice-grid">
@@ -2360,7 +2359,7 @@
             }
         }
 
-        // Invoice form submission
+        // Invoice form submission - creates a checkout link
         document.getElementById('invoice-form')?.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -2368,19 +2367,23 @@
             const statusEl = document.getElementById('invoice-status');
 
             btn.disabled = true;
-            btn.textContent = 'Sending...';
+            btn.textContent = 'Creating checkout...';
             statusEl.innerHTML = '';
 
+            const amount = parseFloat(document.getElementById('inv-amount').value);
+            const customerEmail = document.getElementById('inv-email').value;
+            const customerName = document.getElementById('inv-name').value;
+            const description = document.getElementById('inv-desc').value;
+
             const payload = {
-                customerEmail: document.getElementById('inv-email').value,
-                customerName: document.getElementById('inv-name').value,
-                amount: parseFloat(document.getElementById('inv-amount').value),
-                dueDate: document.getElementById('inv-due').value,
-                description: document.getElementById('inv-desc').value
+                amount: amount,
+                description: description,
+                customerEmail: customerEmail,
+                customerName: customerName || 'Client'
             };
 
             try {
-                const res = await fetch('/api/invoices/create', {
+                const res = await fetch('/api/payments/checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -2390,11 +2393,10 @@
 
                 if (res.ok) {
                     statusEl.innerHTML = `<div style="background:#d4edda; color:#155724; padding:1rem; border-radius:8px;">
-                        ✅ Invoice ${data.invoiceNumber} sent successfully!</div>`;
+                        ✅ Checkout created! <a href="${data.checkoutUrl}" target="_blank" style="color:#155724; font-weight:bold; text-decoration:underline;">Pay Now →</a></div>`;
                     e.target.reset();
-                    loadInvoices();
                 } else {
-                    throw new Error(data.error || 'Failed to create invoice');
+                    throw new Error(data.error || 'Failed to create checkout');
                 }
             } catch (err) {
                 statusEl.innerHTML = `<div style="background:#f8d7da; color:#721c24; padding:1rem; border-radius:8px;">

@@ -33,6 +33,8 @@ let squareClient = null;
 let paymentsApi = null;
 let invoicesApi = null;
 let customersApi = null;
+let checkoutApi = null;
+let ordersApi = null;
 
 if (process.env.SQUARE_ACCESS_TOKEN) {
     squareClient = new Client({
@@ -44,6 +46,8 @@ if (process.env.SQUARE_ACCESS_TOKEN) {
     paymentsApi = squareClient.paymentsApi;
     invoicesApi = squareClient.invoicesApi;
     customersApi = squareClient.customersApi;
+    checkoutApi = squareClient.checkoutApi;
+    ordersApi = squareClient.ordersApi;
     logger.info(`Square SDK initialized in ${process.env.SQUARE_ENVIRONMENT || 'sandbox'} mode`);
 } else {
     logger.warn('SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.');
@@ -2135,6 +2139,78 @@ app.get('/api/invoices', isAuthenticated, async (req, res) => {
     } catch (err) {
         logger.error('List Invoices Error:', err);
         res.status(500).json({ error: 'Failed to list invoices' });
+    }
+});
+
+// Create a Square Checkout URL (professional checkout page)
+app.post('/api/payments/checkout', isAuthenticated, async (req, res) => {
+    if (!checkoutApi || !ordersApi) {
+        return res.status(503).json({ error: 'Checkout not available' });
+    }
+
+    try {
+        const { amount, description, customerEmail, customerName } = req.body;
+
+        if (!amount || !description) {
+            return res.status(400).json({ error: 'Missing required fields: amount, description' });
+        }
+
+        // Create an order for the checkout
+        const idempotencyKey = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        const orderData = {
+            idempotencyKey: idempotencyKey,
+            order: {
+                locationId: process.env.SQUARE_LOCATION_ID,
+                lineItems: [
+                    {
+                        name: description,
+                        quantity: '1',
+                        basePriceMoney: {
+                            amount: Math.round(amount * 100), // Convert to cents
+                            currency: 'USD'
+                        }
+                    }
+                ]
+            }
+        };
+
+        // Create the order
+        const orderResult = await ordersApi.createOrder(orderData);
+        const orderId = orderResult.result.order.id;
+
+        // Create checkout with the order
+        const checkoutIdempotencyKey = `checkout_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        const checkoutData = {
+            idempotencyKey: checkoutIdempotencyKey,
+            order: {
+                id: orderId
+            }
+        };
+
+        // Add customer info if provided
+        if (customerEmail || customerName) {
+            checkoutData.prePopulatedData = {
+                buyerEmail: customerEmail || undefined,
+                buyerPhoneNumber: undefined
+            };
+        }
+
+        const checkoutResult = await checkoutApi.createCheckout(process.env.SQUARE_LOCATION_ID, checkoutData);
+
+        res.json({
+            success: true,
+            checkoutUrl: checkoutResult.result.checkout.checkout_page_url,
+            orderId: orderId
+        });
+
+    } catch (err) {
+        console.error('Checkout Error:', err);
+        res.status(500).json({
+            error: 'Checkout creation failed',
+            details: err.result?.errors || err.message
+        });
     }
 });
 

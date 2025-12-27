@@ -336,3 +336,26 @@
 {"level":"info","message":"Admin verification: {\"id\":1,\"username\":\"admin\"}","timestamp":"2025-12-27T21:54:28.457Z"}
 {"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-27T21:54:28.458Z"}
 {"level":"info","message":"Run: http://localhost:3000","timestamp":"2025-12-27T21:54:28.460Z"}
+{"level":"warn","message":"SQUARE_ACCESS_TOKEN not set. Payment features will be disabled.","timestamp":"2025-12-27T22:37:22.655Z"}
+{"level":"info","message":"Server starting in test mode on port 3000","timestamp":"2025-12-27T22:37:22.656Z"}
+{"level":"info","message":"Opening SQLite database at: ./adria_cross.db","timestamp":"2025-12-27T22:37:22.668Z"}
+{"level":"info","message":"SQLite database opened successfully","timestamp":"2025-12-27T22:37:22.702Z"}
+{"level":"info","message":"Starting migrations...","timestamp":"2025-12-27T22:37:22.702Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2025-12-27T22:37:22.703Z"}
+{"level":"info","message":"Login attempt for username: admin","timestamp":"2025-12-27T22:37:22.729Z"}
+{"level":"info","message":"User query result: 1 rows found","timestamp":"2025-12-27T22:37:22.730Z"}
+{"level":"info","message":"Found user: id=1, username=admin, role=admin, hasPassword=true","timestamp":"2025-12-27T22:37:22.730Z"}
+{"level":"info","message":"Password match: false","timestamp":"2025-12-27T22:37:22.806Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2025-12-27T22:37:22.822Z"}
+{"level":"info","message":"Running migration: 003_oauth_schema.sql","timestamp":"2025-12-27T22:37:22.824Z"}
+{"level":"info","message":"Running migration: 004_add_proposed_times.sql","timestamp":"2025-12-27T22:37:22.825Z"}
+{"level":"info","message":"Running migration: 004_oauth_password_nullable.sql","timestamp":"2025-12-27T22:37:22.828Z"}
+{"level":"info","message":"Skipping PostgreSQL-only statement: -- Migration: 004_oauth_password_nullable.sql\n-- Description...","timestamp":"2025-12-27T22:37:22.828Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: \n\n-- Add a comment explaining the nullable password\nCOMMENT ON COLUMN users.password IS 'Password ha... SQLITE_ERROR: near \"COMMENT\": syntax error","timestamp":"2025-12-27T22:37:22.829Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2025-12-27T22:37:22.829Z"}
+{"level":"info","message":"Migrations completed, now creating admin user...","timestamp":"2025-12-27T22:37:22.829Z"}
+{"level":"info","message":"Users table columns: id, username, password, is_client, verification_code, email, provider, provider_id, display_name, profile_picture, email_verified, role, created_at, hasRoleColumn: true","timestamp":"2025-12-27T22:37:22.829Z"}
+{"level":"info","message":"Admin check result: user exists with id=1","timestamp":"2025-12-27T22:37:22.829Z"}
+{"level":"info","message":"Admin user exists, current role: \"admin\"","timestamp":"2025-12-27T22:37:22.829Z"}
+{"level":"info","message":"Admin user already has correct role","timestamp":"2025-12-27T22:37:22.829Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2025-12-27T22:37:22.829Z"}
