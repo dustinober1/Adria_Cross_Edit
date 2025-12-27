@@ -694,8 +694,11 @@ app.post('/api/appointments', appointmentLimiter, async (req, res) => {
     const { name, email, date, time, service, message } = req.body;
 
     try {
-        const existing = await pool.query('SELECT id FROM appointments WHERE date = $1 AND time = $2 AND status != $3', [date, time, 'cancelled']);
-        if (existing.rows.length > 0) return res.status(400).json({ error: 'Already booked.' });
+        // Only check for duplicate bookings for actual appointments, not general inquiries
+        if (service !== 'other') {
+            const existing = await pool.query('SELECT id FROM appointments WHERE date = $1 AND time = $2 AND status != $3', [date, time, 'cancelled']);
+            if (existing.rows.length > 0) return res.status(400).json({ error: 'Already booked.' });
+        }
 
         await pool.query('INSERT INTO appointments (name, email, date, time, service, message) VALUES ($1, $2, $3, $4, $5, $6)', [name, email, date, time, service, message]);
 
@@ -2146,7 +2149,7 @@ app.get('/api/invoices', isAuthenticated, async (req, res) => {
     }
 
     try {
-        const result = await invoicesApi.listInvoices(process.env.SQUARE_LOCATION_ID, { limit: 50 });
+        const result = await invoicesApi.listInvoices({ locationId: process.env.SQUARE_LOCATION_ID, limit: 50 });
 
         const invoices = (result.result?.invoices || []).map(inv => ({
             id: inv.id,
