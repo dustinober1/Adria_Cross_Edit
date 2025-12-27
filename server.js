@@ -2146,10 +2146,7 @@ app.get('/api/invoices', isAuthenticated, async (req, res) => {
     }
 
     try {
-        const result = await invoicesApi.listInvoices({
-            locationId: process.env.SQUARE_LOCATION_ID,
-            limit: 50
-        });
+        const result = await invoicesApi.listInvoices(process.env.SQUARE_LOCATION_ID, { limit: 50 });
 
         const invoices = (result.result?.invoices || []).map(inv => ({
             id: inv.id,
@@ -2228,7 +2225,8 @@ app.post('/api/payments/checkout', isAuthenticated, async (req, res) => {
         const checkoutData = {
             idempotencyKey: checkoutIdempotencyKey,
             order: {
-                id: orderId
+                id: orderId,
+                locationId: process.env.SQUARE_LOCATION_ID
             }
         };
 
