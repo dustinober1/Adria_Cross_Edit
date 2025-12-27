@@ -2141,13 +2141,17 @@ app.get('/api/invoices', isAuthenticated, async (req, res) => {
         return res.status(503).json({ error: 'Invoice listing not available' });
     }
 
+    if (!process.env.SQUARE_LOCATION_ID) {
+        return res.status(503).json({ error: 'SQUARE_LOCATION_ID not configured' });
+    }
+
     try {
         const result = await invoicesApi.listInvoices({
             locationId: process.env.SQUARE_LOCATION_ID,
             limit: 50
         });
 
-        const invoices = (result.result.invoices || []).map(inv => ({
+        const invoices = (result.result?.invoices || []).map(inv => ({
             id: inv.id,
             invoiceNumber: inv.invoiceNumber,
             title: inv.title,
@@ -2161,8 +2165,15 @@ app.get('/api/invoices', isAuthenticated, async (req, res) => {
         res.json({ invoices });
 
     } catch (err) {
-        logger.error('List Invoices Error:', err);
-        res.status(500).json({ error: 'Failed to list invoices' });
+        logger.error('List Invoices Error:', {
+            message: err.message,
+            errors: err.result?.errors,
+            stack: err.stack
+        });
+        res.status(500).json({
+            error: 'Failed to list invoices',
+            details: err.result?.errors?.[0]?.detail || err.message
+        });
     }
 });
 
@@ -2170,6 +2181,10 @@ app.get('/api/invoices', isAuthenticated, async (req, res) => {
 app.post('/api/payments/checkout', isAuthenticated, async (req, res) => {
     if (!checkoutApi || !ordersApi) {
         return res.status(503).json({ error: 'Checkout not available' });
+    }
+
+    if (!process.env.SQUARE_LOCATION_ID) {
+        return res.status(503).json({ error: 'SQUARE_LOCATION_ID not configured' });
     }
 
     try {
@@ -2180,7 +2195,7 @@ app.post('/api/payments/checkout', isAuthenticated, async (req, res) => {
         }
 
         // Create an order for the checkout
-        const idempotencyKey = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const idempotencyKey = `order_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
         const orderData = {
             idempotencyKey: idempotencyKey,
@@ -2201,10 +2216,14 @@ app.post('/api/payments/checkout', isAuthenticated, async (req, res) => {
 
         // Create the order
         const orderResult = await ordersApi.createOrder(orderData);
-        const orderId = orderResult.result.order.id;
+        const order = orderResult.result?.order;
+        if (!order) {
+            throw new Error('Square API did not return an order');
+        }
+        const orderId = order.id;
 
         // Create checkout with the order
-        const checkoutIdempotencyKey = `checkout_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const checkoutIdempotencyKey = `checkout_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
         const checkoutData = {
             idempotencyKey: checkoutIdempotencyKey,
@@ -2223,17 +2242,26 @@ app.post('/api/payments/checkout', isAuthenticated, async (req, res) => {
 
         const checkoutResult = await checkoutApi.createCheckout(process.env.SQUARE_LOCATION_ID, checkoutData);
 
+        const checkoutPageUrl = checkoutResult.result?.checkout?.checkout_page_url;
+        if (!checkoutPageUrl) {
+            throw new Error('Square API did not return a checkout URL');
+        }
+
         res.json({
             success: true,
-            checkoutUrl: checkoutResult.result.checkout.checkout_page_url,
+            checkoutUrl: checkoutPageUrl,
             orderId: orderId
         });
 
     } catch (err) {
-        console.error('Checkout Error:', err);
+        logger.error('Checkout Error:', {
+            message: err.message,
+            errors: err.result?.errors,
+            stack: err.stack
+        });
         res.status(500).json({
             error: 'Checkout creation failed',
-            details: err.result?.errors || err.message
+            details: err.result?.errors?.[0]?.detail || err.message
         });
     }
 });
