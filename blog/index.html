@@ -153,40 +153,7 @@
             </div>
 
             <div class="blog-list" id="blogList">
-                <!-- Blog Post 1 -->
-                <div class="blog-teaser">
-                    <img src="../images/capsule-wardrobe.webp" alt="How to Build a Capsule Wardrobe"
-                        style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 1.5rem;">
-                    <h2>How to Build a Capsule Wardrobe</h2>
-                    <p><em>Discover the essentials for a versatile closet that makes getting dressed effortless every
-                            day.</em></p>
-                    <p>Learn how to create a small collection of essential, timeless, and high-quality clothing items
-                        that can be easily mixed and matched...</p>
-                    <a href="posts/how-to-build-a-capsule-wardrobe.html" class="read-more">Read Full Article →</a>
-                </div>
-
-                <!-- Blog Post 2 -->
-                <div class="blog-teaser">
-                    <img src="../images/mixing-patterns.webp" alt="Mixing Patterns Like a Pro"
-                        style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 1.5rem;">
-                    <h2>Mixing Patterns Like a Pro</h2>
-                    <p><em>Learn how to combine stripes, florals, and prints for bold, stylish looks that turn
-                            heads.</em></p>
-                    <p>Move beyond the old fashion rule of one pattern per outfit! Modern style is all about playful
-                        self-expression with pattern mixing...</p>
-                    <a href="posts/mixing-patterns-like-a-pro.html" class="read-more">Read Full Article →</a>
-                </div>
-
-                <!-- Blog Post 3 -->
-                <div class="blog-teaser">
-                    <img src="../images/color-trends-2025.webp" alt="Seasonal Color Trends for 2025"
-                        style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 1.5rem;">
-                    <h2>Seasonal Color Trends for 2025</h2>
-                    <p><em>Stay ahead of the curve with this year's hottest colors and how to wear them.</em></p>
-                    <p>Every year brings fresh colors that dominate the runways. Discover this year's influential shades
-                        and how to incorporate them...</p>
-                    <a href="posts/seasonal-color-trends-2025.html" class="read-more">Read Full Article →</a>
-                </div>
+                <p id="blogLoading" style="text-align:center; color:#888;">Loading articles...</p>
             </div>
         </div>
     </main>
@@ -194,27 +161,77 @@
     <script src="../js/main.min.js"></script>
     <script src="../js/auth.js"></script>
     <script>
-        // Blog search functionality (specific to this page)
+        // Load and render blog posts from the server so admin-published posts appear automatically.
         const searchInput = document.getElementById('blogSearch');
         const blogList = document.getElementById('blogList');
-        const blogTeasers = blogList.querySelectorAll('.blog-teaser');
 
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase().trim();
+        function renderBlogPosts(posts) {
+            blogList.innerHTML = '';
 
-            blogTeasers.forEach(teaser => {
+            if (!Array.isArray(posts) || posts.length === 0) {
+                const empty = document.createElement('p');
+                empty.style.textAlign = 'center';
+                empty.style.color = '#888';
+                empty.textContent = 'No articles yet.';
+                blogList.appendChild(empty);
+                return;
+            }
+
+            posts.forEach(post => {
+                const teaser = document.createElement('div');
+                teaser.className = 'blog-teaser';
+
+                const img = document.createElement('img');
+                img.src = post.image || '/images/style-blog.webp';
+                img.alt = post.title || 'Blog post';
+                img.style.width = '100%';
+                img.style.height = '200px';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '8px';
+                img.style.marginBottom = '1.5rem';
+                teaser.appendChild(img);
+
+                const h2 = document.createElement('h2');
+                h2.textContent = post.title || 'Untitled';
+                teaser.appendChild(h2);
+
+                if (post.date && post.date !== 'Unknown') {
+                    const meta = document.createElement('p');
+                    meta.style.color = '#888';
+                    meta.style.fontSize = '0.95rem';
+                    meta.textContent = `Published on ${post.date}`;
+                    teaser.appendChild(meta);
+                }
+
+                if (post.summary) {
+                    const summary = document.createElement('p');
+                    const em = document.createElement('em');
+                    em.textContent = post.summary;
+                    summary.appendChild(em);
+                    teaser.appendChild(summary);
+                }
+
+                const link = document.createElement('a');
+                link.className = 'read-more';
+                link.href = post.url || (post.filename ? post.filename : '#');
+                link.textContent = 'Read Full Article →';
+                teaser.appendChild(link);
+
+                blogList.appendChild(teaser);
+            });
+        }
+
+        function applySearchFilter(searchTerm) {
+            const teasers = blogList.querySelectorAll('.blog-teaser');
+
+            teasers.forEach(teaser => {
                 const title = teaser.querySelector('h2')?.textContent.toLowerCase() || '';
                 const content = teaser.textContent.toLowerCase();
 
-                if (title.includes(searchTerm) || content.includes(searchTerm)) {
-                    teaser.style.display = 'block';
-                } else {
-                    teaser.style.display = 'none';
-                }
+                teaser.style.display = (title.includes(searchTerm) || content.includes(searchTerm)) ? 'block' : 'none';
             });
 
-            // Check if any results are visible
-            const visibleTeasers = Array.from(blogTeasers).filter(t => t.style.display !== 'none');
+            const visibleTeasers = Array.from(teasers).filter(t => t.style.display !== 'none');
             const noResultsEl = blogList.querySelector('.no-results');
 
             if (visibleTeasers.length === 0 && searchTerm !== '') {
@@ -222,12 +239,39 @@
                     const noResults = document.createElement('p');
                     noResults.className = 'no-results';
                     noResults.textContent = 'No articles found matching your search.';
+                    noResults.style.textAlign = 'center';
+                    noResults.style.color = '#888';
                     blogList.appendChild(noResults);
                 }
             } else if (noResultsEl) {
                 noResultsEl.remove();
             }
+        }
+
+        async function loadBlogPosts() {
+            try {
+                const response = await fetch('/api/blog/public');
+                if (!response.ok) {
+                    throw new Error(`Failed to load posts (${response.status})`);
+                }
+                const posts = await response.json();
+                renderBlogPosts(posts);
+            } catch (err) {
+                console.error(err);
+                blogList.innerHTML = '';
+                const error = document.createElement('p');
+                error.style.textAlign = 'center';
+                error.style.color = '#888';
+                error.textContent = 'Unable to load articles right now.';
+                blogList.appendChild(error);
+            }
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            applySearchFilter(e.target.value.toLowerCase().trim());
         });
+
+        loadBlogPosts();
     </script>
     <!-- Site Footer -->
     <footer class="site-footer" role="contentinfo">

@@ -1381,6 +1381,47 @@ app.use('/api/blog/upload-image', (err, req, res, next) => {
     next();
 });
 
+function extractBlogPostMetadata(content, fallbackFilename) {
+    const titleMatch = content.match(/<h1[^>]*>([^<]+)<\/h1>/);
+    const title = titleMatch ? titleMatch[1] : fallbackFilename.replace('.html', '');
+
+    const dateMatch = content.match(/Published on ([^•<]+)/);
+    const date = dateMatch ? dateMatch[1].trim() : 'Unknown';
+
+    const summaryMatch = content.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i);
+    const summary = summaryMatch ? summaryMatch[1] : '';
+
+    const ogImageMatch = content.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i);
+    let image = ogImageMatch ? ogImageMatch[1] : '';
+
+    if (image.startsWith('https://www.adriacrossedit.com/')) {
+        image = image.replace('https://www.adriacrossedit.com', '');
+    }
+
+    return { title, date, summary, image };
+}
+
+function listBlogPostsForDirectory(blogDirPath, urlPrefix) {
+    if (!fs.existsSync(blogDirPath)) return [];
+    const files = fs.readdirSync(blogDirPath).filter(f => f.endsWith('.html') && f !== 'index.html');
+
+    return files.map(filename => {
+        const filePath = path.join(blogDirPath, filename);
+        const content = fs.readFileSync(filePath, 'utf8');
+        const meta = extractBlogPostMetadata(content, filename);
+
+        return {
+            slug: filename.replace('.html', ''),
+            filename,
+            title: meta.title,
+            date: meta.date,
+            summary: meta.summary,
+            image: meta.image,
+            url: `${urlPrefix}${filename}`
+        };
+    });
+}
+
 // Create Blog Post
 app.post('/api/blog', isAuthenticated, async (req, res) => {
     try {
@@ -1479,6 +1520,43 @@ app.post('/api/blog', isAuthenticated, async (req, res) => {
     } catch (err) {
         console.error('Blog Error:', err);
         res.status(500).json({ error: 'Failed to publish post.' });
+    }
+});
+
+// Public list of Blog Posts (for the website blog page)
+app.get('/api/blog/public', (req, res) => {
+    try {
+        const blogDir = path.join(__dirname, 'blog');
+        const postsSubdir = path.join(blogDir, 'posts');
+
+        const rootPosts = listBlogPostsForDirectory(blogDir, '/blog/');
+        const postsDirPosts = listBlogPostsForDirectory(postsSubdir, '/blog/posts/');
+
+        // De-dupe by slug; prefer root (/blog/) to match search.json URLs
+        const bySlug = new Map();
+        for (const post of [...postsDirPosts, ...rootPosts]) {
+            if (!bySlug.has(post.slug)) {
+                bySlug.set(post.slug, post);
+                continue;
+            }
+
+            const existing = bySlug.get(post.slug);
+            const existingIsPostsDir = existing.url.startsWith('/blog/posts/');
+            const postIsRootDir = post.url.startsWith('/blog/') && !post.url.startsWith('/blog/posts/');
+            if (existingIsPostsDir && postIsRootDir) {
+                bySlug.set(post.slug, post);
+            }
+        }
+
+        const posts = Array.from(bySlug.values());
+
+        posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        res.setHeader('Cache-Control', 'no-store');
+        res.json(posts);
+    } catch (err) {
+        console.error('Public blog list error:', err);
+        res.status(500).json({ error: 'Failed to list blog posts' });
     }
 });
 
