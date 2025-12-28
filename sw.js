@@ -11,7 +11,7 @@ const ASSETS_TO_CACHE = [
     '/css/landing.min.css',
     '/js/main.min.js',
     '/images/icon-152x152.png',
-    '/images/adria-stylist.webp',
+    '/images/adria-hero-new.jpg',
     // Add other critical assets here
 ];
 
