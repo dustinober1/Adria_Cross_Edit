@@ -717,7 +717,7 @@ app.post('/api/appointments', appointmentLimiter, async (req, res) => {
 
         // Fire and forget email sending
         Promise.all([
-            sendEmail(process.env.ADMIN_EMAIL || 'adria@adriacrossedit.com', service === 'other' ? `New Inquiry: ${name}` : `New Booking: ${name} - ${date}`, adminHtml),
+            sendEmail('adria@adriacrossedit.com', service === 'other' ? `New Inquiry: ${name}` : `New Booking: ${name} - ${date}`, adminHtml),
             sendEmail(email, emailSubject, userHtml)
         ]).catch(err => logger.error('Email sending failed', err));
 
