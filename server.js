@@ -2149,7 +2149,7 @@ app.get('/api/invoices', isAuthenticated, async (req, res) => {
     }
 
     try {
-        const result = await invoicesApi.listInvoices(process.env.SQUARE_LOCATION_ID, 50);
+        const result = await invoicesApi.listInvoices(process.env.SQUARE_LOCATION_ID, undefined, 50);
 
         const invoices = (result.result?.invoices || []).map(inv => ({
             id: inv.id,
@@ -2194,6 +2194,10 @@ app.post('/api/payments/checkout', isAuthenticated, async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields: amount, description' });
         }
 
+        if (!customerEmail) {
+            return res.status(400).json({ error: 'Missing required field: customerEmail' });
+        }
+
         // Create payment link using quickPay (simpler than creating order first)
         const idempotencyKey = `payment_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
@@ -2225,6 +2229,39 @@ app.post('/api/payments/checkout', isAuthenticated, async (req, res) => {
         if (!paymentLinkUrl) {
             throw new Error('Square API did not return a payment link URL');
         }
+
+        // Send payment link emails
+        const displayName = customerName || 'Valued Client';
+        const formattedAmount = `$${amount.toFixed(2)}`;
+
+        const userHtml = `
+            <h3>Payment Request</h3>
+            <p>Hi ${displayName},</p>
+            <p>Thank you for your business! A payment of <strong>${formattedAmount}</strong> is requested for:</p>
+            <p><em>${description}</em></p>
+            <p>Please click the button below to complete your payment securely through Square:</p>
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="${paymentLinkUrl}" style="background: #d4a574; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Pay Now - ${formattedAmount}</a>
+            </p>
+            <p>Or copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; color: #666;">${paymentLinkUrl}</p>
+            <p>The payment link will expire in 24 hours.</p>
+            <p>Best,<br>Adria Cross</p>
+        `;
+
+        const adminHtml = `
+            <h3>Payment Link Created</h3>
+            <p><strong>Client:</strong> ${displayName} (${customerEmail})</p>
+            <p><strong>Amount:</strong> ${formattedAmount}</p>
+            <p><strong>Description:</strong> ${description}</p>
+            <p><strong>Payment Link:</strong> <a href="${paymentLinkUrl}">View Link</a></p>
+        `;
+
+        // Fire and forget email sending
+        Promise.all([
+            sendEmail(customerEmail, `Payment Request: ${description} - ${formattedAmount}`, userHtml),
+            sendEmail('adria@adriacrossedit.com', `Payment Link Created for ${displayName}`, adminHtml)
+        ]).catch(err => logger.error('Payment email sending failed', err));
 
         res.json({
             success: true,
