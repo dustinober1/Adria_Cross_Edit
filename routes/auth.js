@@ -77,7 +77,8 @@ router.get('/api/auth/status', async (req, res) => {
         });
     }
     // Fall back to session-based authentication (from /api/login)
-    else if (req.session && req.session.userId) {
+    // Only query if userId is numeric (anonymous session IDs are strings like "anon_...")
+    else if (req.session && req.session.userId && typeof req.session.userId === 'number') {
         try {
             // Import pool dynamically to avoid circular dependency
             const pool = require('../server').pool;

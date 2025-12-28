@@ -5,7 +5,8 @@ const isAuthenticated = (req, res, next) => {
         return next();
     }
     // Fallback for legacy session-based auth (if mixed usage continues)
-    if (req.session && req.session.userId) {
+    // Only allow if userId is numeric (anonymous session IDs are strings like "anon_...")
+    if (req.session && typeof req.session.userId === 'number' && req.session.userId) {
         return next();
     }
     res.status(401).json({ error: 'Unauthorized', message: 'Please log in to continue.' });
@@ -38,8 +39,8 @@ const isAdmin = (req, res, next) => {
 };
 
 const isClient = (req, res, next) => {
-    if ((req.user && (req.user.role === 'client' || req.user.role === 'admin')) || 
-        (req.session && (req.session.isClient || req.session.userId))) {
+    if ((req.user && (req.user.role === 'client' || req.user.role === 'admin')) ||
+        (req.session && (req.session.isClient || (typeof req.session.userId === 'number' && req.session.userId)))) {
         return next();
     }
     res.status(403).json({ error: 'Forbidden', message: 'Client access required.' });
@@ -47,12 +48,12 @@ const isClient = (req, res, next) => {
 
 // Middleware for frontend page redirects (not JSON APIs)
 const ensureAuthenticated = (req, res, next) => {
-    if (req.isAuthenticated() || req.session.userId) {
+    if (req.isAuthenticated() || (typeof req.session?.userId === 'number' && req.session.userId)) {
         return next();
     }
     // Store original URL to redirect back after login
     req.session.returnTo = req.originalUrl;
-    res.redirect('/?login=required'); 
+    res.redirect('/?login=required');
 };
 
 module.exports = {
