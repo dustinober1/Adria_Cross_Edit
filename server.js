@@ -2149,7 +2149,7 @@ app.get('/api/invoices', isAuthenticated, async (req, res) => {
     }
 
     try {
-        const result = await invoicesApi.listInvoices({ locationId: process.env.SQUARE_LOCATION_ID, limit: 50 });
+        const result = await invoicesApi.listInvoices(process.env.SQUARE_LOCATION_ID, 50);
 
         const invoices = (result.result?.invoices || []).map(inv => ({
             id: inv.id,
@@ -2177,9 +2177,9 @@ app.get('/api/invoices', isAuthenticated, async (req, res) => {
     }
 });
 
-// Create a Square Checkout URL (professional checkout page)
+// Create a Square Payment Link (professional checkout page)
 app.post('/api/payments/checkout', isAuthenticated, async (req, res) => {
-    if (!checkoutApi || !ordersApi) {
+    if (!checkoutApi) {
         return res.status(503).json({ error: 'Checkout not available' });
     }
 
@@ -2194,74 +2194,52 @@ app.post('/api/payments/checkout', isAuthenticated, async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields: amount, description' });
         }
 
-        // Create an order for the checkout
-        const idempotencyKey = `order_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+        // Create payment link using quickPay (simpler than creating order first)
+        const idempotencyKey = `payment_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
-        const orderData = {
+        const paymentLinkData = {
             idempotencyKey: idempotencyKey,
-            order: {
+            description: description,
+            quickPay: {
+                name: description,
                 locationId: process.env.SQUARE_LOCATION_ID,
-                lineItems: [
-                    {
-                        name: description,
-                        quantity: '1',
-                        basePriceMoney: {
-                            amount: Math.round(amount * 100), // Convert to cents
-                            currency: 'USD'
-                        }
-                    }
-                ]
-            }
-        };
-
-        // Create the order
-        const orderResult = await ordersApi.createOrder(orderData);
-        const order = orderResult.result?.order;
-        if (!order) {
-            throw new Error('Square API did not return an order');
-        }
-        const orderId = order.id;
-
-        // Create checkout with the order
-        const checkoutIdempotencyKey = `checkout_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
-
-        const checkoutData = {
-            idempotencyKey: checkoutIdempotencyKey,
-            order: {
-                id: orderId,
-                locationId: process.env.SQUARE_LOCATION_ID
+                priceMoney: {
+                    amount: Math.round(amount * 100), // Convert to cents
+                    currency: 'USD'
+                }
             }
         };
 
         // Add customer info if provided
-        if (customerEmail || customerName) {
-            checkoutData.prePopulatedData = {
-                buyerEmail: customerEmail || undefined,
-                buyerPhoneNumber: undefined
+        if (customerEmail) {
+            paymentLinkData.prePopulatedData = {
+                buyerEmail: customerEmail
             };
         }
 
-        const checkoutResult = await checkoutApi.createCheckout(process.env.SQUARE_LOCATION_ID, checkoutData);
+        const paymentLinkResult = await checkoutApi.createPaymentLink(paymentLinkData);
 
-        const checkoutPageUrl = checkoutResult.result?.checkout?.checkout_page_url;
-        if (!checkoutPageUrl) {
-            throw new Error('Square API did not return a checkout URL');
+        const paymentLinkUrl = paymentLinkResult.result?.paymentLink?.url;
+        const paymentLinkId = paymentLinkResult.result?.paymentLink?.id;
+
+        if (!paymentLinkUrl) {
+            throw new Error('Square API did not return a payment link URL');
         }
 
         res.json({
             success: true,
-            checkoutUrl: checkoutPageUrl,
-            orderId: orderId
+            checkoutUrl: paymentLinkUrl,
+            paymentLinkId: paymentLinkId
         });
 
     } catch (err) {
-        logger.error('Checkout Error:', {
+        logger.error('Payment Link Error:', {
             message: err.message,
             errors: err.result?.errors,
             stack: err.stack
         });
         res.status(500).json({
-            error: 'Checkout creation failed',
+            error: 'Payment link creation failed',
             details: err.result?.errors?.[0]?.detail || err.message
         });
     }
