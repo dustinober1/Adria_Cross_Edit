@@ -568,23 +568,43 @@
             }
         });
 
-        // Register Form Handler
+        // Register Form Handler with TOS
         document.getElementById('registerForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const btn = this.querySelector('button[type="submit"]');
             const originalText = btn.textContent;
-            btn.textContent = 'Creating account...';
-            btn.disabled = true;
+
+            // Collect form data
+            const formData = {
+                username: document.getElementById('regUsername').value,
+                email: document.getElementById('regEmail').value,
+                displayName: document.getElementById('regDisplayName').value,
+                password: document.getElementById('regPassword').value
+            };
 
             try {
+                // Show TOS modal
+                const tosAcceptedAt = await window.tosModal.show({
+                    title: 'Terms of Service',
+                    message: 'To create your account, please read and accept the Terms of Service:',
+                    onAccept: (acceptedAt) => {
+                        console.log('TOS accepted at:', acceptedAt);
+                    },
+                    onCancel: () => {
+                        btn.disabled = false;
+                    }
+                });
+
+                // TOS accepted - proceed with registration
+                btn.textContent = 'Creating account...';
+                btn.disabled = true;
+
                 const response = await fetch('/api/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        username: document.getElementById('regUsername').value,
-                        email: document.getElementById('regEmail').value,
-                        displayName: document.getElementById('regDisplayName').value,
-                        password: document.getElementById('regPassword').value
+                        ...formData,
+                        tosAcceptedAt: tosAcceptedAt
                     })
                 });
 
@@ -592,14 +612,29 @@
 
                 if (response.ok && data.success) {
                     showMessage('Account created successfully! Welcome aboard! 🎉', 'success');
-                    setTimeout(() => {
-                        window.location.href = '/member-portal.html';
-                    }, 1000);
+
+                    // Check for pending purchase
+                    const pendingPurchase = sessionStorage.getItem('pendingPurchase');
+                    if (pendingPurchase) {
+                        sessionStorage.removeItem('pendingPurchase');
+                        setTimeout(() => {
+                            window.location.href = '/services.html';
+                        }, 1000);
+                    } else {
+                        setTimeout(() => {
+                            window.location.href = '/member-portal.html';
+                        }, 1000);
+                    }
                 } else {
                     showMessage(data.error || 'Registration failed. Please try again.', 'error');
                 }
-            } catch (error) {
-                showMessage('Registration failed. Please try again.', 'error');
+            } catch (err) {
+                // User declined TOS or closed modal
+                if (err.message === 'TOS declined') {
+                    showMessage('You must accept the Terms of Service to create an account.', 'error');
+                } else {
+                    showMessage('Registration cancelled.', 'info');
+                }
             } finally {
                 btn.textContent = originalText;
                 btn.disabled = false;
@@ -616,8 +651,28 @@
 
             // Check if already authenticated
             checkAuthAndRedirect();
+
+            // Check for purchase context in URL
+            const purchaseContext = urlParams.get('purchase');
+            if (purchaseContext) {
+                try {
+                    const purchase = JSON.parse(decodeURIComponent(purchaseContext));
+                    // Pre-fill email if provided
+                    if (purchase.email) {
+                        document.getElementById('regEmail').value = purchase.email;
+                    }
+                    // Store for after registration
+                    sessionStorage.setItem('pendingPurchase', JSON.stringify(purchase));
+
+                    // Show message about completing purchase after registration
+                    showMessage('Please create an account to complete your purchase.', 'info');
+                } catch (err) {
+                    console.error('Failed to parse purchase context:', err);
+                }
+            }
         });
     </script>
+    <script src="js/tos-modal.js"></script>
 </body>
 
 </html>

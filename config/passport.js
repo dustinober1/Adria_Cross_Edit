@@ -28,7 +28,8 @@ module.exports = function configurePassport(app, pool) {
                     profilePicture: user.profile_picture,
                     role: user.role,
                     isClient: user.role === 'client' || user.is_client, // Backwards compatibility
-                    provider: user.provider
+                    provider: user.provider,
+                    tos_accepted_at: user.tos_accepted_at
                 };
                 done(null, sessionUser);
             } else {
@@ -71,7 +72,7 @@ module.exports = function configurePassport(app, pool) {
                     const username = email.split('@')[0] + '_' + Math.floor(Math.random() * 1000);
 
                     const insertResult = await pool.query(
-                        'INSERT INTO users (username, email, provider, provider_id, display_name, profile_picture, email_verified, role) VALUES ($1, $2, $3, $4, $5, $6, TRUE, $7) RETURNING *',
+                        'INSERT INTO users (username, email, provider, provider_id, display_name, profile_picture, email_verified, role, tos_accepted_at) VALUES ($1, $2, $3, $4, $5, $6, TRUE, $7, NULL) RETURNING *',
                         [username, email, 'google', googleId, displayName, photo, 'client']
                     );
                     user = insertResult.rows[0] || (insertResult.rows ? insertResult.rows[0] : null); // Handle different DB adapters

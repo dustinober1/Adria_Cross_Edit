@@ -791,21 +791,189 @@ class SquarePayment {
         `;
         document.head.appendChild(styles);
     }
+
+    /**
+     * Show email collection modal before payment
+     * Checks if user exists and branches accordingly
+     */
+    showEmailCheckModal(amount, description) {
+        return new Promise((resolve, reject) => {
+            const modal = document.createElement('div');
+            modal.id = 'email-check-modal';
+            modal.className = 'payment-modal';
+            modal.innerHTML = `
+                <div class="payment-modal-content" style="max-width: 500px;">
+                    <span class="payment-close">&times;</span>
+                    <div class="payment-header">
+                        <h2>Before We Continue</h2>
+                    </div>
+                    <form id="email-check-form">
+                        <div class="payment-section">
+                            <p style="margin-bottom: 1rem;">Please enter your email address to continue with your purchase:</p>
+                            <div class="payment-field">
+                                <label for="check-email">Email Address *</label>
+                                <input type="email" id="check-email" name="email" required
+                                       placeholder="you@example.com" autocomplete="email">
+                            </div>
+                        </div>
+                        <div class="payment-actions">
+                            <button type="submit" class="payment-btn-primary">Continue</button>
+                        </div>
+                        <div id="email-check-status" class="payment-status"></div>
+                    </form>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            this.addPaymentStyles();
+
+            const form = document.getElementById('email-check-form');
+            const statusEl = document.getElementById('email-check-status');
+            const emailInput = document.getElementById('check-email');
+
+            // Close handlers
+            modal.querySelector('.payment-close').onclick = () => {
+                modal.remove();
+                reject(new Error('Email check cancelled'));
+            };
+
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                    reject(new Error('Email check cancelled'));
+                }
+            };
+
+            // Form submission
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                const email = emailInput.value.trim();
+
+                if (!email) {
+                    statusEl.textContent = 'Please enter your email address';
+                    statusEl.className = 'payment-status error';
+                    statusEl.style.display = 'block';
+                    return;
+                }
+
+                const btn = form.querySelector('button[type="submit"]');
+                btn.disabled = true;
+                btn.textContent = 'Checking...';
+                statusEl.style.display = 'none';
+
+                try {
+                    // Check if email exists
+                    const response = await fetch('/api/check-email-exists', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+
+                    const data = await response.json();
+
+                    modal.remove();
+
+                    if (data.exists) {
+                        // Email exists - send payment link via email
+                        resolve({
+                            action: 'send-link',
+                            email: email,
+                            amount: amount,
+                            description: description
+                        });
+                    } else {
+                        // No account - require registration
+                        resolve({
+                            action: 'require-registration',
+                            email: email,
+                            amount: amount,
+                            description: description
+                        });
+                    }
+                } catch (err) {
+                    statusEl.textContent = 'Failed to check email. Please try again.';
+                    statusEl.className = 'payment-status error';
+                    statusEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.textContent = 'Continue';
+                }
+            };
+
+            // Auto-focus email input
+            setTimeout(() => emailInput.focus(), 100);
+        });
+    }
 }
 
 // Create global instance
 window.squarePayment = new SquarePayment();
 
-// Helper function to open payment modal
-function openPaymentModal(amount, description) {
-    window.squarePayment.createPaymentModal({
-        amount: amount,
-        description: description,
-        onSuccess: (result) => {
-            console.log('Payment successful:', result);
-        },
-        onError: (err) => {
-            console.error('Payment failed:', err);
+// Helper function to show payment link sent modal
+function showPaymentLinkSentModal(email) {
+    const modal = document.createElement('div');
+    modal.id = 'link-sent-modal';
+    modal.className = 'payment-modal';
+    modal.innerHTML = `
+        <div class="payment-modal-content" style="max-width: 500px; text-align: center;">
+            <span class="payment-close">&times;</span>
+            <div style="font-size: 3rem; margin-bottom: 1rem;">✉️</div>
+            <h2 style="color: #c19a5d; margin-bottom: 1rem;">Payment Link Sent!</h2>
+            <p style="margin-bottom: 1.5rem;">We've sent a secure payment link to:</p>
+            <p style="background: #f9f9f9; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-weight: 600;">${email}</p>
+            <p style="color: #666; font-size: 0.9rem;">The link will expire in 24 hours. Please check your inbox and spam folder.</p>
+            <button class="payment-btn-primary" style="margin-top: 1.5rem;" onclick="this.closest('.payment-modal').remove()">Close</button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    window.squarePayment.addPaymentStyles();
+
+    modal.querySelector('.payment-close').onclick = () => modal.remove();
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+}
+
+// Helper function to open payment modal with email check
+async function openPaymentModal(amount, description) {
+    try {
+        // Show email check modal first
+        const emailResult = await window.squarePayment.showEmailCheckModal(amount, description);
+
+        if (emailResult.action === 'send-link') {
+            // Send payment link to existing user
+            const linkResponse = await fetch('/api/payments/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: emailResult.amount,
+                    description: emailResult.description,
+                    customerEmail: emailResult.email,
+                    customerName: emailResult.email.split('@')[0]
+                })
+            });
+
+            const linkData = await linkResponse.json();
+
+            if (linkResponse.ok && linkData.success) {
+                // Show success message
+                showPaymentLinkSentModal(emailResult.email);
+            } else {
+                alert(`Failed to send payment link: ${linkData.error || 'Unknown error'}`);
+            }
+        } else if (emailResult.action === 'require-registration') {
+            // Redirect to registration with context
+            const params = new URLSearchParams({
+                tab: 'register',
+                redirect: encodeURIComponent('/services.html'),
+                purchase: encodeURIComponent(JSON.stringify({
+                    amount: emailResult.amount,
+                    description: emailResult.description,
+                    email: emailResult.email
+                }))
+            });
+            window.location.href = `/login.html?${params.toString()}`;
         }
-    });
+    } catch (err) {
+        // User cancelled or error
+        console.log('Payment flow cancelled:', err.message);
+    }
 }

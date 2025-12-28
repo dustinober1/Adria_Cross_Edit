@@ -29,20 +29,34 @@ router.get('/google', (req, res, next) => {
 router.get('/google/callback',
     passport.authenticate('google', { failureRedirect: '/?login=failed' }),
     (req, res) => {
-        // Successful authentication
-        const userEmail = req.user?.email || req.user?.id || 'unknown user';
-        logger.info(`User ${userEmail} logged in via Google`);
+        // Check if user is new (no TOS acceptance)
+        if (req.user && !req.user.tos_accepted_at) {
+            // Store user data in session for TOS flow
+            req.session.pendingOAuthUser = {
+                id: req.user.id,
+                email: req.user.email,
+                username: req.user.username,
+                displayName: req.user.display_name,
+                provider: req.user.provider,
+                providerId: req.user.provider_id
+            };
 
-        // Ensure session is saved before redirect
-        req.session.save((err) => {
-            if (err) {
-                logger.error('Session save error after Google auth:', err);
-            }
-            // Redirect to member portal or intended page
-            const returnTo = req.session.returnTo || '/member-portal.html';
-            delete req.session.returnTo;
-            res.redirect(returnTo);
-        });
+            // Redirect to TOS acceptance page
+            res.redirect('/auth/tos-acceptance?provider=google');
+        } else {
+            // Existing user with TOS - proceed normally
+            const userEmail = req.user?.email || req.user?.id || 'unknown user';
+            logger.info(`User ${userEmail} logged in via Google`);
+
+            req.session.save((err) => {
+                if (err) {
+                    logger.error('Session save error after Google auth:', err);
+                }
+                const returnTo = req.session.returnTo || '/member-portal.html';
+                delete req.session.returnTo;
+                res.redirect(returnTo);
+            });
+        }
     }
 );
 

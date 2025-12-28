@@ -798,7 +798,8 @@ app.post('/api/register', rateLimit({
         username: Joi.string().min(3).max(30).required(),
         email: Joi.string().email().required(),
         password: Joi.string().min(6).required(),
-        displayName: Joi.string().allow('')
+        displayName: Joi.string().allow(''),
+        tosAcceptedAt: Joi.string().isoDate().required()
     });
 
     const { error } = schema.validate(req.body);
@@ -807,7 +808,7 @@ app.post('/api/register', rateLimit({
     }
 
     try {
-        const { username, email, password, displayName } = req.body;
+        const { username, email, password, displayName, tosAcceptedAt } = req.body;
 
         // Check if user exists
         const existing = await pool.query('SELECT id FROM users WHERE username = $1 OR email = $2', [username, email]);
@@ -817,8 +818,8 @@ app.post('/api/register', rateLimit({
 
         const hash = bcrypt.hashSync(password, 10);
         const result = await pool.query(
-            'INSERT INTO users (username, email, password, display_name, role, provider) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-            [username, email, hash, displayName || username, 'client', 'local']
+            'INSERT INTO users (username, email, password, display_name, role, provider, tos_accepted_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+            [username, email, hash, displayName || username, 'client', 'local', tosAcceptedAt]
         );
 
         const userId = result.rows[0].id;
@@ -832,6 +833,133 @@ app.post('/api/register', rateLimit({
 });
 
 app.post('/api/logout', (req, res) => { req.session.destroy(); res.json({ success: true }); });
+
+/**
+ * @openapi
+ * /api/auth/accept-tos:
+ *   post:
+ *     summary: Accept TOS for pending OAuth user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               tosAcceptedAt:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       200:
+ *         description: TOS accepted successfully
+ *       400:
+ *         description: No pending registration
+ *       401:
+ *         description: Not authenticated
+ */
+app.post('/api/auth/accept-tos', async (req, res) => {
+    const schema = Joi.object({
+        tosAcceptedAt: Joi.string().isoDate().required()
+    });
+
+    const { error } = schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
+
+    try {
+        // Check for pending OAuth user in session
+        if (!req.session || !req.session.pendingOAuthUser) {
+            return res.status(400).json({ error: 'No pending registration found' });
+        }
+
+        const { tosAcceptedAt } = req.body;
+        const pendingUser = req.session.pendingOAuthUser;
+
+        // Update user with TOS acceptance timestamp
+        await pool.query(
+            'UPDATE users SET tos_accepted_at = $1 WHERE id = $2',
+            [tosAcceptedAt, pendingUser.id]
+        );
+
+        // Clear pending user from session
+        delete req.session.pendingOAuthUser;
+
+        // User is now fully authenticated
+        const returnTo = req.session.returnTo || '/member-portal.html';
+        delete req.session.returnTo;
+
+        res.json({
+            success: true,
+            redirect: returnTo
+        });
+    } catch (err) {
+        logger.error('TOS acceptance error:', err);
+        res.status(500).json({ error: 'Failed to accept Terms of Service' });
+    }
+});
+
+/**
+ * @openapi
+ * /api/check-email-exists:
+ *   post:
+ *     summary: Check if an email is already registered
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Email check result
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 exists:
+ *                   type: boolean
+ *                 provider:
+ *                   type: string
+ *                   nullable: true
+ */
+app.post('/api/check-email-exists', async (req, res) => {
+    const schema = Joi.object({
+        email: Joi.string().email().required()
+    });
+
+    const { error } = schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
+
+    try {
+        const { email } = req.body;
+
+        // Check if user exists with this email
+        const result = await pool.query(
+            'SELECT id, username, provider FROM users WHERE email = $1',
+            [email.toLowerCase()]
+        );
+
+        const exists = result.rows.length > 0;
+
+        res.json({
+            exists: exists,
+            provider: exists ? result.rows[0].provider : null
+        });
+    } catch (err) {
+        logger.error('Email check error:', err);
+        res.status(500).json({ error: 'Failed to check email' });
+    }
+});
 
 app.get('/api/appointments', isAuthenticated, async (req, res) => {
     const data = await pool.query('SELECT * FROM appointments ORDER BY created_at DESC');
@@ -2178,7 +2306,8 @@ app.get('/api/invoices', isAuthenticated, async (req, res) => {
 });
 
 // Create a Square Payment Link (professional checkout page)
-app.post('/api/payments/checkout', isAuthenticated, async (req, res) => {
+// Note: No auth required - accessible for customer-initiated purchases
+app.post('/api/payments/checkout', async (req, res) => {
     if (!checkoutApi) {
         return res.status(503).json({ error: 'Checkout not available' });
     }
@@ -2246,6 +2375,7 @@ app.post('/api/payments/checkout', isAuthenticated, async (req, res) => {
             <p>Or copy and paste this link into your browser:</p>
             <p style="word-break: break-all; color: #666;">${paymentLinkUrl}</p>
             <p>The payment link will expire in 24 hours.</p>
+            ${!req.isAuthenticated ? '<p><small><em>Note: If you already have an account, please <a href="/login.html">log in</a> before completing your purchase to link this payment to your account.</em></small></p>' : ''}
             <p>Best,<br>Adria Cross</p>
         `;
 
