@@ -1,5 +1,6 @@
 const express = require('express');
 const passport = require('passport');
+const path = require('path');
 const router = express.Router();
 const logger = require('../logger');
 
@@ -59,6 +60,12 @@ router.get('/google/callback',
         }
     }
 );
+
+// GET /auth/tos-acceptance
+// Serves the TOS acceptance page for OAuth users
+router.get('/tos-acceptance', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'auth-tos.html'));
+});
 
 // GET /api/auth/diagnostic
 // Returns detailed diagnostic info about passport configuration
