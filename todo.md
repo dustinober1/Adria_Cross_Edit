@@ -1,9 +1,9 @@
-- Sets by day of week as an option other than just one day at a time when the admin is setting this availability
-- Fix booking windows for each servie
-    - 15 consult will book 30 minute window
-    - Closet Edit (in person) will book all day
-    - Closet Edit (virtual) Will book for 2 hours
-    - In person color analyais, all day booking
-    - Lux shoping experiences, all day booking
-- Trouble shoot TOS not being readable. 
-- Images that are uploaded are share on different devices when they log in
+- ✅ Sets by day of week as an option other than just one day at a time when the admin is setting this availability
+- ✅ Fix booking windows for each servie
+    - ✅ 15 consult will book 30 minute window
+    - ✅ Closet Edit (in person) will book all day
+    - ✅ Closet Edit (virtual) Will book for 2 hours
+    - ✅ In person color analyais, all day booking
+    - ✅ Lux shoping experiences, all day booking
+- ✅ Trouble shoot TOS not being readable.
+- ✅ Images that are uploaded are share on different devices when they log in
