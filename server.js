@@ -421,9 +421,62 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.use(cors()); // Enable CORS for all routes
-app.use(express.json({ limit: '10kb' })); // Limit JSON size
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
+// --- Body size diagnostics / limits ---
+// NOTE: The current defaults are intentionally small; blog publishing requests may exceed this.
+// We'll log Content-Length for blog routes and capture 413 errors to confirm before changing limits.
+const JSON_BODY_LIMIT = process.env.JSON_BODY_LIMIT || '10kb';
+const URLENCODED_BODY_LIMIT = process.env.URLENCODED_BODY_LIMIT || '10kb';
+
+// Log request sizing headers early (before body parsing) for blog endpoints.
+app.use((req, res, next) => {
+    try {
+        if (req.path && req.path.startsWith('/api/blog')) {
+            logger.info('Incoming blog request (pre-parse)', {
+                method: req.method,
+                url: req.originalUrl,
+                contentType: req.headers['content-type'],
+                contentLength: req.headers['content-length'],
+                jsonLimit: JSON_BODY_LIMIT,
+                urlEncodedLimit: URLENCODED_BODY_LIMIT
+            });
+        }
+    } catch (e) {
+        // Never block request flow due to logging issues
+    }
+    next();
+});
+
+app.use(express.json({ limit: JSON_BODY_LIMIT })); // Limit JSON size
+app.use(express.urlencoded({ extended: true, limit: URLENCODED_BODY_LIMIT }));
 app.use(cookieParser());
+
+// Handle "request entity too large" from body parsing with structured logs.
+// This confirms whether /api/blog payloads are exceeding JSON_BODY_LIMIT.
+app.use((err, req, res, next) => {
+    if (err && (err.type === 'entity.too.large' || err.status === 413)) {
+        logger.warn('PayloadTooLargeError', {
+            method: req.method,
+            url: req.originalUrl,
+            contentType: req.headers['content-type'],
+            contentLength: req.headers['content-length'],
+            jsonLimit: JSON_BODY_LIMIT,
+            urlEncodedLimit: URLENCODED_BODY_LIMIT
+        });
+
+        // Prefer JSON response for API calls.
+        if (req.originalUrl && req.originalUrl.startsWith('/api/')) {
+            return res.status(413).json({
+                error: 'Request entity too large',
+                hint: 'Payload exceeded server JSON/urlencoded body limits',
+                jsonLimit: JSON_BODY_LIMIT,
+                urlEncodedLimit: URLENCODED_BODY_LIMIT
+            });
+        }
+    }
+
+    return next(err);
+});
 
 // Determine session database path - SEPARATE from main app DB to avoid conflicts
 // Session store uses its own SQLite file to prevent locking issues
