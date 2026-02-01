@@ -243,7 +243,11 @@ class TosModal {
             .tos-content {
                 font-size: 0.9rem;
                 line-height: 1.6;
-                color: #333;
+                color: #2f2f2f;
+            }
+
+            .tos-content * {
+                color: #2f2f2f;
             }
 
             .tos-content h1,
@@ -251,6 +255,10 @@ class TosModal {
             .tos-content h3 {
                 color: #c19a5d;
                 margin-top: 1rem;
+            }
+
+            .tos-content a {
+                color: #7b5a2d;
             }
 
             .tos-content p {

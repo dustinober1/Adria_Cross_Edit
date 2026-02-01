@@ -1236,12 +1236,20 @@ app.post('/api/appointments/:id/propose-times', isAuthenticated, async (req, res
 // ============================================
 // Clothing Matcher Helper Functions
 // ============================================
+const normalizeUserId = (userId) => {
+    if (!userId) return null;
+    if (typeof userId === 'number') return Number.isNaN(userId) ? null : userId;
+    if (typeof userId === 'string') {
+        if (!/^\d+$/.test(userId)) return null;
+        const parsed = parseInt(userId, 10);
+        return Number.isNaN(parsed) ? null : parsed;
+    }
+    return null;
+};
+
 const checkClientStatus = async (userId) => {
-    if (!userId) return false;
-    // If userId is a non-numeric string (e.g. anon_...), treat as not a registered client
-    if (typeof userId === 'string' && !/^\d+$/.test(userId)) return false;
-    const id = (typeof userId === 'number') ? userId : parseInt(userId, 10);
-    if (Number.isNaN(id)) return false;
+    const id = normalizeUserId(userId);
+    if (!id) return false;
     const result = await pool.query('SELECT is_client FROM users WHERE id = $1', [id]);
     return result.rows[0]?.is_client || false;
 };
@@ -1251,7 +1259,8 @@ const checkUploadLimit = async (categoryId, userId = null, sessionId = null) => 
     const catId = (typeof categoryId === 'number') ? categoryId : parseInt(categoryId, 10);
     if (Number.isNaN(catId)) return { allowed: false, used: 0, limit: 2 };
 
-    const isClient = await checkClientStatus(userId);
+    const normalizedUserId = normalizeUserId(userId);
+    const isClient = await checkClientStatus(normalizedUserId);
     if (isClient) return { allowed: true, used: 0, limit: 'unlimited' };
 
     const countResult = await pool.query(`
@@ -1259,7 +1268,7 @@ const checkUploadLimit = async (categoryId, userId = null, sessionId = null) => 
                 WHERE category_id = $1 
                 AND (user_id = $2 OR session_id = $3)
                 AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
-            `, [catId, userId, sessionId]);
+            `, [catId, normalizedUserId, sessionId]);
 
     // Handle both PostgreSQL (countResult.rows[0].count) and SQLite wrappers
     const countRow = countResult.rows[0];
@@ -1421,7 +1430,7 @@ app.post('/api/clothing/upload', upload.single('image'), async (req, res) => {
         logger.info('POST /api/clothing/upload - incoming', { body: req.body, session: sessInfo, file: req.file ? { originalname: req.file.originalname, filename: req.file.filename } : null });
 
         const { category_id, color_tags, style_tags, season_tags, brand, pattern } = req.body;
-        const userId = req.session.userId || null;
+        const userId = normalizeUserId(req.session.userId);
 
         // Generate or get session ID for non-authenticated users
         let sessionId = req.session.sessionId;
@@ -1488,7 +1497,7 @@ app.use('/api/clothing/upload', (err, req, res, next) => {
 // Get user's clothing items
 app.get('/api/clothing/', async (req, res) => {
     try {
-        const userId = req.session.userId || null;
+        const userId = normalizeUserId(req.session.userId);
         const sessionId = req.session.sessionId || null;
         const categoryId = req.query.category_id;
 
@@ -1519,7 +1528,7 @@ app.get('/api/clothing/', async (req, res) => {
 // Check upload limits
 app.get('/api/clothing/check-limit', async (req, res) => {
     try {
-        const userId = req.session.userId || null;
+        const userId = normalizeUserId(req.session.userId);
         const sessionId = req.session.sessionId || null;
 
         const categories = await pool.query('SELECT * FROM clothing_categories');
@@ -1543,7 +1552,7 @@ app.get('/api/clothing/check-limit', async (req, res) => {
 app.get('/api/clothing/limits', async (req, res) => {
     // Re-use logic from check-limit
     try {
-        const userId = req.session.userId || null;
+        const userId = normalizeUserId(req.session.userId);
         const sessionId = req.session.sessionId || null;
         const categories = await pool.query('SELECT * FROM clothing_categories');
         const limits = {};
@@ -1574,7 +1583,7 @@ app.get('/api/clothing/categories', async (req, res) => {
 // Get matching items
 app.get('/api/matches', async (req, res) => {
     try {
-        const userId = req.session.userId || null;
+        const userId = normalizeUserId(req.session.userId);
         const sessionId = req.session.sessionId || null;
         const excludeId = req.query.exclude_id;
 
@@ -1664,7 +1673,7 @@ app.get('/api/matches', async (req, res) => {
 // Delete clothing item
 app.delete('/api/clothing/:id', async (req, res) => {
     try {
-        const userId = req.session.userId || null;
+        const userId = normalizeUserId(req.session.userId);
         const sessionId = req.session.sessionId || null;
         const itemId = req.params.id;
 
