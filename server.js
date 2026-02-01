@@ -1810,14 +1810,15 @@ app.delete('/api/clothing/:id', async (req, res) => {
 // ============================================
 // Blog Image Upload
 // ============================================
-const BLOG_UPLOAD_ROOT = path.join(__dirname, 'uploads', 'blog');
-if (!fs.existsSync(BLOG_UPLOAD_ROOT)) {
-    fs.mkdirSync(BLOG_UPLOAD_ROOT, { recursive: true });
+// Temporary directory for file processing - files are moved to DB after upload
+const BLOG_UPLOAD_TEMP_DIR = path.join(__dirname, 'temp', 'blog_uploads');
+if (!fs.existsSync(BLOG_UPLOAD_TEMP_DIR)) {
+    fs.mkdirSync(BLOG_UPLOAD_TEMP_DIR, { recursive: true });
 }
 
 const blogStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, BLOG_UPLOAD_ROOT);
+        cb(null, BLOG_UPLOAD_TEMP_DIR);
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -1825,6 +1826,7 @@ const blogStorage = multer.diskStorage({
     }
 });
 
+// For blog image uploads, we'll temporarily store files and then move them to DB
 const blogUpload = multer({
     storage: blogStorage,
     limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit for blog images
@@ -1840,17 +1842,50 @@ const blogUpload = multer({
 });
 
 // Upload blog image endpoint
-app.post('/api/blog/upload-image', isAuthenticated, blogUpload.single('image'), (req, res) => {
+app.post('/api/blog/upload-image', isAuthenticated, blogUpload.single('image'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const url = `/uploads/blog/${req.file.filename}`;
-    res.json({
-        success: true,
-        url: url,
-        filename: req.file.filename
-    });
+    try {
+        // Read the file data
+        const imageData = fs.readFileSync(req.file.path);
+        
+        // Insert image data into the database
+        const result = await pool.query(
+            `INSERT INTO blog_images (filename, original_name, mime_type, file_size, image_data)
+             VALUES ($1, $2, $3, $4, $5)
+             RETURNING id`,
+            [
+                req.file.filename,
+                req.file.originalname,
+                req.file.mimetype,
+                req.file.size,
+                imageData
+            ]
+        );
+
+        // Clean up the temporary file
+        fs.unlinkSync(req.file.path);
+
+        // Return the database ID as the identifier
+        const imageUrl = `/api/blog/image/${result.rows[0].id}`;
+        res.json({
+            success: true,
+            url: imageUrl,
+            filename: req.file.filename,
+            imageId: result.rows[0].id
+        });
+    } catch (error) {
+        logger.error('Error storing blog image in database:', error);
+        
+        // Clean up the temporary file if database insertion fails
+        if (req.file && req.file.path) {
+            fs.unlinkSync(req.file.path);
+        }
+        
+        return res.status(500).json({ error: 'Failed to store image in database' });
+    }
 });
 
 // Handle multer errors for blog upload
@@ -1866,6 +1901,71 @@ app.use('/api/blog/upload-image', (err, req, res, next) => {
     }
     next();
 });
+
+// Serve blog images from database
+app.get('/api/blog/image/:id', async (req, res) => {
+    try {
+        const imageId = req.params.id;
+        
+        // Retrieve image data from database
+        const result = await pool.query(
+            'SELECT filename, original_name, mime_type, file_size, image_data, alt_text FROM blog_images WHERE id = $1',
+            [imageId]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Image not found' });
+        }
+        
+        const imageData = result.rows[0];
+        
+        // Set appropriate headers
+        res.set({
+            'Content-Type': imageData.mime_type,
+            'Content-Length': imageData.file_size,
+            'Content-Disposition': `inline; filename="${imageData.original_name}"`,
+            'Cache-Control': 'public, max-age=31536000' // Cache for 1 year
+        });
+        
+        // Send the image data
+        res.send(imageData.image_data);
+    } catch (error) {
+        logger.error('Error retrieving blog image from database:', error);
+        res.status(500).json({ error: 'Failed to retrieve image' });
+    }
+});
+
+// Function to clean up old temporary files
+async function cleanupTempFiles() {
+    try {
+        const tempDir = path.join(__dirname, 'temp', 'blog_uploads');
+        if (!fs.existsSync(tempDir)) {
+            return;
+        }
+        
+        const files = fs.readdirSync(tempDir);
+        const now = Date.now();
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+        
+        for (const file of files) {
+            const filePath = path.join(tempDir, file);
+            const stats = fs.statSync(filePath);
+            
+            if (now - stats.mtime.getTime() > maxAge) {
+                fs.unlinkSync(filePath);
+                logger.info(`Cleaned up old temporary file: ${filePath}`);
+            }
+        }
+    } catch (error) {
+        logger.error('Error cleaning up temporary files:', error);
+    }
+}
+
+// Schedule cleanup of temporary files every hour
+setInterval(cleanupTempFiles, 60 * 60 * 1000);
+
+// Run initial cleanup after a delay to not interfere with startup
+setTimeout(cleanupTempFiles, 5000);
 
 function extractBlogPostMetadata(content, fallbackFilename) {
     const titleMatch = content.match(/<h1[^>]*>([^<]+)<\/h1>/);
