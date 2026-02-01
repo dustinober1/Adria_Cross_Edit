@@ -1,6 +1,37 @@
-[dotenv@17.2.3] injecting env (4) from .env -- tip: ⚙️  override existing env vars with { override: true }
-Run: http://localhost:3000
-SQLite database initialized successfully
-Created anonymous session for clothing matcher: anon_1766288908403_53259ooed
-Created anonymous session for clothing matcher: anon_1766289074089_3x9shm5rr
-Created anonymous session for clothing matcher: anon_1766289160634_x594s1bn5
+
+> adria_cross_edit@1.0.1 start
+> node server.js
+
+[dotenv@17.2.3] injecting env (24) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[32minfo[39m: Square SDK initialized in sandbox mode {"timestamp":"2026-02-01T18:58:31.498Z"}
+[32minfo[39m: Server starting in development mode on port 3000 {"timestamp":"2026-02-01T18:58:31.501Z"}
+[32minfo[39m: Opening SQLite database at: adria_cross.db {"timestamp":"2026-02-01T18:58:31.511Z"}
+[32minfo[39m: Passport: Google Strategy configured {"timestamp":"2026-02-01T18:58:31.517Z"}
+(node:19842) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[32minfo[39m: SQLite database opened successfully {"timestamp":"2026-02-01T18:58:31.520Z"}
+[32minfo[39m: Starting migrations... {"timestamp":"2026-02-01T18:58:31.520Z"}
+[32minfo[39m: Running migration: 001_initial_schema.sql {"timestamp":"2026-02-01T18:58:31.520Z"}
+[32minfo[39m: Running migration: 002_performance_indexes.sql {"timestamp":"2026-02-01T18:58:31.534Z"}
+[32minfo[39m: Running migration: 003_oauth_schema.sql {"timestamp":"2026-02-01T18:58:31.535Z"}
+[32minfo[39m: Running migration: 004_add_proposed_times.sql {"timestamp":"2026-02-01T18:58:31.536Z"}
+[32minfo[39m: Running migration: 004_oauth_password_nullable.sql {"timestamp":"2026-02-01T18:58:31.538Z"}
+[32minfo[39m: Skipping PostgreSQL-only statement: -- Migration: 004_oauth_password_nullable.sql
+-- Description... {"timestamp":"2026-02-01T18:58:31.538Z"}
+[31merror[39m: Migration query failed in 004_oauth_password_nullable.sql: 
+
+-- Add a comment explaining the nullable password
+COMMENT ON COLUMN users.password IS 'Password ha... SQLITE_ERROR: near "COMMENT": syntax error {"code":"SQLITE_ERROR","errno":1,"stack":"Error: SQLITE_ERROR: near \"COMMENT\": syntax error","timestamp":"2026-02-01T18:58:31.538Z"}
+[32minfo[39m: Running migration: 005_reset_appointments_sequence.sql {"timestamp":"2026-02-01T18:58:31.539Z"}
+[31merror[39m: Migration query failed in 005_reset_appointments_sequence.sql: -- Reset appointments primary key sequence to fix duplicate key errors
+-- This ensures the next ID i... SQLITE_ERROR: no such function: pg_get_serial_sequence {"code":"SQLITE_ERROR","errno":1,"stack":"Error: SQLITE_ERROR: no such function: pg_get_serial_sequence","timestamp":"2026-02-01T18:58:31.539Z"}
+[32minfo[39m: Running migration: 006_add_tos_timestamp.sql {"timestamp":"2026-02-01T18:58:31.539Z"}
+[32minfo[39m: All migrations completed successfully. {"timestamp":"2026-02-01T18:58:31.539Z"}
+[32minfo[39m: Migrations completed, now creating admin user... {"timestamp":"2026-02-01T18:58:31.539Z"}
+[32minfo[39m: Users table columns: id, username, password, is_client, verification_code, email, provider, provider_id, display_name, profile_picture, email_verified, role, created_at, tos_accepted_at, hasRoleColumn: true {"timestamp":"2026-02-01T18:58:31.539Z"}
+[32minfo[39m: Admin check result: user exists with id=1 {"timestamp":"2026-02-01T18:58:31.540Z"}
+[32minfo[39m: Admin user exists, current role: "admin" {"timestamp":"2026-02-01T18:58:31.540Z"}
+[32minfo[39m: Admin user already has correct role {"timestamp":"2026-02-01T18:58:31.540Z"}
+[32minfo[39m: SQLite database initialized successfully {"timestamp":"2026-02-01T18:58:31.540Z"}
+[32minfo[39m: Run: http://localhost:3000 {"timestamp":"2026-02-01T18:58:31.541Z"}
+[32minfo[39m: POST /api/clothing/upload - incoming {"body":{"category_id":"1","color_tags":"red,blue","season_tags":"summer","style_tags":"casual"},"file":null,"session":{},"timestamp":"2026-02-01T18:58:37.103Z"}

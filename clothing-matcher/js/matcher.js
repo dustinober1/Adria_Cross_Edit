@@ -82,8 +82,14 @@
             });
 
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Upload failed');
+                let message = 'Upload failed';
+                try {
+                    const error = await response.json();
+                    message = error.error || message;
+                } catch (parseErr) {
+                    // Non-JSON response (e.g., proxy error)
+                }
+                throw new Error(message);
             }
 
             return await response.json();

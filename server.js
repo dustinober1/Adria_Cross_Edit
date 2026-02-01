@@ -1238,11 +1238,19 @@ app.post('/api/appointments/:id/propose-times', isAuthenticated, async (req, res
 // ============================================
 const checkClientStatus = async (userId) => {
     if (!userId) return false;
-    const result = await pool.query('SELECT is_client FROM users WHERE id = $1', [userId]);
+    // If userId is a non-numeric string (e.g. anon_...), treat as not a registered client
+    if (typeof userId === 'string' && !/^\d+$/.test(userId)) return false;
+    const id = (typeof userId === 'number') ? userId : parseInt(userId, 10);
+    if (Number.isNaN(id)) return false;
+    const result = await pool.query('SELECT is_client FROM users WHERE id = $1', [id]);
     return result.rows[0]?.is_client || false;
 };
 
 const checkUploadLimit = async (categoryId, userId = null, sessionId = null) => {
+    // Ensure categoryId is numeric to avoid passing strings into integer DB fields
+    const catId = (typeof categoryId === 'number') ? categoryId : parseInt(categoryId, 10);
+    if (Number.isNaN(catId)) return { allowed: false, used: 0, limit: 2 };
+
     const isClient = await checkClientStatus(userId);
     if (isClient) return { allowed: true, used: 0, limit: 'unlimited' };
 
@@ -1251,7 +1259,7 @@ const checkUploadLimit = async (categoryId, userId = null, sessionId = null) => 
                 WHERE category_id = $1 
                 AND (user_id = $2 OR session_id = $3)
                 AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
-            `, [categoryId, userId, sessionId]);
+            `, [catId, userId, sessionId]);
 
     // Handle both PostgreSQL (countResult.rows[0].count) and SQLite wrappers
     const countRow = countResult.rows[0];
@@ -1408,6 +1416,10 @@ app.post('/api/clothing/request-verification', async (req, res) => {
 // Upload clothing item
 app.post('/api/clothing/upload', upload.single('image'), async (req, res) => {
     try {
+        // Log incoming request body/session/file for debugging upload issues
+        const sessInfo = req.session ? { userId: req.session.userId, sessionId: req.session.sessionId } : null;
+        logger.info('POST /api/clothing/upload - incoming', { body: req.body, session: sessInfo, file: req.file ? { originalname: req.file.originalname, filename: req.file.filename } : null });
+
         const { category_id, color_tags, style_tags, season_tags, brand, pattern } = req.body;
         const userId = req.session.userId || null;
 
@@ -1436,6 +1448,11 @@ app.post('/api/clothing/upload', upload.single('image'), async (req, res) => {
         // Set expiry for session items (1 week)
         const expiresAt = userId ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
+        // Require an uploaded file
+        if (!req.file) {
+            return res.status(400).json({ error: 'Image file is required' });
+        }
+
         const result = await pool.query(`
                     INSERT INTO clothing_items 
                     (session_id, user_id, category_id, image_path, color_tags, style_tags, season_tags, brand, pattern, expires_at)
@@ -1452,6 +1469,20 @@ app.post('/api/clothing/upload', upload.single('image'), async (req, res) => {
         console.error('Upload error:', err);
         res.status(500).json({ error: 'Upload failed' });
     }
+});
+
+// Handle multer errors for clothing upload
+app.use('/api/clothing/upload', (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(413).json({ error: 'File size exceeds 5MB limit' });
+        }
+        return res.status(400).json({ error: err.message });
+    }
+    if (err) {
+        return res.status(400).json({ error: err.message });
+    }
+    next();
 });
 
 // Get user's clothing items
