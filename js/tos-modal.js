@@ -33,7 +33,18 @@ class TosModal {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 const mainContent = doc.querySelector('.legal-content, main, .container');
-                this.tosText = mainContent ? mainContent.innerHTML : '<p>Terms of Service not available</p>';
+                
+                if (mainContent) {
+                    // Remove any color/style attributes that might interfere with modal styling
+                    const clone = mainContent.cloneNode(true);
+                    clone.querySelectorAll('*').forEach(el => {
+                        el.removeAttribute('style');
+                        el.removeAttribute('color');
+                    });
+                    this.tosText = clone.innerHTML;
+                } else {
+                    this.tosText = '<p>Terms of Service not available</p>';
+                }
             } catch (err) {
                 console.error('Failed to load TOS:', err);
                 this.tosText = '<p>Terms of Service not available</p>';
@@ -243,26 +254,28 @@ class TosModal {
             .tos-content {
                 font-size: 0.9rem;
                 line-height: 1.6;
-                color: #2f2f2f;
+                color: #2f2f2f !important;
             }
 
-            .tos-content * {
-                color: #2f2f2f;
+            .tos-content *:not(h1):not(h2):not(h3):not(a) {
+                color: #2f2f2f !important;
             }
 
             .tos-content h1,
             .tos-content h2,
             .tos-content h3 {
-                color: #c19a5d;
+                color: #c19a5d !important;
                 margin-top: 1rem;
             }
 
             .tos-content a {
-                color: #7b5a2d;
+                color: #7b5a2d !important;
+                text-decoration: underline;
             }
 
             .tos-content p {
                 margin-bottom: 0.75rem;
+                color: #2f2f2f !important;
             }
 
             .tos-content ul,
