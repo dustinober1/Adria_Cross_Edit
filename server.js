@@ -423,10 +423,10 @@ if (process.env.NODE_ENV === 'production') {
 app.use(cors()); // Enable CORS for all routes
 
 // --- Body size diagnostics / limits ---
-// NOTE: The current defaults are intentionally small; blog publishing requests may exceed this.
-// We'll log Content-Length for blog routes and capture 413 errors to confirm before changing limits.
-const JSON_BODY_LIMIT = process.env.JSON_BODY_LIMIT || '10kb';
-const URLENCODED_BODY_LIMIT = process.env.URLENCODED_BODY_LIMIT || '10kb';
+// NOTE: Blog publishing can include sizable HTML content. Default to 10mb to avoid 413s.
+// Override via env vars if you want stricter limits in production.
+const JSON_BODY_LIMIT = process.env.JSON_BODY_LIMIT || '10mb';
+const URLENCODED_BODY_LIMIT = process.env.URLENCODED_BODY_LIMIT || '10mb';
 
 // Log request sizing headers early (before body parsing) for blog endpoints.
 app.use((req, res, next) => {
