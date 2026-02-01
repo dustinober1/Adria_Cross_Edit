@@ -1103,6 +1103,144 @@
                         <div class="legend-item"><span class="legend-dot booked"></span> Has Bookings</div>
                     </div>
                 </div>
+
+                <!-- Weekly Defaults Section -->
+                <div class="table-card" style="max-width: 1000px; margin-top: 2rem;">
+                    <h2>📆 Weekly Availability Templates (Coming Soon)</h2>
+                    <p style="color: #666; margin-bottom: 1.5rem;">Set recurring availability by day of week. These will serve as defaults when you batch-create availability for future dates.</p>
+                    
+                    <div id="weekly-availability-container">
+                        <!-- Sunday -->
+                        <div class="day-config-card">
+                            <div class="day-header">
+                                <h3 style="margin: 0;">Sunday</h3>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" class="day-enabled-toggle" data-day="0">
+                                    <span>Available</span>
+                                </label>
+                            </div>
+                            <div class="day-slots" data-day="0">
+                                <div class="slots-list"></div>
+                                <div class="add-slot-row" style="margin-top: 0.5rem;">
+                                    <input type="text" class="new-slot-input" placeholder="e.g., 9:00 AM" style="flex: 1; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px;">
+                                    <button class="btn-view add-slot-btn" data-day="0">+ Add</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monday -->
+                        <div class="day-config-card">
+                            <div class="day-header">
+                                <h3 style="margin: 0;">Monday</h3>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" class="day-enabled-toggle" data-day="1">
+                                    <span>Available</span>
+                                </label>
+                            </div>
+                            <div class="day-slots" data-day="1">
+                                <div class="slots-list"></div>
+                                <div class="add-slot-row" style="margin-top: 0.5rem;">
+                                    <input type="text" class="new-slot-input" placeholder="e.g., 9:00 AM" style="flex: 1; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px;">
+                                    <button class="btn-view add-slot-btn" data-day="1">+ Add</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tuesday -->
+                        <div class="day-config-card">
+                            <div class="day-header">
+                                <h3 style="margin: 0;">Tuesday</h3>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" class="day-enabled-toggle" data-day="2">
+                                    <span>Available</span>
+                                </label>
+                            </div>
+                            <div class="day-slots" data-day="2">
+                                <div class="slots-list"></div>
+                                <div class="add-slot-row" style="margin-top: 0.5rem;">
+                                    <input type="text" class="new-slot-input" placeholder="e.g., 9:00 AM" style="flex: 1; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px;">
+                                    <button class="btn-view add-slot-btn" data-day="2">+ Add</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wednesday -->
+                        <div class="day-config-card">
+                            <div class="day-header">
+                                <h3 style="margin: 0;">Wednesday</h3>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" class="day-enabled-toggle" data-day="3">
+                                    <span>Available</span>
+                                </label>
+                            </div>
+                            <div class="day-slots" data-day="3">
+                                <div class="slots-list"></div>
+                                <div class="add-slot-row" style="margin-top: 0.5rem;">
+                                    <input type="text" class="new-slot-input" placeholder="e.g., 9:00 AM" style="flex: 1; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px;">
+                                    <button class="btn-view add-slot-btn" data-day="3">+ Add</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thursday -->
+                        <div class="day-config-card">
+                            <div class="day-header">
+                                <h3 style="margin: 0;">Thursday</h3>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" class="day-enabled-toggle" data-day="4">
+                                    <span>Available</span>
+                                </label>
+                            </div>
+                            <div class="day-slots" data-day="4">
+                                <div class="slots-list"></div>
+                                <div class="add-slot-row" style="margin-top: 0.5rem;">
+                                    <input type="text" class="new-slot-input" placeholder="e.g., 9:00 AM" style="flex: 1; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px;">
+                                    <button class="btn-view add-slot-btn" data-day="4">+ Add</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Friday -->
+                        <div class="day-config-card">
+                            <div class="day-header">
+                                <h3 style="margin: 0;">Friday</h3>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" class="day-enabled-toggle" data-day="5">
+                                    <span>Available</span>
+                                </label>
+                            </div>
+                            <div class="day-slots" data-day="5">
+                                <div class="slots-list"></div>
+                                <div class="add-slot-row" style="margin-top: 0.5rem;">
+                                    <input type="text" class="new-slot-input" placeholder="e.g., 9:00 AM" style="flex: 1; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px;">
+                                    <button class="btn-view add-slot-btn" data-day="5">+ Add</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Saturday -->
+                        <div class="day-config-card">
+                            <div class="day-header">
+                                <h3 style="margin: 0;">Saturday</h3>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" class="day-enabled-toggle" data-day="6">
+                                    <span>Available</span>
+                                </label>
+                            </div>
+                            <div class="day-slots" data-day="6">
+                                <div class="slots-list"></div>
+                                <div class="add-slot-row" style="margin-top: 0.5rem;">
+                                    <input type="text" class="new-slot-input" placeholder="e.g., 9:00 AM" style="flex: 1; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px;">
+                                    <button class="btn-view add-slot-btn" data-day="6">+ Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: #f0f8ff; border-radius: 8px; border-left: 4px solid #0066cc;">
+                        <p style="margin: 0; color: #004080; font-size: 0.9rem;"><strong>💡 Future Feature:</strong> Use these templates to bulk-apply availability to multiple dates at once. Click a calendar date above to set availability for specific dates right now.</p>
+                    </div>
+                </div>
             </div>
         </section>
     </div>
@@ -1271,6 +1409,7 @@
             loadAppointments();
             loadIntake();
             loadOverrides();
+            loadWeeklyAvailability();
         }
 
         async function loadAppointments() {
@@ -2205,6 +2344,109 @@
                 btn.textContent = isEditMode ? '💾 Update Post' : '🚀 Publish Post';
             }
         });
+
+        // ============================================================================
+        // WEEKLY AVAILABILITY MANAGEMENT (Future Feature - UI Only)
+        // ============================================================================
+        let weeklyAvailability = {};
+
+        async function loadWeeklyAvailability() {
+            try {
+                const res = await fetch('/api/availability');
+                if (res.ok) {
+                    const data = await res.json();
+                    data.forEach(day => {
+                        weeklyAvailability[day.day_of_week] = {
+                            slots: day.slots,
+                            is_enabled: day.is_enabled === 1
+                        };
+                    });
+                    renderWeeklyAvailability();
+                }
+            } catch (err) {
+                console.error('Failed to load weekly availability:', err);
+            }
+        }
+
+        function renderWeeklyAvailability() {
+            for (let day = 0; day <= 6; day++) {
+                const dayData = weeklyAvailability[day] || { slots: [], is_enabled: false };
+                const container = document.querySelector(`.day-slots[data-day="${day}"]`);
+                const toggle = document.querySelector(`.day-enabled-toggle[data-day="${day}"]`);
+                
+                if (toggle) toggle.checked = dayData.is_enabled;
+                if (container) {
+                    const slotsList = container.querySelector('.slots-list');
+                    if (slotsList) {
+                        slotsList.innerHTML = dayData.slots.length > 0 
+                            ? dayData.slots.map(slot => `
+                                <div class="slot-pill">
+                                    ${slot} <span class="remove-weekly-slot" data-day="${day}" data-slot="${slot}">&times;</span>
+                                </div>
+                            `).join('')
+                            : '<p style="color:#888; font-size:0.85rem;">No slots added yet.</p>';
+                    }
+                }
+            }
+        }
+
+        // Event handlers for weekly availability (delegated)
+        document.addEventListener('click', function(e) {
+            // Add slot button
+            if (e.target.classList.contains('add-slot-btn')) {
+                const day = parseInt(e.target.dataset.day);
+                const input = e.target.previousElementSibling;
+                const slot = input.value.trim();
+                if (slot) {
+                    if (!weeklyAvailability[day]) weeklyAvailability[day] = { slots: [], is_enabled: true };
+                    if (!weeklyAvailability[day].slots.includes(slot)) {
+                        weeklyAvailability[day].slots.push(slot);
+                        saveWeeklyDay(day);
+                    }
+                    input.value = '';
+                }
+                return;
+            }
+
+            // Remove slot
+            if (e.target.classList.contains('remove-weekly-slot')) {
+                const day = parseInt(e.target.dataset.day);
+                const slot = e.target.dataset.slot;
+                if (weeklyAvailability[day]) {
+                    weeklyAvailability[day].slots = weeklyAvailability[day].slots.filter(s => s !== slot);
+                    saveWeeklyDay(day);
+                }
+                return;
+            }
+        });
+
+        // Toggle day enabled
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('day-enabled-toggle')) {
+                const day = parseInt(e.target.dataset.day);
+                if (!weeklyAvailability[day]) weeklyAvailability[day] = { slots: [], is_enabled: false };
+                weeklyAvailability[day].is_enabled = e.target.checked;
+                saveWeeklyDay(day);
+            }
+        });
+
+        async function saveWeeklyDay(day) {
+            try {
+                await fetch('/api/availability', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        day_of_week: day,
+                        slots: weeklyAvailability[day].slots,
+                        is_enabled: weeklyAvailability[day].is_enabled
+                    })
+                });
+                renderWeeklyAvailability();
+            } catch (err) {
+                console.error('Failed to save weekly availability:', err);
+                alert('Failed to save weekly availability. Please try again.');
+            }
+        }
 
         checkAuth();
     </script>

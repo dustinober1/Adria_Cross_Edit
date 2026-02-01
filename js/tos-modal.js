@@ -282,6 +282,12 @@ class TosModal {
             .tos-content ol {
                 padding-left: 1.5rem;
                 margin-bottom: 0.75rem;
+                color: #2f2f2f !important;
+            }
+
+            .tos-content li {
+                color: #2f2f2f !important;
+                margin-bottom: 0.5rem;
             }
 
             .tos-checkbox-wrapper {

@@ -468,6 +468,18 @@ configurePassport(app, pool);
 app.use('/auth', authRoutes);
 app.use(authRoutes); // For API routes mounted at root/api level inside authRoutes
 
+// ============================================
+// Ensure authenticated users have session.userId set
+// This enables image persistence across devices
+// ============================================
+app.use((req, res, next) => {
+    if (req.isAuthenticated() && req.user && req.user.id && !req.session.userId) {
+        req.session.userId = req.user.id;
+        logger.debug(`Set session.userId = ${req.user.id} for authenticated user`);
+    }
+    next();
+});
+
 app.get('/api/debug/strategies', (req, res) => {
     res.json({
         strategies: passport._strategies ? Object.keys(passport._strategies) : [],
@@ -1031,20 +1043,62 @@ async function getBlockedTimes(date, pool) {
 
     const blockedTimes = new Set();
 
+    // Service duration configuration based on requirements
+    const serviceDurations = {
+        'consultation': 30,  // 15min consult books 30min window
+        '15-min-consultation': 30,
+        'closet-edit-virtual': 120, // Virtual Closet Edit: 2 hours
+        'closet-edit-in-person': 'all-day',  // In-person Closet Edit: all day
+        'closet-edit': 'all-day',  // Default closet edit: all day
+        'color-analysis': 'all-day',  // In person color analysis: all day
+        'color-analysis-in-person': 'all-day',
+        'lux-shopping-experience': 'all-day',  // Lux shopping: all day
+        'lux-shopping': 'all-day'
+    };
+
     // Process each booked appointment
     for (const appointment of booked.rows) {
-        blockedTimes.add(appointment.time); // Block the booked time itself
+        const service = appointment.service || '';
+        const serviceLower = service.toLowerCase().trim();
+        
+        // Always block the booked time itself
+        blockedTimes.add(appointment.time);
 
-        if (appointment.service === 'consultation') {
-            // 15-min consultation blocks 30 minutes
-            const blockedSlot = getNextTimeSlot(appointment.time, 30);
-            if (blockedSlot) {
-                blockedTimes.add(blockedSlot);
+        // Get duration for this service
+        const duration = serviceDurations[serviceLower];
+
+        if (duration === 'all-day') {
+            // Block all times for the entire day - get all slots from availability
+            // For now, block common slots throughout the day
+            const allDaySlots = [
+                '8:00 AM', '8:30 AM', '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+                '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM',
+                '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM', '6:00 PM', '6:30 PM', '7:00 PM', '7:30 PM', '8:00 PM'
+            ];
+            allDaySlots.forEach(slot => blockedTimes.add(slot));
+        } else if (duration && typeof duration === 'number') {
+            // Block specific duration in minutes
+            let currentTime = appointment.time;
+            let minutesBlocked = 0;
+            
+            while (minutesBlocked < duration) {
+                const nextSlot = getNextTimeSlot(currentTime, 30);
+                if (nextSlot) {
+                    blockedTimes.add(nextSlot);
+                    currentTime = nextSlot;
+                    minutesBlocked += 30;
+                } else {
+                    break;
+                }
             }
-        } else if (appointment.service === 'closet-edit') {
-            // Closet edit blocks entire morning (8-12) or afternoon (1-4) session
-            const sessionSlots = getSessionSlots(appointment.time);
-            sessionSlots.forEach(slot => blockedTimes.add(slot));
+        } else if (serviceLower.includes('closet') || serviceLower.includes('edit')) {
+            // Default for any closet edit service: block entire day
+            const allDaySlots = [
+                '8:00 AM', '8:30 AM', '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+                '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM',
+                '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM', '6:00 PM', '6:30 PM', '7:00 PM', '7:30 PM', '8:00 PM'
+            ];
+            allDaySlots.forEach(slot => blockedTimes.add(slot));
         }
     }
 

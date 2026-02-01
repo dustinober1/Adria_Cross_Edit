@@ -1,4 +1,4 @@
-- Sets by day of week as an option other than just one day at a time
+- Sets by day of week as an option other than just one day at a time when the admin is setting this availability
 - Fix booking windows for each servie
     - 15 consult will book 30 minute window
     - Closet Edit (in person) will book all day
