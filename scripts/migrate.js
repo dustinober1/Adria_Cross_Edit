@@ -18,11 +18,12 @@ async function runMigrations(dbPoolOrWrapper) {
             let sql = fs.readFileSync(migrationPath, 'utf8');
 
             const isSqlite = process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('sqlite:');
-
-            // Simple compatibility check: SQLite doesn't use SERIAL or TIMESTAMP
+            
+            // Simple compatibility check: SQLite doesn't use SERIAL, TIMESTAMP, or BYTEA
             if (isSqlite) {
                 sql = sql.replace(/SERIAL PRIMARY KEY/g, 'INTEGER PRIMARY KEY AUTOINCREMENT');
                 sql = sql.replace(/TIMESTAMP/g, 'DATETIME');
+                sql = sql.replace(/BYTEA/g, 'BLOB');  // Convert PostgreSQL BYTEA to SQLite BLOB
                 sql = sql.replace(/TEXT\[\]/g, 'TEXT');
                 sql = sql.replace(/ON CONFLICT \(name\) DO NOTHING/g, '');
             }
