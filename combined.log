@@ -461,3 +461,54 @@
 {"level":"info","message":"Admin user exists, current role: \"admin\"","timestamp":"2026-02-01T19:04:33.942Z"}
 {"level":"info","message":"Admin user already has correct role","timestamp":"2026-02-01T19:04:33.942Z"}
 {"level":"info","message":"SQLite database initialized successfully","timestamp":"2026-02-01T19:04:33.942Z"}
+{"level":"info","message":"Square SDK initialized in sandbox mode","timestamp":"2026-02-01T20:14:59.108Z"}
+{"level":"info","message":"Server starting in development mode on port 5055","timestamp":"2026-02-01T20:14:59.110Z"}
+{"level":"info","message":"Opening SQLite database at: adria_cross.db","timestamp":"2026-02-01T20:14:59.121Z"}
+{"level":"info","message":"Passport: Google Strategy configured","timestamp":"2026-02-01T20:14:59.127Z"}
+{"level":"info","message":"SQLite database opened successfully","timestamp":"2026-02-01T20:14:59.129Z"}
+{"level":"info","message":"Starting migrations...","timestamp":"2026-02-01T20:14:59.129Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2026-02-01T20:14:59.130Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2026-02-01T20:14:59.142Z"}
+{"level":"info","message":"Running migration: 003_oauth_schema.sql","timestamp":"2026-02-01T20:14:59.144Z"}
+{"level":"info","message":"Running migration: 004_add_proposed_times.sql","timestamp":"2026-02-01T20:14:59.145Z"}
+{"level":"info","message":"Running migration: 004_oauth_password_nullable.sql","timestamp":"2026-02-01T20:14:59.147Z"}
+{"level":"info","message":"Skipping PostgreSQL-only statement: -- Migration: 004_oauth_password_nullable.sql\n-- Description...","timestamp":"2026-02-01T20:14:59.148Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: \n\n-- Add a comment explaining the nullable password\nCOMMENT ON COLUMN users.password IS 'Password ha... SQLITE_ERROR: near \"COMMENT\": syntax error","stack":"Error: SQLITE_ERROR: near \"COMMENT\": syntax error","timestamp":"2026-02-01T20:14:59.148Z"}
+{"level":"info","message":"Running migration: 005_reset_appointments_sequence.sql","timestamp":"2026-02-01T20:14:59.148Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 005_reset_appointments_sequence.sql: -- Reset appointments primary key sequence to fix duplicate key errors\n-- This ensures the next ID i... SQLITE_ERROR: no such function: pg_get_serial_sequence","stack":"Error: SQLITE_ERROR: no such function: pg_get_serial_sequence","timestamp":"2026-02-01T20:14:59.148Z"}
+{"level":"info","message":"Running migration: 006_add_tos_timestamp.sql","timestamp":"2026-02-01T20:14:59.148Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2026-02-01T20:14:59.148Z"}
+{"level":"info","message":"Migrations completed, now creating admin user...","timestamp":"2026-02-01T20:14:59.148Z"}
+{"level":"info","message":"Users table columns: id, username, password, is_client, verification_code, email, provider, provider_id, display_name, profile_picture, email_verified, role, created_at, tos_accepted_at, hasRoleColumn: true","timestamp":"2026-02-01T20:14:59.149Z"}
+{"level":"info","message":"Admin check result: user exists with id=1","timestamp":"2026-02-01T20:14:59.149Z"}
+{"level":"info","message":"Admin user exists, current role: \"admin\"","timestamp":"2026-02-01T20:14:59.149Z"}
+{"level":"info","message":"Admin user already has correct role","timestamp":"2026-02-01T20:14:59.149Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2026-02-01T20:14:59.149Z"}
+{"level":"info","message":"Run: http://localhost:5055","timestamp":"2026-02-01T20:14:59.151Z"}
+{"contentLength":"20040","contentType":"application/json","jsonLimit":"10kb","level":"info","message":"Incoming blog request (pre-parse)","method":"POST","timestamp":"2026-02-01T20:14:59.478Z","url":"/api/blog","urlEncodedLimit":"10kb"}
+{"contentLength":"20040","contentType":"application/json","jsonLimit":"10kb","level":"warn","message":"PayloadTooLargeError","method":"POST","timestamp":"2026-02-01T20:14:59.479Z","url":"/api/blog","urlEncodedLimit":"10kb"}
+{"level":"info","message":"Square SDK initialized in sandbox mode","timestamp":"2026-02-01T20:17:37.886Z"}
+{"level":"info","message":"Server starting in development mode on port 5056","timestamp":"2026-02-01T20:17:37.889Z"}
+{"level":"info","message":"Opening SQLite database at: adria_cross.db","timestamp":"2026-02-01T20:17:37.899Z"}
+{"level":"info","message":"Passport: Google Strategy configured","timestamp":"2026-02-01T20:17:37.905Z"}
+{"level":"info","message":"SQLite database opened successfully","timestamp":"2026-02-01T20:17:37.908Z"}
+{"level":"info","message":"Starting migrations...","timestamp":"2026-02-01T20:17:37.908Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2026-02-01T20:17:37.908Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2026-02-01T20:17:37.923Z"}
+{"level":"info","message":"Running migration: 003_oauth_schema.sql","timestamp":"2026-02-01T20:17:37.924Z"}
+{"level":"info","message":"Running migration: 004_add_proposed_times.sql","timestamp":"2026-02-01T20:17:37.925Z"}
+{"level":"info","message":"Running migration: 004_oauth_password_nullable.sql","timestamp":"2026-02-01T20:17:37.928Z"}
+{"level":"info","message":"Skipping PostgreSQL-only statement: -- Migration: 004_oauth_password_nullable.sql\n-- Description...","timestamp":"2026-02-01T20:17:37.928Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: \n\n-- Add a comment explaining the nullable password\nCOMMENT ON COLUMN users.password IS 'Password ha... SQLITE_ERROR: near \"COMMENT\": syntax error","stack":"Error: SQLITE_ERROR: near \"COMMENT\": syntax error","timestamp":"2026-02-01T20:17:37.928Z"}
+{"level":"info","message":"Running migration: 005_reset_appointments_sequence.sql","timestamp":"2026-02-01T20:17:37.928Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 005_reset_appointments_sequence.sql: -- Reset appointments primary key sequence to fix duplicate key errors\n-- This ensures the next ID i... SQLITE_ERROR: no such function: pg_get_serial_sequence","stack":"Error: SQLITE_ERROR: no such function: pg_get_serial_sequence","timestamp":"2026-02-01T20:17:37.928Z"}
+{"level":"info","message":"Running migration: 006_add_tos_timestamp.sql","timestamp":"2026-02-01T20:17:37.928Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2026-02-01T20:17:37.928Z"}
+{"level":"info","message":"Migrations completed, now creating admin user...","timestamp":"2026-02-01T20:17:37.929Z"}
+{"level":"info","message":"Users table columns: id, username, password, is_client, verification_code, email, provider, provider_id, display_name, profile_picture, email_verified, role, created_at, tos_accepted_at, hasRoleColumn: true","timestamp":"2026-02-01T20:17:37.929Z"}
+{"level":"info","message":"Admin check result: user exists with id=1","timestamp":"2026-02-01T20:17:37.929Z"}
+{"level":"info","message":"Admin user exists, current role: \"admin\"","timestamp":"2026-02-01T20:17:37.929Z"}
+{"level":"info","message":"Admin user already has correct role","timestamp":"2026-02-01T20:17:37.929Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2026-02-01T20:17:37.929Z"}
+{"level":"info","message":"Run: http://localhost:5056","timestamp":"2026-02-01T20:17:37.930Z"}
+{"contentLength":"20040","contentType":"application/json","jsonLimit":"10mb","level":"info","message":"Incoming blog request (pre-parse)","method":"POST","timestamp":"2026-02-01T20:17:38.278Z","url":"/api/blog","urlEncodedLimit":"10mb"}
