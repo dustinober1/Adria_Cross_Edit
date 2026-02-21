@@ -761,3 +761,4 @@
 {"level":"info","message":"User query result: 1 rows found","timestamp":"2026-02-21T14:49:32.900Z"}
 {"level":"info","message":"Found user: id=1, username=admin, role=admin, hasPassword=true","timestamp":"2026-02-21T14:49:32.901Z"}
 {"level":"info","message":"Password match: true","timestamp":"2026-02-21T14:49:32.991Z"}
+{"level":"error","message":"Registration error: Cannot read properties of undefined (reading 'id')","stack":"TypeError: Cannot read properties of undefined (reading 'id')\n    at /Users/dustinober/Projects/Adria_Cross_Edit/server.js:903:39","timestamp":"2026-02-21T15:01:33.872Z"}
