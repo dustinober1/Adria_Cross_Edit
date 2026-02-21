@@ -902,7 +902,7 @@ app.post('/api/register', rateLimit({
 
         const userId = result.rows[0].id;
         req.session.userId = userId; // Auto-login after registration
-        
+
         // Generate JWT token for mobile clients
         const token = jwt.sign(
             { id: userId, role: 'client', username: username },
@@ -1047,8 +1047,27 @@ app.post('/api/check-email-exists', async (req, res) => {
 });
 
 app.get('/api/appointments', isAuthenticated, async (req, res) => {
-    const data = await pool.query('SELECT * FROM appointments ORDER BY created_at DESC');
-    res.json(data.rows);
+    try {
+        const userId = req.user ? req.user.id : req.session.userId;
+        const userResult = await pool.query('SELECT role, email FROM users WHERE id = $1', [userId]);
+
+        if (userResult.rows.length === 0) {
+            return res.status(401).json({ error: 'User not found' });
+        }
+
+        const user = userResult.rows[0];
+
+        if (user.role === 'admin') {
+            const data = await pool.query('SELECT * FROM appointments ORDER BY created_at DESC');
+            res.json(data.rows);
+        } else {
+            const data = await pool.query('SELECT * FROM appointments WHERE email = $1 ORDER BY created_at DESC', [user.email]);
+            res.json(data.rows);
+        }
+    } catch (err) {
+        logger.error('Appointments GET error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
 });
 
 // Helper function to get the next 30-minute slot
@@ -1133,7 +1152,7 @@ async function getBlockedTimes(date, pool) {
     for (const appointment of booked.rows) {
         const service = appointment.service || '';
         const serviceLower = service.toLowerCase().trim();
-        
+
         // Always block the booked time itself
         blockedTimes.add(appointment.time);
 
@@ -1153,7 +1172,7 @@ async function getBlockedTimes(date, pool) {
             // Block specific duration in minutes
             let currentTime = appointment.time;
             let minutesBlocked = 0;
-            
+
             while (minutesBlocked < duration) {
                 const nextSlot = getNextTimeSlot(currentTime, 30);
                 if (nextSlot) {
@@ -1870,7 +1889,7 @@ app.post('/api/blog/upload-image', isAuthenticated, blogUpload.single('image'), 
     try {
         // Read the file data
         const imageData = fs.readFileSync(req.file.path);
-        
+
         // Insert image data into the database
         const result = await pool.query(
             `INSERT INTO blog_images (filename, original_name, mime_type, file_size, image_data)
@@ -1898,12 +1917,12 @@ app.post('/api/blog/upload-image', isAuthenticated, blogUpload.single('image'), 
         });
     } catch (error) {
         logger.error('Error storing blog image in database:', error);
-        
+
         // Clean up the temporary file if database insertion fails
         if (req.file && req.file.path) {
             fs.unlinkSync(req.file.path);
         }
-        
+
         return res.status(500).json({ error: 'Failed to store image in database' });
     }
 });
@@ -1926,19 +1945,19 @@ app.use('/api/blog/upload-image', (err, req, res, next) => {
 app.get('/api/blog/image/:id', async (req, res) => {
     try {
         const imageId = req.params.id;
-        
+
         // Retrieve image data from database
         const result = await pool.query(
             'SELECT filename, original_name, mime_type, file_size, image_data, alt_text FROM blog_images WHERE id = $1',
             [imageId]
         );
-        
+
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Image not found' });
         }
-        
+
         const imageData = result.rows[0];
-        
+
         // Set appropriate headers
         res.set({
             'Content-Type': imageData.mime_type,
@@ -1946,7 +1965,7 @@ app.get('/api/blog/image/:id', async (req, res) => {
             'Content-Disposition': `inline; filename="${imageData.original_name}"`,
             'Cache-Control': 'public, max-age=31536000' // Cache for 1 year
         });
-        
+
         // Send the image data
         res.send(imageData.image_data);
     } catch (error) {
@@ -1962,15 +1981,15 @@ async function cleanupTempFiles() {
         if (!fs.existsSync(tempDir)) {
             return;
         }
-        
+
         const files = fs.readdirSync(tempDir);
         const now = Date.now();
         const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-        
+
         for (const file of files) {
             const filePath = path.join(tempDir, file);
             const stats = fs.statSync(filePath);
-            
+
             if (now - stats.mtime.getTime() > maxAge) {
                 fs.unlinkSync(filePath);
                 logger.info(`Cleaned up old temporary file: ${filePath}`);

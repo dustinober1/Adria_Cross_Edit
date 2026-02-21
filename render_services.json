@@ -1,0 +1,95 @@
+[
+  {
+    "service": {
+      "autoDeploy": "no",
+      "autoDeployTrigger": "off",
+      "branch": "main",
+      "createdAt": "2025-12-20T23:23:44.135021Z",
+      "dashboardUrl": "https://dashboard.render.com/web/srv-d53ivvur433s73ccmpng",
+      "environmentId": "evm-d53ivvur433s73ccmplg",
+      "id": "srv-d53ivvur433s73ccmpng",
+      "name": "Adria_Cross_Edit",
+      "notifyOnFail": "default",
+      "ownerId": "tea-d53ise0gjchc73f8k27g",
+      "repo": "https://github.com/dustinober1/Adria_Cross_Edit",
+      "rootDir": "",
+      "serviceDetails": {
+        "buildPlan": "starter",
+        "cache": {
+          "profile": "no-cache"
+        },
+        "env": "node",
+        "envSpecificDetails": {
+          "buildCommand": "npm install",
+          "startCommand": "npm start"
+        },
+        "healthCheckPath": "",
+        "ipAllowList": [
+          {
+            "cidrBlock": "0.0.0.0/0",
+            "description": "everywhere"
+          }
+        ],
+        "maintenanceMode": {
+          "enabled": false,
+          "uri": ""
+        },
+        "numInstances": 1,
+        "openPorts": [
+          {
+            "port": 10000,
+            "protocol": "TCP"
+          }
+        ],
+        "plan": "starter",
+        "previews": {
+          "generation": "off"
+        },
+        "pullRequestPreviewsEnabled": "no",
+        "region": "oregon",
+        "runtime": "node",
+        "sshAddress": "srv-d53ivvur433s73ccmpng@ssh.oregon.render.com",
+        "url": "https://adria-cross-edit.onrender.com"
+      },
+      "slug": "adria-cross-edit",
+      "suspended": "not_suspended",
+      "suspenders": [],
+      "type": "web_service",
+      "updatedAt": "2026-02-01T20:32:51.715623Z"
+    },
+    "project": {
+      "createdAt": "2025-12-20T23:23:43.055235Z",
+      "environmentIds": [
+        "evm-d53ivvur433s73ccmplg"
+      ],
+      "id": "prj-d53ivvur433s73ccmpl0",
+      "name": "My project",
+      "owner": {
+        "email": "dober.code@gmail.com",
+        "id": "tea-d53ise0gjchc73f8k27g",
+        "name": "Adria Cross Edit",
+        "type": "team"
+      },
+      "updatedAt": "2025-12-20T23:23:43.055235Z"
+    },
+    "environment": {
+      "databasesIds": null,
+      "envGroupIds": null,
+      "id": "evm-d53ivvur433s73ccmplg",
+      "ipAllowList": [
+        {
+          "cidrBlock": "0.0.0.0/0",
+          "description": "everywhere"
+        }
+      ],
+      "name": "Production",
+      "networkIsolationEnabled": false,
+      "projectId": "prj-d53ivvur433s73ccmpl0",
+      "protectedStatus": "unprotected",
+      "redisIds": null,
+      "serviceIds": [
+        "srv-d53ivvur433s73ccmpng"
+      ]
+    }
+  }
+]

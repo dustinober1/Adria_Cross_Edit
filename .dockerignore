@@ -10,3 +10,4 @@ appointments.db
 render.yaml
 Dockerfile
 .dockerignore
+adria-mobile/

@@ -3,7 +3,8 @@ import { useAuthStore } from '../store/authStore';
 
 // Change this to your actual local IP when testing on a physical device, 
 // or 10.0.2.2 for Android Emulator, or localhost for iOS simulator.
-const BASE_URL = 'http://localhost:3000/api';
+// For production, use the Render URL:
+const BASE_URL = 'https://adria-cross-edit.onrender.com/api';
 
 export const apiClient = axios.create({
     baseURL: BASE_URL,
