@@ -23,6 +23,10 @@ const cookieParser = require('cookie-parser');
 const configurePassport = require('./config/passport');
 const authRoutes = require('./routes/auth');
 const { isAuthenticated, isAdmin } = require('./middleware/auth');
+const jwt = require('jsonwebtoken');
+
+// Secret key for mobile API tokens
+const JWT_SECRET = process.env.JWT_SECRET || 'adria-cross-edit-mobile-secret-dev';
 
 // ============================================
 // Square SDK Configuration
@@ -839,8 +843,17 @@ app.post('/api/login', loginLimiter, async (req, res) => {
             logger.info(`Password match: ${passwordMatch}`);
 
             if (passwordMatch) {
+                // Set session for standard web clients
                 req.session.userId = user.rows[0].id;
-                res.json({ success: true });
+
+                // Generate JWT token for mobile clients
+                const token = jwt.sign(
+                    { id: user.rows[0].id, role: user.rows[0].role, username: user.rows[0].username },
+                    JWT_SECRET,
+                    { expiresIn: '30d' }
+                );
+
+                res.json({ success: true, token: token, user: { id: user.rows[0].id, username: user.rows[0].username, email: user.rows[0].email, role: user.rows[0].role } });
             } else {
                 res.status(401).json({ error: 'Invalid username or password' });
             }
@@ -889,8 +902,15 @@ app.post('/api/register', rateLimit({
 
         const userId = result.rows[0].id;
         req.session.userId = userId; // Auto-login after registration
+        
+        // Generate JWT token for mobile clients
+        const token = jwt.sign(
+            { id: userId, role: 'client', username: username },
+            JWT_SECRET,
+            { expiresIn: '30d' }
+        );
 
-        res.status(201).json({ success: true, message: 'Account created successfully.' });
+        res.status(201).json({ success: true, message: 'Account created successfully.', token: token, user: { id: userId, username: username, email: email, role: 'client' } });
     } catch (err) {
         logger.error('Registration error:', err);
         res.status(500).json({ error: 'Failed to create account.' });
