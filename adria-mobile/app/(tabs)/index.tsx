@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { useAuthStore } from '../../store/authStore';
 import { apiClient } from '../../utils/api';
 import { useRouter } from 'expo-router';
@@ -33,6 +33,7 @@ export default function MemberDashboard() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
+        <Image source={require('../../assets/images/logo-v2.png')} style={styles.logo} resizeMode="contain" />
         <View>
           <Text style={styles.greeting}>Hello, {user?.displayName || user?.username || 'Member'}!</Text>
           <Text style={styles.subtitle}>Welcome back to your Style Portal.</Text>
@@ -94,6 +95,11 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     borderBottomWidth: 1,
     borderColor: '#EAEAEA',
+  },
+  logo: {
+    width: 60,
+    height: 60,
+    marginBottom: 16,
   },
   greeting: {
     fontSize: 28,

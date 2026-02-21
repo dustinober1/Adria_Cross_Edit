@@ -724,3 +724,40 @@
 {"level":"info","message":"User query result: 1 rows found","timestamp":"2026-02-21T14:42:55.325Z"}
 {"level":"info","message":"Found user: id=1, username=admin, role=admin, hasPassword=true","timestamp":"2026-02-21T14:42:55.325Z"}
 {"level":"info","message":"Password match: true","timestamp":"2026-02-21T14:42:55.406Z"}
+{"code":"EDNS","command":"CONN","errno":-3008,"hostname":"smtp.example.com","level":"error","message":"Attempt 1 failed to send email to client@example.com: getaddrinfo ENOTFOUND smtp.example.com","stack":"Error: getaddrinfo ENOTFOUND smtp.example.com\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:121:26)","syscall":"getaddrinfo","timestamp":"2026-02-21T14:45:19.003Z"}
+{"code":"EDNS","command":"CONN","errno":-3008,"hostname":"smtp.example.com","level":"error","message":"Attempt 1 failed to send email to adria@adriacrossedit.com: getaddrinfo ENOTFOUND smtp.example.com","stack":"Error: getaddrinfo ENOTFOUND smtp.example.com\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:121:26)","syscall":"getaddrinfo","timestamp":"2026-02-21T14:45:19.006Z"}
+{"code":"EDNS","command":"CONN","errno":-3008,"hostname":"smtp.example.com","level":"error","message":"Attempt 2 failed to send email to client@example.com: getaddrinfo ENOTFOUND smtp.example.com","stack":"Error: getaddrinfo ENOTFOUND smtp.example.com\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:121:26)","syscall":"getaddrinfo","timestamp":"2026-02-21T14:45:20.028Z"}
+{"code":"EDNS","command":"CONN","errno":-3008,"hostname":"smtp.example.com","level":"error","message":"Attempt 2 failed to send email to adria@adriacrossedit.com: getaddrinfo ENOTFOUND smtp.example.com","stack":"Error: getaddrinfo ENOTFOUND smtp.example.com\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:121:26)","syscall":"getaddrinfo","timestamp":"2026-02-21T14:45:20.033Z"}
+{"code":"EDNS","command":"CONN","errno":-3008,"hostname":"smtp.example.com","level":"error","message":"Attempt 3 failed to send email to client@example.com: getaddrinfo ENOTFOUND smtp.example.com","stack":"Error: getaddrinfo ENOTFOUND smtp.example.com\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:121:26)","syscall":"getaddrinfo","timestamp":"2026-02-21T14:45:22.046Z"}
+{"level":"error","message":"Failed to send email to client@example.com after 3 attempts.","timestamp":"2026-02-21T14:45:22.047Z"}
+{"code":"EDNS","command":"CONN","errno":-3008,"hostname":"smtp.example.com","level":"error","message":"Attempt 3 failed to send email to adria@adriacrossedit.com: getaddrinfo ENOTFOUND smtp.example.com","stack":"Error: getaddrinfo ENOTFOUND smtp.example.com\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:121:26)","syscall":"getaddrinfo","timestamp":"2026-02-21T14:45:22.051Z"}
+{"level":"error","message":"Failed to send email to adria@adriacrossedit.com after 3 attempts.","timestamp":"2026-02-21T14:45:22.051Z"}
+{"level":"info","message":"Square SDK initialized in sandbox mode","timestamp":"2026-02-21T14:47:16.977Z"}
+{"level":"info","message":"Server starting in development mode on port 3000","timestamp":"2026-02-21T14:47:16.979Z"}
+{"level":"info","message":"Opening SQLite database at: adria_cross.db","timestamp":"2026-02-21T14:47:16.992Z"}
+{"level":"info","message":"Passport: Google Strategy configured","timestamp":"2026-02-21T14:47:16.999Z"}
+{"level":"info","message":"SQLite database opened successfully","timestamp":"2026-02-21T14:47:17.003Z"}
+{"level":"info","message":"Starting migrations...","timestamp":"2026-02-21T14:47:17.003Z"}
+{"level":"info","message":"Running migration: 001_initial_schema.sql","timestamp":"2026-02-21T14:47:17.003Z"}
+{"level":"info","message":"Running migration: 002_performance_indexes.sql","timestamp":"2026-02-21T14:47:17.017Z"}
+{"level":"info","message":"Running migration: 003_oauth_schema.sql","timestamp":"2026-02-21T14:47:17.019Z"}
+{"level":"info","message":"Running migration: 004_add_proposed_times.sql","timestamp":"2026-02-21T14:47:17.020Z"}
+{"level":"info","message":"Running migration: 004_oauth_password_nullable.sql","timestamp":"2026-02-21T14:47:17.023Z"}
+{"level":"info","message":"Skipping PostgreSQL-only statement: -- Migration: 004_oauth_password_nullable.sql\n-- Description...","timestamp":"2026-02-21T14:47:17.023Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 004_oauth_password_nullable.sql: \n\n-- Add a comment explaining the nullable password\nCOMMENT ON COLUMN users.password IS 'Password ha... SQLITE_ERROR: near \"COMMENT\": syntax error","stack":"Error: SQLITE_ERROR: near \"COMMENT\": syntax error","timestamp":"2026-02-21T14:47:17.024Z"}
+{"level":"info","message":"Running migration: 005_reset_appointments_sequence.sql","timestamp":"2026-02-21T14:47:17.024Z"}
+{"code":"SQLITE_ERROR","errno":1,"level":"error","message":"Migration query failed in 005_reset_appointments_sequence.sql: -- Reset appointments primary key sequence to fix duplicate key errors\n-- This ensures the next ID i... SQLITE_ERROR: no such function: pg_get_serial_sequence","stack":"Error: SQLITE_ERROR: no such function: pg_get_serial_sequence","timestamp":"2026-02-21T14:47:17.024Z"}
+{"level":"info","message":"Running migration: 006_add_tos_timestamp.sql","timestamp":"2026-02-21T14:47:17.024Z"}
+{"level":"info","message":"Running migration: 007_add_blog_images_table.sql","timestamp":"2026-02-21T14:47:17.025Z"}
+{"level":"info","message":"All migrations completed successfully.","timestamp":"2026-02-21T14:47:17.025Z"}
+{"level":"info","message":"Migrations completed, now creating admin user...","timestamp":"2026-02-21T14:47:17.025Z"}
+{"level":"info","message":"Users table columns: id, username, password, is_client, verification_code, email, provider, provider_id, display_name, profile_picture, email_verified, role, created_at, tos_accepted_at, hasRoleColumn: true","timestamp":"2026-02-21T14:47:17.026Z"}
+{"level":"info","message":"Admin check result: user exists with id=1","timestamp":"2026-02-21T14:47:17.026Z"}
+{"level":"info","message":"Admin user exists, current role: \"admin\"","timestamp":"2026-02-21T14:47:17.026Z"}
+{"level":"info","message":"Admin user already has correct role","timestamp":"2026-02-21T14:47:17.026Z"}
+{"level":"info","message":"SQLite database initialized successfully","timestamp":"2026-02-21T14:47:17.026Z"}
+{"level":"info","message":"Run: http://localhost:3000","timestamp":"2026-02-21T14:47:17.027Z"}
+{"level":"info","message":"Login attempt for username: admin","timestamp":"2026-02-21T14:49:32.900Z"}
+{"level":"info","message":"User query result: 1 rows found","timestamp":"2026-02-21T14:49:32.900Z"}
+{"level":"info","message":"Found user: id=1, username=admin, role=admin, hasPassword=true","timestamp":"2026-02-21T14:49:32.901Z"}
+{"level":"info","message":"Password match: true","timestamp":"2026-02-21T14:49:32.991Z"}
