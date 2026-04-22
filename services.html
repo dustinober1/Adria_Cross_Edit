@@ -89,6 +89,20 @@
     <!-- Skip to main content link for accessibility -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
+    <!-- Event Announcement Banner -->
+    <div class="event-banner" id="eventBanner">
+        <span>Upcoming Workshop: <strong>Find Your Perfect Fit: Tops That Actually Work</strong> — May 2, 2026 in Culpeper, VA</span>
+        <a href="https://www.eventbrite.com/e/find-your-perfect-fit-tops-that-actually-work-tickets-1987968282648" target="_blank" rel="noopener">Get Tickets &rarr;</a>
+        <button class="banner-dismiss" aria-label="Dismiss announcement" onclick="document.getElementById('eventBanner').style.display='none'; document.body.classList.remove('has-event-banner'); sessionStorage.setItem('eventBannerDismissed','true');">&times;</button>
+    </div>
+    <script>
+        if (sessionStorage.getItem('eventBannerDismissed') === 'true') {
+            document.getElementById('eventBanner').style.display = 'none';
+        } else {
+            document.body.classList.add('has-event-banner');
+        }
+    </script>
+
     <!-- Navigation Bar -->
     <nav class="top-nav" role="navigation" aria-label="Main navigation">
         <div class="nav-container">
