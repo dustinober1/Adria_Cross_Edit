@@ -2288,11 +2288,11 @@ iframe[src*="docs.google.com/forms"] {
 }
 
 body.has-event-banner .top-nav {
-    top: 44px;
+    top: 50px;
 }
 
 body.has-event-banner {
-    padding-top: 44px;
+    padding-top: 50px;
 }
 
 body.dark-mode .event-banner {
