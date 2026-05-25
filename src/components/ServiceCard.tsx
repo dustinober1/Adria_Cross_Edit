@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { MediaFrame } from "@/components/MediaFrame";
 import type { services } from "@/lib/services";
 
@@ -15,7 +16,24 @@ export function ServiceCard({ service }: { service: Service }) {
         <p className="eyebrow">{service.price}</p>
         <h2>{service.name}</h2>
         <p>{service.summary}</p>
-        <p className="detail">{service.details}</p>
+        <dl className="service-meta">
+          <div>
+            <dt>Best for</dt>
+            <dd>{service.bestFor}</dd>
+          </div>
+          <div>
+            <dt>Time</dt>
+            <dd>{service.duration}</dd>
+          </div>
+        </dl>
+        <ul className="service-includes">
+          {service.includes.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+        <Link className="button service-card__cta" href="/contact/">
+          {service.ctaLabel}
+        </Link>
       </div>
     </article>
   );

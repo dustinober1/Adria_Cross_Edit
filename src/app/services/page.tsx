@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/JsonLd";
 import { MediaFrame } from "@/components/MediaFrame";
@@ -52,6 +53,11 @@ export default function ServicesPage() {
             Every service is shaped around real life, not idealized fashion
             content. That is what makes the results stick.
           </p>
+          <div className="button-row">
+            <Link className="button" href="/contact/">
+              Book a free consult
+            </Link>
+          </div>
         </div>
         <MediaFrame
           alt="Adria Cross posing with a phone during a styling session."
@@ -65,6 +71,34 @@ export default function ServicesPage() {
         <div className="grid">
           {services.map((service) => (
             <ServiceCard key={service.id} service={service} />
+          ))}
+        </div>
+      </section>
+
+      <section className="section service-compare">
+        <div>
+          <p className="eyebrow">Compare Services</p>
+          <h2>Choose the right level of wardrobe support.</h2>
+        </div>
+        <div className="comparison-grid">
+          {services.map((service) => (
+            <article key={service.id} className="comparison-card">
+              <h3>{service.name}</h3>
+              <p className="detail">{service.bestFor}</p>
+              <dl className="service-meta">
+                <div>
+                  <dt>Starting at</dt>
+                  <dd>{service.price}</dd>
+                </div>
+                <div>
+                  <dt>Time</dt>
+                  <dd>{service.duration}</dd>
+                </div>
+              </dl>
+              <Link className="text-link" href="/contact/">
+                {service.ctaLabel}
+              </Link>
+            </article>
           ))}
         </div>
       </section>
