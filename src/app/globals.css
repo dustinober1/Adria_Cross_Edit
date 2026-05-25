@@ -343,6 +343,7 @@ li {
 }
 
 .faq-list,
+.faq-card,
 .legal-card,
 .contact-card,
 .panel-card {
@@ -666,7 +667,16 @@ li {
   }
 
   .site-nav {
+    gap: 1rem;
     position: relative;
+  }
+
+  .brand {
+    min-width: 0;
+  }
+
+  .brand-copy {
+    min-width: 0;
   }
 
   .desktop-nav {
@@ -675,6 +685,8 @@ li {
 
   .mobile-nav {
     display: block;
+    flex: 0 0 auto;
+    margin-left: auto;
   }
 
   .mobile-nav .nav-menu {
@@ -702,10 +714,22 @@ li {
 
   .page-hero h1,
   .legal-card h1 {
-    font-size: 2.7rem;
+    font-size: 2.4rem;
+    line-height: 1.03;
+    max-width: 100%;
   }
 
   .comparison-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .brand-copy span {
+    display: none;
+  }
+
+  .mobile-nav summary {
+    padding: 0.65rem 0.9rem;
   }
 }
