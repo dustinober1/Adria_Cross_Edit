@@ -456,6 +456,13 @@ li {
   gap: 0.55rem;
 }
 
+.footer-cta {
+  align-self: flex-start;
+  min-height: 40px;
+  margin-top: 0;
+  padding: 0.7rem 1rem;
+}
+
 .search-note {
   color: var(--color-muted);
   font-size: 0.95rem;
