@@ -1,8 +1,10 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/JsonLd";
 import { Markdown } from "@/components/Markdown";
+import { blogConversionCta } from "@/lib/engagement";
 import { getAllPosts, getPostBySlug } from "@/lib/blog";
 import { createMetadata } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site";
@@ -91,6 +93,14 @@ export default async function BlogPostPage({ params }: Props) {
         />
       </header>
       <Markdown>{post.body}</Markdown>
+      <section className="article-cta">
+        <p className="eyebrow">{blogConversionCta.eyebrow}</p>
+        <h2>{blogConversionCta.title}</h2>
+        <p>{blogConversionCta.copy}</p>
+        <Link className="button" href={blogConversionCta.href}>
+          {blogConversionCta.label}
+        </Link>
+      </section>
     </article>
   );
 }

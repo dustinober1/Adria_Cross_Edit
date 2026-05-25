@@ -35,7 +35,10 @@ export default function BlogPage() {
       </section>
 
       <section className="section">
-        <p className="search-note">Search is generated at build time for static browsing and indexing.</p>
+        <div className="section-heading">
+          <p className="eyebrow">Featured Guidance</p>
+          <h2>Start with the wardrobe question you are already asking.</h2>
+        </div>
         <div className="grid">
           {posts.map((post) => (
             <BlogCard key={post.slug} post={post} />

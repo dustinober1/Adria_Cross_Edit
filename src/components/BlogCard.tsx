@@ -16,9 +16,14 @@ export function BlogCard({ post }: { post: BlogPost }) {
         </p>
         <h2>{post.title}</h2>
         <p>{post.description}</p>
-        <Link className="text-link" href={`/blog/${post.slug}/`}>
-          Read article
-        </Link>
+        <div className="button-row">
+          <Link className="text-link" href={`/blog/${post.slug}/`}>
+            Read article
+          </Link>
+          <Link className="text-link blog-card__service-link" href="/services/">
+            Match to a service
+          </Link>
+        </div>
       </div>
     </article>
   );

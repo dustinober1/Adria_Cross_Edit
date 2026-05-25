@@ -3,6 +3,12 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/JsonLd";
 import { MediaFrame } from "@/components/MediaFrame";
 import { ServiceCard } from "@/components/ServiceCard";
+import {
+  clientOutcomes,
+  finalConversionCta,
+  processSteps,
+  trustSignals,
+} from "@/lib/engagement";
 import { createMetadata } from "@/lib/seo";
 import { services } from "@/lib/services";
 import { absoluteUrl, site } from "@/lib/site";
@@ -62,12 +68,48 @@ export default function HomePage() {
         />
       </section>
 
+      <section className="proof-strip" aria-label="Adria Cross Edit highlights">
+        {trustSignals.map((signal) => (
+          <div key={signal.label}>
+            <strong>{signal.value}</strong>
+            <span>{signal.label}</span>
+          </div>
+        ))}
+      </section>
+
       <section className="section">
         <p className="eyebrow">What I Do</p>
         <h2>Wardrobe clarity for busy, high-performing lives.</h2>
         <div className="grid">
           {services.slice(0, 2).map((service) => (
             <ServiceCard key={service.id} service={service} />
+          ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <p className="eyebrow">Client Outcomes</p>
+        <h2>What changes after the edit.</h2>
+        <div className="outcome-grid">
+          {clientOutcomes.map((outcome) => (
+            <article key={outcome.title} className="outcome-card">
+              <h3>{outcome.title}</h3>
+              <p>{outcome.copy}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <p className="eyebrow">How It Works</p>
+        <h2>A simple path from closet friction to daily clarity.</h2>
+        <div className="process-grid">
+          {processSteps.map((step, index) => (
+            <article key={step.title} className="process-card">
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <h3>{step.title}</h3>
+              <p>{step.copy}</p>
+            </article>
           ))}
         </div>
       </section>
@@ -91,6 +133,15 @@ export default function HomePage() {
             saves time and feels like you.
           </p>
         </div>
+      </section>
+
+      <section className="cta-band">
+        <p className="eyebrow">{finalConversionCta.eyebrow}</p>
+        <h2>{finalConversionCta.title}</h2>
+        <p>{finalConversionCta.copy}</p>
+        <Link className="button" href={finalConversionCta.href}>
+          {finalConversionCta.label}
+        </Link>
       </section>
     </>
   );

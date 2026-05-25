@@ -38,9 +38,14 @@ export default function ContactPage() {
             Choose a time on the calendar or email Adria directly if you want to
             talk through your wardrobe goals before booking.
           </p>
-          <a className="button" href={`mailto:${site.email}`}>
-            Email Adria
-          </a>
+          <div className="button-row">
+            <a className="button" href="#calendar">
+              Choose a time
+            </a>
+            <a className="button ghost" href={`mailto:${site.email}`}>
+              Email Adria
+            </a>
+          </div>
         </div>
         <MediaFrame
           alt="Adria Cross seated and smiling during a styling portrait."
@@ -51,7 +56,7 @@ export default function ContactPage() {
       </section>
 
       <section className="section split-section">
-        <div className="contact-card">
+        <div className="contact-card" id="calendar">
           <p className="eyebrow">Calendar</p>
           <h2>Choose your consultation time</h2>
           <iframe

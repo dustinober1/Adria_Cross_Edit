@@ -21,6 +21,9 @@ export function SiteFooter() {
           <Link href="/terms-of-service/">Terms</Link>
         </nav>
         <div className="footer-contact">
+          <Link className="button footer-cta" href="/contact/">
+            Book Free Consult
+          </Link>
           <a href={`mailto:${site.email}`}>{site.email}</a>
           <a href={site.instagramUrl} target="_blank" rel="noreferrer">
             Instagram
