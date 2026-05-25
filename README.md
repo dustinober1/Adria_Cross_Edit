@@ -1,49 +1,63 @@
-# Legacy Static Site
+# Adria Cross Edit
 
-This directory contains the original static HTML/CSS/JavaScript site that was live before the transformation to a full-stack application.
+Static, SEO-first marketing site for Adria Cross Edit, built with Next.js App Router, TypeScript, and static export for Vercel hosting.
 
-## Contents
-- All HTML pages (index, about, services, contact, blog, etc.)
-- CSS stylesheets
-- JavaScript files
-- Nginx configuration
-- Docker files for static site deployment
+## Stack
 
-# Adria Cross Edit — Personal styling & content site
+- Next.js App Router
+- TypeScript
+- React 19
+- Tailwind CSS 4 via `src/app/globals.css`
+- Static export with `output: "export"`
+- JSON-driven blog content under `src/app/blog/content`
 
-This repository contains the application powering Adria Cross Edit: a small full-stack site that serves a public landing and blog, a clothing-matcher tool, user authentication and member portal, appointment scheduling, and payment integration.
-
-Key pieces
-- Public pages and blog: static pages and blog posts live under the repository root and `blog/`.
-- Clothing matcher: an interactive client-side tool is in `clothing-matcher/`.
-- Authentication: session- and OAuth-based auth using Passport (see `config/passport.js` and `routes/auth.js`).
-- Member experience: `member-portal.html`, intake form, and protected routes for signed-in users.
-- Appointments & payments: DB migrations in `migrations/` support appointments; `payments.js` and Square SDK integration handle payments.
-- Server: Express-based server in `server.js` serves the site and APIs.
-
-Local development
-1. Install dependencies:
+## Local development
 
 ```bash
 npm install
+npm run dev
 ```
 
-2. Configure environment: copy or create an environment file and provide DB and auth credentials (the app uses `dotenv` and `ctx_config.json` for some settings).
+The local dev server runs on [http://localhost:3000](http://localhost:3000).
 
-3. Run the app:
+## Scripts
 
 ```bash
-npm start
+npm run dev
+npm run lint
+npm run typecheck
+npm test
+npm run build
+npm run seo:audit
+npm run preview
 ```
 
-Useful scripts
-- `npm start`: starts `server.js`.
-- `npm run check-links`: run the link-checker script in `scripts/link-checker.js`.
-- `npm test`: run tests (Jest).
+`npm run build` validates blog content, generates the blog search index, builds the static export into `out/`, and runs a post-build SEO verification pass.
 
-Notes for maintainers
-- DB: migrations are SQL files in `migrations/`; the project can use SQLite or Postgres depending on environment.
-- Assets: static assets live in `css/`, `js/`, and `images/`.
-- Deployment: there are Docker and Procfile hints for containerized deployment (see `Dockerfile` and `Procfile`).
+## Content model
 
-If you'd like, I can expand this README with a full environment variable list, deployment steps, or a quick-start section for contributors.
+- Site pages live in `src/app`
+- Shared UI components live in `src/components`
+- Shared content and SEO helpers live in `src/lib`
+- Blog posts live in `src/app/blog/content/*.json`
+- Static assets live in `public/images` and `public/uploads/blog`
+
+## Deployment
+
+Deploy on Vercel as a Next.js project. The repository is configured for static export:
+
+- build command: `npm run build`
+- output directory: `out`
+- redirects and cache headers are defined in `vercel.json`
+
+## SEO surfaces
+
+- Page metadata and canonical tags come from `src/lib/seo.ts`
+- `src/app/sitemap.ts` generates the sitemap
+- `src/app/robots.ts` generates robots rules
+- `src/app/manifest.ts` generates the web manifest
+- `scripts/verify-static-seo.mjs` validates exported HTML metadata
+
+## Notes
+
+The prior Express, database, auth, and payment runtime has been removed. This repository is now a static marketing and content site only.

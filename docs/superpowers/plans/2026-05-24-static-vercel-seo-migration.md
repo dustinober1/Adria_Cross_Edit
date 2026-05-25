@@ -30,7 +30,7 @@ Context7 was used on 2026-05-24 for current Next.js and Vercel guidance.
 - Static export does not support server-side Next features such as request-time route handlers, Server Actions, ISR, `next.config` redirects, `next.config` headers, cookies, or request-dependent dynamic rendering.
 - Vercel can host the static `out/` output and can own platform redirects/headers through `vercel.json`.
 
-## Key Direction Change From The Astro Plan
+## Key Direction Change From The Prior Plan
 
 This plan intentionally aligns Adria with the maintainability pattern used in `sundee-fundee-web`: Next.js App Router, React, TypeScript, typed local content helpers, generated SEO surfaces, and repo-local validation scripts.
 
@@ -2192,4 +2192,3 @@ Plan complete and saved to `docs/superpowers/plans/2026-05-24-static-vercel-seo-
 
 1. **Subagent-Driven (recommended)** - Dispatch a fresh subagent per task, review between tasks, faster iteration.
 2. **Inline Execution** - Execute tasks in this session using executing-plans, batch execution with checkpoints.
-

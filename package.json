@@ -1,11 +1,18 @@
 {
   "name": "adria_cross_edit",
-  "version": "1.0.1",
-  "description": "This directory contains the original static HTML/CSS/JavaScript site that was live before the transformation to a full-stack application.",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Static, SEO-first Adria Cross Edit website built with Next.js App Router.",
   "scripts": {
-    "start": "node server.js",
-    "check-links": "node scripts/link-checker.js",
-    "test": "jest"
+    "dev": "next dev",
+    "prebuild": "node scripts/validate-blog-content.mjs && node scripts/generate-search-index.mjs",
+    "build": "npm run lint && npm run typecheck && next build && node scripts/verify-static-seo.mjs",
+    "start": "serve out",
+    "preview": "serve out",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "seo:audit": "node scripts/verify-static-seo.mjs"
   },
   "repository": {
     "type": "git",
@@ -14,38 +21,29 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/dustinober1/Adria_Cross_Edit/issues"
   },
   "homepage": "https://github.com/dustinober1/Adria_Cross_Edit#readme",
   "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.5.0",
-    "body-parser": "^2.2.1",
-    "connect-sqlite3": "^0.9.16",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.2.1",
-    "express-rate-limit": "^8.2.1",
-    "express-session": "^1.18.2",
-    "multer": "^2.0.2",
-    "nodemailer": "^7.0.11",
-    "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0",
-    "pg": "^8.16.3",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7",
-    "square": "^39.0.0",
-    "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "next": "^16.2.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
-    "helmet": "^8.1.0",
-    "jest": "^30.2.0",
-    "joi": "^18.0.2",
-    "supertest": "^7.1.4",
-    "winston": "^3.19.0"
+    "@tailwindcss/postcss": "^4.1.17",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "cheerio": "^1.1.2",
+    "eslint": "^9.39.1",
+    "eslint-config-next": "^16.2.4",
+    "serve": "^14.2.5",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.8"
   }
 }

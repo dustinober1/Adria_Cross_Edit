@@ -1,0 +1,102 @@
+routes/auth.js:9:router.get('/google', (req, res, next) => {
+routes/auth.js:30:router.get('/google/callback',
+routes/auth.js:66:router.get('/tos-acceptance', (req, res) => {
+routes/auth.js:72:router.get('/api/auth/diagnostic', (req, res) => {
+routes/auth.js:84:router.get('/api/auth/status', async (req, res) => {
+routes/auth.js:140:router.post('/api/auth/logout', (req, res, next) => {
+member-portal.html:144:                <li><a href="#" class="auth-link" data-action="logout">Logout</a></li>
+member-portal.html:253:                    const res = await fetch('/api/user/profile', {
+auth-tos.html:118:                const response = await fetch('/api/auth/accept-tos', {
+index.html:399:                <form class="newsletter-form" action="/api/newsletter" method="post" id="newsletterForm">
+index.html:421:                        const response = await fetch('/api/newsletter', {
+intake-form.html:532:                const response = await fetch('/api/intake', {
+login.html:520:                const response = await fetch('/api/auth/status');
+login.html:541:                const response = await fetch('/api/login', {
+login.html:602:                const response = await fetch('/api/register', {
+contact.html:353:                        const response = await fetch('/api/appointments', {
+server.js:536:app.get('/api/debug/strategies', (req, res) => {
+server.js:544:app.get('/api/user/profile', isAuthenticated, async (req, res) => {
+server.js:568:app.put('/api/user/profile', isAuthenticated, async (req, res) => {
+server.js:590:app.get('/health', (req, res) => {
+server.js:619:app.post('/api/newsletter', rateLimit({
+server.js:671:app.get('/confirm-newsletter', async (req, res) => {
+server.js:744:app.post('/api/appointments', appointmentLimiter, async (req, res) => {
+server.js:796:app.post('/api/intake', upload.array('photos', 5), async (req, res) => {
+server.js:818:app.post('/api/login', loginLimiter, async (req, res) => {
+server.js:857:app.post('/api/register', rateLimit({
+server.js:900:app.post('/api/logout', (req, res) => { req.session.destroy(); res.json({ success: true }); });
+server.js:926:app.post('/api/auth/accept-tos', async (req, res) => {
+server.js:998:app.post('/api/check-email-exists', async (req, res) => {
+server.js:1029:app.get('/api/appointments', isAuthenticated, async (req, res) => {
+server.js:1161:app.get('/api/available-slots', async (req, res) => {
+server.js:1184:app.get('/api/availability-overrides', isAuthenticated, async (req, res) => {
+server.js:1189:app.post('/api/availability-overrides', isAuthenticated, async (req, res) => {
+server.js:1198:app.delete('/api/availability-overrides/:date', isAuthenticated, async (req, res) => {
+server.js:1203:app.get('/api/availability', isAuthenticated, async (req, res) => {
+server.js:1208:app.post('/api/availability', isAuthenticated, async (req, res) => {
+server.js:1214:app.get('/api/intake', isAuthenticated, async (req, res) => {
+server.js:1219:app.patch('/api/appointments/:id', isAuthenticated, async (req, res) => {
+server.js:1224:app.post('/api/appointments/:id/decline', isAuthenticated, async (req, res) => {
+server.js:1277:app.post('/api/appointments/:id/propose-times', isAuthenticated, async (req, res) => {
+server.js:1475:app.post('/api/clothing/verify-client', async (req, res) => {
+server.js:1505:app.post('/api/clothing/request-verification', async (req, res) => {
+server.js:1533:app.post('/api/clothing/upload', upload.single('image'), async (req, res) => {
+server.js:1605:app.get('/api/clothing/', async (req, res) => {
+server.js:1636:app.get('/api/clothing/check-limit', async (req, res) => {
+server.js:1659:app.get('/api/clothing/limits', async (req, res) => {
+server.js:1680:app.get('/api/clothing/categories', async (req, res) => {
+server.js:1691:app.get('/api/matches', async (req, res) => {
+server.js:1781:app.delete('/api/clothing/:id', async (req, res) => {
+server.js:1845:app.post('/api/blog/upload-image', isAuthenticated, blogUpload.single('image'), async (req, res) => {
+server.js:1906:app.get('/api/blog/image/:id', async (req, res) => {
+server.js:2012:app.post('/api/blog', isAuthenticated, async (req, res) => {
+server.js:2113:app.get('/api/blog/public', (req, res) => {
+server.js:2150:app.get('/api/blog', isAuthenticated, (req, res) => {
+server.js:2191:app.get('/api/blog/:slug', isAuthenticated, (req, res) => {
+server.js:2227:app.put('/api/blog/:slug', isAuthenticated, async (req, res) => {
+server.js:2325:app.delete('/api/blog/:slug', isAuthenticated, async (req, res) => {
+server.js:2365:app.get('/api/square/config', (req, res) => {
+server.js:2377:app.post('/api/payments/create', async (req, res) => {
+server.js:2434:app.post('/api/invoices/create', isAuthenticated, async (req, res) => {
+server.js:2517:app.get('/api/invoices', isAuthenticated, async (req, res) => {
+server.js:2557:app.post('/api/payments/checkout', async (req, res) => {
+server.js:2672:app.post('/api/square/webhook', (req, res) => {
+server.js:2708:app.get('/blog', (req, res) => {
+server.js:2713:app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+server.js:2714:app.get('/clothing-matcher', (req, res) => res.sendFile(path.join(__dirname, 'clothing-matcher', 'index.html')));
+admin.html:1373:            const res = await fetch('/api/auth/status');
+admin.html:1417:            const res = await fetch('/api/appointments', {
+admin.html:1430:                        <button data-app-id="${app.id}" data-action="confirm-appointment" class="btn-view" style="background:#28a745">Confirm</button>
+admin.html:1431:                        <button data-app-id="${app.id}" data-action="propose-time" class="btn-view" style="background:#007bff; margin: 0 2px;">Propose Time</button>
+admin.html:1432:                        <button data-app-id="${app.id}" data-action="decline-appointment" class="btn-view" style="background:#dc3545">Decline</button>
+admin.html:1440:            const res = await fetch('/api/intake');
+admin.html:1448:                    <td><button data-intake-id="${sub.id}" data-action="view-intake" class="btn-view">View Full Profile</button></td>
+admin.html:1455:            const res = await fetch('/api/availability-overrides');
+admin.html:1706:            await fetch('/api/availability-overrides', {
+admin.html:2098:                if (e.target.matches('[data-action="confirm-appointment"]')) {
+admin.html:2104:                if (e.target.matches('[data-action="propose-time"]')) {
+admin.html:2110:                if (e.target.matches('[data-action="decline-appointment"]')) {
+admin.html:2116:                if (e.target.matches('[data-action="view-intake"]')) {
+admin.html:2140:        async function logout() { await fetch('/api/logout', { method: 'POST' }); window.location.reload(); }
+admin.html:2146:            const res = await fetch('/api/login', {
+admin.html:2153:                const authRes = await fetch('/api/auth/status');
+admin.html:2159:                    await fetch('/api/auth/logout', { method: 'POST' });
+admin.html:2174:                const res = await fetch('/api/blog');
+admin.html:2191:                            <button class="btn-view" data-slug="${post.slug}" data-action="edit" style="padding: 0.5rem 1rem;">✏️ Edit</button>
+admin.html:2192:                            <button class="btn-view" data-slug="${post.slug}" data-action="delete" style="padding: 0.5rem 1rem; background: #dc3545;">🗑️ Delete</button>
+admin.html:2199:                listEl.querySelectorAll('button[data-action="edit"]').forEach(btn => {
+admin.html:2202:                listEl.querySelectorAll('button[data-action="delete"]').forEach(btn => {
+admin.html:2355:                const res = await fetch('/api/availability');
+admin.html:2435:                await fetch('/api/availability', {
+admin.html:2507:                    const res = await fetch('/api/blog/upload-image', {
+admin.html:2569:                const res = await fetch('/api/invoices');
+admin.html:2630:                const res = await fetch('/api/payments/checkout', {
+clothing-matcher/js/matcher.js:79:            const response = await fetch('/api/clothing/upload', {
+blog/index.html:267:                const response = await fetch('/api/blog/public');
+js/payments.js:20:            const configRes = await fetch('/api/square/config');
+js/payments.js:100:            const response = await fetch('/api/payments/create', {
+js/payments.js:866:                    const response = await fetch('/api/check-email-exists', {
+js/payments.js:943:            const linkResponse = await fetch('/api/payments/checkout', {
+js/auth.js:18:            const response = await fetch('/api/auth/status');
+js/auth.js:92:            if (e.target.matches('[data-action="logout"]') || e.target.closest('[data-action="logout"]')) {
+js/auth.js:111:            const response = await fetch('/api/auth/logout', { method: 'POST' });

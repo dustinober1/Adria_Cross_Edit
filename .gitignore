@@ -3,4 +3,9 @@ node_modules
 appointments.db
 .DS_Store
 adria_cross.db
+.next
+out
+.vercel
+tsconfig.tsbuildinfo
 *.log
+*.db
