@@ -10,6 +10,7 @@ export function SiteFooter() {
           <p className="eyebrow">Adria Cross Edit</p>
           <h2>{site.owner}</h2>
           <p>{site.description}</p>
+          <p className="mt-4 text-sm text-gray-500">Based in Culpeper, VA. Serving Northern Virginia & Worldwide.</p>
         </div>
         <nav aria-label="Footer navigation" className="footer-links">
           {navigation.map((item) => (

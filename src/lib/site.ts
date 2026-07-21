@@ -13,7 +13,7 @@ export const site = {
   instagramUrl: "https://www.instagram.com/adriacrossedit/",
   bookingUrl:
     "https://calendar.google.com/calendar/appointments/schedules/AcZssZ3wUMcfi9PCbrbgE118d-hvfmKZwgdv39eg488EKFZ8jbFP-yJMlaNEaRHs2Lxe_6Fjz7E-WNSK",
-  defaultOgImage: "/images/adria-hero-new.jpg",
+  defaultOgImage: "/images/adria-cross-personal-stylist-culpeper.jpg",
 } as const;
 
 export function absoluteUrl(path: string): string {

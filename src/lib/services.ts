@@ -15,8 +15,8 @@ export const services = [
       "A short list of missing wardrobe priorities",
     ],
     ctaLabel: "Book a closet edit",
-    image: "/images/adria-services-new.jpg",
-    href: "/services/#closet-edit",
+    image: "/images/adria-cross-closet-edit-service.jpg",
+    href: "/services/closet-edit/",
   },
   {
     id: "wardrobe-overhaul",
@@ -34,8 +34,8 @@ export const services = [
       "Repeatable outfit formulas for daily life",
     ],
     ctaLabel: "Plan an overhaul",
-    image: "/images/adria-extra-new.jpg",
-    href: "/services/#wardrobe-overhaul",
+    image: "/images/adria-cross-wardrobe-overhaul-service.jpg",
+    href: "/services/wardrobe-overhaul/",
   },
   {
     id: "personal-shopping",
@@ -53,8 +53,8 @@ export const services = [
       "Clear yes/no decision support while shopping",
     ],
     ctaLabel: "Start shopping smarter",
-    image: "/images/adria-profile-new.jpg",
-    href: "/services/#personal-shopping",
+    image: "/images/adria-cross-personal-shopper.jpg",
+    href: "/services/personal-shopping/",
   },
   {
     id: "color-analysis",
@@ -72,7 +72,7 @@ export const services = [
       "Color guardrails for future purchases",
     ],
     ctaLabel: "Book color analysis",
-    image: "/images/adria-contact-new.jpg",
-    href: "/services/#color-analysis",
+    image: "/images/adria-cross-color-analysis-service.jpg",
+    href: "/services/color-analysis/",
   },
 ] as const;

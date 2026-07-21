@@ -10,7 +10,7 @@ export const metadata: Metadata = createMetadata({
   description:
     "Book a consultation with Adria Cross Edit for closet edits, wardrobe styling, personal shopping, and confidence-focused style guidance.",
   path: "/contact/",
-  image: "/images/adria-contact-new.jpg",
+  image: "/images/adria-cross-color-analysis-service.jpg",
 });
 
 const faqJsonLd = {
@@ -50,7 +50,7 @@ export default function ContactPage() {
         <MediaFrame
           alt="Adria Cross seated and smiling during a styling portrait."
           priority
-          src="/images/adria-extra-new.jpg"
+          src="/images/adria-cross-wardrobe-overhaul-service.jpg"
           variant="panel"
         />
       </section>

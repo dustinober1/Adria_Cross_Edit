@@ -5,11 +5,11 @@ import { MediaFrame } from "@/components/MediaFrame";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
-  title: "About Adria Cross",
+  title: "About Adria Cross | Personal Stylist in Culpeper, VA",
   description:
-    "Learn about Adria Cross Edit, a personal styling service focused on closet edits, wardrobe clarity, outfit confidence, and practical personal style.",
+    "Learn about Adria Cross Edit, a personal styling service based in Culpeper, VA. Adria focuses on closet edits, wardrobe clarity, and practical personal style.",
   path: "/about/",
-  image: "/images/adria-about-new.jpg",
+  image: "/images/adria-cross-wardrobe-consultant-virginia.jpg",
 });
 
 const jsonLd = {
@@ -20,7 +20,7 @@ const jsonLd = {
   description:
     "Professional personal stylist helping clients discover their personal style and build confident wardrobes.",
   url: "https://www.adriacrossedit.com/about/",
-  image: "https://www.adriacrossedit.com/images/adria-about-new.jpg",
+  image: "https://www.adriacrossedit.com/images/adria-cross-wardrobe-consultant-virginia.jpg",
 };
 
 export default function AboutPage() {
@@ -32,9 +32,9 @@ export default function AboutPage() {
           <p className="eyebrow">About Adria</p>
           <h1>Style should feel luxurious and livable.</h1>
           <p>
-            Adria is a wife, a mom, a CrossFit coach, and a Brazilian Jiu-Jitsu
+            Based in Culpeper, VA, Adria is a wife, a mom, a CrossFit coach, and a Brazilian Jiu-Jitsu
             blue belt. Fashion started as a creative outlet and grew into a way of
-            helping real people feel clearer and more confident in what they wear.
+            helping real people across Northern Virginia and virtually to feel clearer and more confident in what they wear.
           </p>
           <p>
             Her approach is rooted in practicality. She works with clients who
@@ -48,9 +48,9 @@ export default function AboutPage() {
           </div>
         </div>
         <MediaFrame
-          alt="Adria Cross in a white blazer and jeans."
+          alt="Adria Cross, wardrobe consultant and personal stylist in Northern Virginia, wearing a white blazer and jeans."
           priority
-          src="/images/adria-about-new.jpg"
+          src="/images/adria-cross-wardrobe-consultant-virginia.jpg"
           variant="panel"
         />
       </section>

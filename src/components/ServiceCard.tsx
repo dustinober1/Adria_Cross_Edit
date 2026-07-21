@@ -31,9 +31,14 @@ export function ServiceCard({ service }: { service: Service }) {
             <li key={item}>{item}</li>
           ))}
         </ul>
-        <Link className="button service-card__cta" href="/contact/">
-          {service.ctaLabel}
-        </Link>
+        <div className="flex gap-4">
+          <Link className="button service-card__cta" href="/contact/">
+            {service.ctaLabel}
+          </Link>
+          <Link className="button ghost service-card__cta" href={service.href}>
+            View Details
+          </Link>
+        </div>
       </div>
     </article>
   );

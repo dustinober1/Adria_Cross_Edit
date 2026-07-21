@@ -14,24 +14,52 @@ import { services } from "@/lib/services";
 import { absoluteUrl, site } from "@/lib/site";
 
 export const metadata: Metadata = createMetadata({
-  title: "Personal Stylist for Closet Edits and Wardrobe Confidence",
+  title: "Personal Stylist in Culpeper, VA | Adria Cross Edit",
   description:
-    "Transform your wardrobe with Adria Cross Edit, a personal styling service for closet edits, wardrobe planning, outfit creation, and confidence-focused style guidance.",
+    "Transform your wardrobe with Adria Cross Edit, a personal styling service based in Culpeper, VA. Offering closet edits, wardrobe planning, and style guidance.",
   path: "/",
-  image: "/images/adria-hero-new.jpg",
+  image: "/images/adria-cross-personal-stylist-culpeper.jpg",
 });
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "ProfessionalService",
+  "@type": ["LocalBusiness", "ProfessionalService"],
   name: site.name,
   founder: site.owner,
   url: site.url,
-  image: absoluteUrl("/images/adria-hero-new.jpg"),
+  image: absoluteUrl("/images/adria-cross-personal-stylist-culpeper.jpg"),
   email: site.email,
   priceRange: "$200-$1,300",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Culpeper",
+    addressRegion: "VA",
+    addressCountry: "US",
+  },
+  areaServed: [
+    {
+      "@type": "City",
+      name: "Culpeper",
+    },
+    {
+      "@type": "State",
+      name: "Virginia",
+    },
+  ],
   sameAs: [site.instagramUrl],
-  serviceType: services.map((service) => service.name),
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Styling Services",
+    itemListElement: services.map((service, index) => ({
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "Service",
+        name: service.name,
+        description: service.summary,
+      },
+      position: index + 1,
+    })),
+  },
 };
 
 export default function HomePage() {
@@ -43,9 +71,9 @@ export default function HomePage() {
           <p className="eyebrow">Personal Styling</p>
           <h1>It is not your body. It is your wardrobe.</h1>
           <p>
-            Adria Cross Edit helps clients fall back in love with their clothes
+            Based in Culpeper, VA, Adria Cross Edit helps clients fall back in love with their clothes
             by building wardrobes that fit their body, lifestyle, and next season
-            of life.
+            of life, serving Northern Virginia and clients worldwide virtually.
           </p>
           <p>
             The work is practical, polished, and confidence-focused. No costume.
@@ -61,9 +89,9 @@ export default function HomePage() {
           </div>
         </div>
         <MediaFrame
-          alt="Adria Cross holding styled wardrobe pieces and shoes."
+          alt="Adria Cross, personal stylist in Culpeper, VA, holding styled wardrobe pieces and shoes."
           priority
-          src="/images/adria-hero-new.jpg"
+          src="/images/adria-cross-personal-stylist-culpeper.jpg"
           variant="hero"
         />
       </section>

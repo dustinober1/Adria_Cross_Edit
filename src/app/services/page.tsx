@@ -12,7 +12,7 @@ export const metadata: Metadata = createMetadata({
   description:
     "Explore personal styling services from Adria Cross Edit, including closet edits, wardrobe styling, personal shopping, and practical style planning.",
   path: "/services/",
-  image: "/images/adria-services-new.jpg",
+  image: "/images/adria-cross-closet-edit-service.jpg",
 });
 
 const jsonLd = {
@@ -60,9 +60,9 @@ export default function ServicesPage() {
           </div>
         </div>
         <MediaFrame
-          alt="Adria Cross posing with a phone during a styling session."
+          alt="Adria Cross offering a closet edit styling session in Culpeper, VA."
           priority
-          src="/images/adria-services-new.jpg"
+          src="/images/adria-cross-closet-edit-service.jpg"
           variant="panel"
         />
       </section>
@@ -95,9 +95,14 @@ export default function ServicesPage() {
                   <dd>{service.duration}</dd>
                 </div>
               </dl>
-              <Link className="text-link" href="/contact/">
-                {service.ctaLabel}
-              </Link>
+              <div className="flex gap-4">
+                <Link className="text-link" href="/contact/">
+                  {service.ctaLabel}
+                </Link>
+                <Link className="text-link" href={service.href}>
+                  View Details
+                </Link>
+              </div>
             </article>
           ))}
         </div>
